@@ -37,6 +37,9 @@ function normalizeBookmark(b: Bookmark): Bookmark {
     tags: b.tags ?? [],
     notes: b.notes ?? [],
     metadata: b.metadata ?? {},
+    content: b.content ?? {},
+    content_status: b.content_status ?? 'pending',
+    content_fetched_at: b.content_fetched_at ?? null,
     is_favorited: b.is_favorited ?? false,
     synced: b.synced ?? false,
   };
@@ -92,6 +95,8 @@ export function useBookmarks() {
       toast.success('Bookmark added');
       // Auto-fetch metadata in background
       void autoFetchMetadata(newBookmark);
+      // Auto-extract content in background
+      void triggerExtraction(newBookmark);
       // Auto-suggest tags via AI if no tags provided and API key exists
       if (newBookmark.tags.length === 0 && localStorage.getItem('openrouter_key')) {
         void autoSuggestTags(newBookmark);
@@ -359,6 +364,24 @@ export function useBookmarks() {
     queryClient.setQueryData<Bookmark[]>(QUERY_KEY, (old) =>
       old?.map((b) => (b.id === bookmark.id ? { ...b, ...updates } : b)),
     );
+    // Also re-extract content
+    void triggerExtraction(bookmark);
+  }
+
+  const isDemo = localStorage.getItem('contentdeck_demo') === 'true';
+  const SKIP_EXTRACTION_SOURCES = ['youtube', 'twitter'];
+
+  async function triggerExtraction(bookmark: Bookmark) {
+    if (isDemo) return;
+    if (SKIP_EXTRACTION_SOURCES.includes(bookmark.source_type)) return;
+    try {
+      await db.functions.invoke('extract-content', {
+        body: { bookmark_id: bookmark.id },
+      });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+    } catch {
+      // Silent fail — extraction is non-critical
+    }
   }
 
   async function autoSuggestTags(bookmark: Bookmark) {

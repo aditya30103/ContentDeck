@@ -1,4 +1,12 @@
-import { Heart, ExternalLink, Clock, FileText, RefreshCw } from 'lucide-react';
+import {
+  Heart,
+  ExternalLink,
+  Clock,
+  FileText,
+  RefreshCw,
+  Loader2,
+  AlertCircle,
+} from 'lucide-react';
 import { SourceBadge, StatusBadge } from '../ui/Badge';
 import { getDomain, getFaviconUrl, timeAgo, formatDate } from '../../lib/utils';
 import type { Bookmark, Status } from '../../types';
@@ -93,6 +101,31 @@ export default function MetadataHeader({
             </svg>
             Synced
           </span>
+        )}
+
+        {b.content_status === 'extracting' && (
+          <span className="text-xs text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">
+            <Loader2 size={12} className="animate-spin" />
+            Extracting...
+          </span>
+        )}
+
+        {b.content_status === 'success' && b.content?.word_count && (
+          <span className="text-xs text-green-600 dark:text-green-400 font-medium flex items-center gap-1">
+            <FileText size={12} />
+            {b.content.word_count.toLocaleString()} words extracted
+          </span>
+        )}
+
+        {b.content_status === 'failed' && (
+          <button
+            onClick={() => onRefreshMetadata(b)}
+            disabled={isRefreshing}
+            className="text-xs text-red-600 dark:text-red-400 font-medium flex items-center gap-1 hover:underline disabled:opacity-50"
+          >
+            <AlertCircle size={12} />
+            Extract failed — retry
+          </button>
         )}
       </div>
 

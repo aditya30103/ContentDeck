@@ -217,6 +217,9 @@ export function createMockSupabaseClient(): SupabaseClient {
     from(table: string) {
       return new MockQueryBuilder(store, table as TableName);
     },
+    functions: {
+      invoke: () => Promise.resolve({ data: null, error: null }),
+    },
   };
 
   return mock as unknown as SupabaseClient;

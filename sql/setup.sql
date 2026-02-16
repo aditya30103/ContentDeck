@@ -16,6 +16,9 @@ create table bookmarks (
   notes jsonb default '[]'::jsonb,
   tags text[] default '{}',
   metadata jsonb default '{}'::jsonb,
+  content jsonb default '{}'::jsonb,
+  content_status text default 'pending' check (content_status in ('pending', 'extracting', 'success', 'failed', 'skipped')),
+  content_fetched_at timestamptz,
   synced boolean default false,
   created_at timestamptz default now(),
   status_changed_at timestamptz default now(),
@@ -27,6 +30,7 @@ create index idx_bookmarks_source on bookmarks(source_type);
 create index idx_bookmarks_status on bookmarks(status);
 create index idx_bookmarks_created on bookmarks(created_at desc);
 create index idx_bookmarks_user on bookmarks(user_id);
+create index idx_bookmarks_content_status on bookmarks(content_status) where content_status in ('pending', 'failed');
 
 -- Tag areas
 create table tag_areas (

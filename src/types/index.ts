@@ -1,6 +1,7 @@
 export type SourceType = 'youtube' | 'twitter' | 'linkedin' | 'substack' | 'blog' | 'book';
 export type Status = 'unread' | 'reading' | 'done';
 export type NoteType = 'insight' | 'question' | 'highlight' | 'note';
+export type ContentStatus = 'pending' | 'extracting' | 'success' | 'failed' | 'skipped';
 export type SortOption = 'newest' | 'oldest' | 'title';
 export type ViewMode = 'list' | 'areas';
 
@@ -17,6 +18,18 @@ export interface BookmarkMetadata {
   reading_time?: number;
 }
 
+export interface BookmarkContent {
+  text?: string;
+  author?: string;
+  word_count?: number;
+  reading_time?: number;
+  lead_image?: string;
+  excerpt?: string;
+  extracted_at?: string;
+  method?: 'readability' | 'failed';
+  error?: string;
+}
+
 export interface Bookmark {
   id: string;
   url: string;
@@ -29,6 +42,9 @@ export interface Bookmark {
   notes: Note[];
   tags: string[];
   metadata: BookmarkMetadata;
+  content: BookmarkContent;
+  content_status: ContentStatus;
+  content_fetched_at: string | null;
   synced: boolean;
   created_at: string;
   status_changed_at: string;
