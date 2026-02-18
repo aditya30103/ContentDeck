@@ -7,13 +7,85 @@ function daysAgo(n: number): string {
 }
 
 const SAMPLE_CONTENT: BookmarkContent = {
-  text: 'A well-structured monolith is easier to split into services later than a poorly structured microservice architecture. The key insight is that module boundaries within a monolith can be just as strong as service boundaries...',
+  text: `A well-structured monolith is easier to split into services later than a poorly structured microservice architecture. The key insight is that module boundaries within a monolith can be just as strong as service boundaries — the difference is that they're enforced by code conventions rather than network boundaries.
+
+The argument for microservices has always been about organizational scaling: Conway's Law tells us that software architecture mirrors the communication structure of the teams building it. But for most teams, a modular monolith provides 80% of the benefits with 20% of the operational overhead.
+
+What makes a modular monolith successful is strict adherence to module boundaries in code. Each module owns its data — no module reaches into another module's database tables. Cross-module communication goes through defined interfaces, not direct function calls into implementation details.
+
+The failure mode of the monolith is not the monolith itself, but the big ball of mud: an unmodularized codebase where everything depends on everything else. This is what gives monoliths a bad reputation, and what makes them hard to split later.
+
+The failure mode of microservices is distributed systems complexity introduced before you actually need it: network failures, eventual consistency, distributed transactions, service discovery, and the cascade of operational concerns that come with running dozens of independent services.
+
+The pragmatic path: start with a well-modularized monolith. Define clear module boundaries from day one. When — and only when — a specific module needs to scale independently or be owned by a separate team, extract it into a service. The boundaries you defined in the monolith become your service contracts.
+
+This approach also means your deployment story stays simple early in a project's life, when you have the least certainty about the right boundaries. It's much easier to refine module boundaries within a codebase than to change service contracts across independently deployed systems.
+
+Teams that succeed with this approach treat the module boundary as seriously as a service boundary: no shared mutable state, explicit interfaces, separate test suites per module, and module-scoped database schemas (even if they share a single database instance).
+
+The key metrics to watch: if a single module accounts for more than 30% of your deployment risk, or if a module's team has grown to the point where they're stepping on each other's work, those are signals it's time to extract. Not the size of the codebase alone.`,
   author: 'Martin Fowler',
   word_count: 5100,
   reading_time: 20,
   excerpt:
     'Finding the sweet spot between monolith and microservices — a practical guide to modular architecture.',
   extracted_at: daysAgo(2),
+  method: 'readability',
+};
+
+const DEMO_CONTENT_USEEFFECT: BookmarkContent = {
+  text: `useEffect is one of the most misunderstood hooks in React. Many developers reach for it as a catch-all for "I need to do something after render" — but that framing leads to bugs, infinite loops, and code that's hard to reason about.
+
+The mental model that actually works: useEffect lets you synchronize your component with something outside React. That "something" might be a browser API, a network request, a subscription, or a third-party library. If you're not synchronizing with something external, you probably don't need useEffect.
+
+The cleanup function is not optional. Every effect that sets up a subscription, starts an interval, or registers an event listener must return a cleanup function. React runs cleanup before re-running the effect and when the component unmounts. Forgetting this is the number one source of memory leaks and stale closure bugs.
+
+The dependency array is a contract, not a performance optimization. Every value from the component scope that the effect reads must be in the dependency array. If you find yourself adding a comment like "// eslint-disable-next-line" to suppress the exhaustive-deps warning, that's a signal your effect design needs rethinking, not that the linter is wrong.
+
+Common patterns and their correct implementations:
+
+Data fetching: The most common misuse. Modern React recommends using a data-fetching library like TanStack Query or SWR instead of raw useEffect for fetching. These handle caching, deduplication, loading states, and error states correctly. If you must use useEffect for fetching, always handle the cleanup with an AbortController to cancel in-flight requests when the component unmounts.
+
+Event listeners: Add the listener in the effect, remove it in the cleanup. Pass the handler as a ref if it needs to close over component state to avoid stale closures.
+
+Timers: Create the timer in the effect, clear it in the cleanup. Don't use the timer ID from a ref — let the closure capture it.
+
+Derived state: Never use useEffect to compute derived state from props or other state. Compute it directly during render, or use useMemo for expensive computations.
+
+The rules of hooks exist because React relies on call order stability. Effects are no different — the same number of hook calls, in the same order, every render. Conditional effects are achieved by putting the condition inside the effect, not by conditionally calling useEffect.`,
+  author: 'Dan Abramov',
+  word_count: 8900,
+  reading_time: 35,
+  excerpt:
+    'A deep dive into the mental model, dependency arrays, cleanup functions, and common pitfalls of useEffect.',
+  extracted_at: daysAgo(5),
+  method: 'readability',
+};
+
+const DEMO_CONTENT_BROWSER_DESIGN: BookmarkContent = {
+  text: `Designing directly in the browser sounds counterintuitive if you've spent years in Figma or Sketch. But for components that live in the browser, the browser is the right design tool.
+
+The problem with mockup tools is fidelity loss: you design something that looks pixel-perfect in Figma, then implement it in CSS, and it never quite matches. Text rendering is different. Spacing is different. The way fonts scale at different viewport sizes is different. You spend hours reconciling the mockup with the implementation.
+
+Designing in the browser eliminates that gap entirely. What you see during design is what ships.
+
+The workflow: start with semantic HTML. A heading, some paragraphs, a list. No classes, no styling — just the structure. Then add CSS incrementally, making decisions in the browser where the feedback loop is immediate. Use browser DevTools as your design canvas; toggle properties, try different values, copy the winning CSS back to your editor.
+
+Responsive design becomes natural this way. You can drag the browser window to see how your component behaves at different widths, immediately. In Figma, responsive behavior is a separate artboard. In the browser, it's always there.
+
+The objection is usually about iteration speed: isn't it faster to prototype in Figma? For visual explorations with stakeholders who can't read code, yes. But for a developer designing their own components, the context switch between Figma and the codebase has a cost. Designing in the browser means staying in one context.
+
+Typography decisions reveal themselves differently in the browser. You immediately see how the font renders at the system level — anti-aliasing, subpixel rendering, the way different weights look at small sizes. These details are invisible in mockup tools.
+
+The practical setup: a hot-reloading dev server (Vite is ideal), a minimal component scaffolded with HTML, and a browser window side-by-side with your editor. No extensions required, no special tooling. Just the fundamentals working together.
+
+Start small: try designing your next button component this way. Or a card. The technique scales from atoms to full page layouts, but the best place to start is with something you can complete in an afternoon.`,
+  author: 'Jim Nielsen',
+  word_count: 1800,
+  reading_time: 7,
+  excerpt:
+    'Skip the mockup tools — designing directly in CSS gives you real typography, real spacing, and real interactions.',
+  extracted_at: daysAgo(1),
   method: 'readability',
 };
 
@@ -235,9 +307,9 @@ export const DEMO_BOOKMARKS: Bookmark[] = [
     tags: ['design', 'css'],
     areas: [],
     metadata: { word_count: 1800, reading_time: 7 },
-    content: {},
-    content_status: 'pending',
-    content_fetched_at: null,
+    content: DEMO_CONTENT_BROWSER_DESIGN,
+    content_status: 'success',
+    content_fetched_at: daysAgo(1),
     synced: false,
     created_at: daysAgo(3),
     status_changed_at: daysAgo(3),
@@ -330,9 +402,9 @@ export const DEMO_BOOKMARKS: Bookmark[] = [
     tags: ['react', 'frontend'],
     areas: [],
     metadata: { word_count: 8900, reading_time: 35 },
-    content: {},
-    content_status: 'pending',
-    content_fetched_at: null,
+    content: DEMO_CONTENT_USEEFFECT,
+    content_status: 'success',
+    content_fetched_at: daysAgo(5),
     synced: true,
     created_at: daysAgo(13),
     status_changed_at: daysAgo(9),

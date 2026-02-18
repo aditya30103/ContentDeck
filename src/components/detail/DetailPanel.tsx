@@ -1,8 +1,9 @@
-import { useEffect, useRef, useCallback } from 'react';
-import { X } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { X, BookOpen } from 'lucide-react';
 import MetadataHeader from './MetadataHeader';
 import NotesTab from './NotesTab';
 import DetailActions from './DetailActions';
+import ReaderModal from '../reader/ReaderModal';
 import type { Bookmark, Status, NoteType } from '../../types';
 
 interface DetailPanelProps {
@@ -34,6 +35,7 @@ export default function DetailPanel({
   isNotePending,
   isRefreshing,
 }: DetailPanelProps) {
+  const [showReader, setShowReader] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -53,6 +55,10 @@ export default function DetailPanel({
 
   if (!bookmark) return null;
 
+  const canRead = bookmark.content_status === 'success' && !!bookmark.content?.text;
+  const isExtracting =
+    bookmark.content_status === 'pending' || bookmark.content_status === 'extracting';
+
   function handleDelete() {
     if (confirm('Delete this bookmark?')) {
       onDelete(bookmark!.id);
@@ -62,6 +68,14 @@ export default function DetailPanel({
 
   return (
     <>
+      {/* Reader Modal — covers everything */}
+      <ReaderModal
+        bookmark={bookmark}
+        open={showReader}
+        onClose={() => setShowReader(false)}
+        onCycleStatus={onCycleStatus}
+      />
+
       {/* Mobile: full-screen slide-up overlay */}
       <div
         ref={overlayRef}
@@ -100,6 +114,17 @@ export default function DetailPanel({
               onRefreshMetadata={onRefreshMetadata}
               isRefreshing={isRefreshing}
             />
+            {(canRead || isExtracting) && (
+              <button
+                onClick={() => setShowReader(true)}
+                disabled={!canRead}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
+                aria-label={isExtracting ? 'Extracting content…' : 'Open reader mode'}
+              >
+                <BookOpen size={16} />
+                {isExtracting ? 'Extracting…' : 'Read'}
+              </button>
+            )}
             <NotesTab
               notes={bookmark.notes}
               onAddNote={(type, content) => onAddNote(bookmark.id, type, content)}
@@ -143,6 +168,17 @@ export default function DetailPanel({
             onRefreshMetadata={onRefreshMetadata}
             isRefreshing={isRefreshing}
           />
+          {(canRead || isExtracting) && (
+            <button
+              onClick={() => setShowReader(true)}
+              disabled={!canRead}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
+              aria-label={isExtracting ? 'Extracting content…' : 'Open reader mode'}
+            >
+              <BookOpen size={16} />
+              {isExtracting ? 'Extracting…' : 'Read'}
+            </button>
+          )}
           <NotesTab
             notes={bookmark.notes}
             onAddNote={(type, content) => onAddNote(bookmark.id, type, content)}
