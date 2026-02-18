@@ -68,7 +68,7 @@ export default function BookmarkList({
       }
     }
 
-    // Search
+    // Search — covers title, url, tags, areas, excerpt, and extracted content body
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -76,7 +76,9 @@ export default function BookmarkList({
           b.title?.toLowerCase().includes(q) ||
           b.url.toLowerCase().includes(q) ||
           b.tags.some((t) => t.toLowerCase().includes(q)) ||
-          b.areas?.some((a) => a.name.toLowerCase().includes(q)),
+          b.areas?.some((a) => a.name.toLowerCase().includes(q)) ||
+          b.excerpt?.toLowerCase().includes(q) ||
+          b.content?.text?.toLowerCase().includes(q),
       );
     }
 
@@ -136,21 +138,30 @@ export default function BookmarkList({
   }
 
   return (
-    <ul className="space-y-2" role="list">
-      {filtered.map((b) => (
-        <li key={b.id}>
-          <BookmarkCard
-            bookmark={b}
-            selected={selectedIds.has(b.id)}
-            selectMode={selectMode}
-            onCycleStatus={onCycleStatus}
-            onToggleFavorite={onToggleFavorite}
-            onDelete={onDelete}
-            onSelect={toggleSelected}
-            onClick={onClick}
-          />
-        </li>
-      ))}
-    </ul>
+    <>
+      {searchQuery && (
+        <p className="text-xs text-surface-500 dark:text-surface-400 mb-2 px-1" aria-live="polite">
+          {filtered.length === 1
+            ? `1 result for "${searchQuery}"`
+            : `${filtered.length} results for "${searchQuery}"`}
+        </p>
+      )}
+      <ul className="space-y-2" role="list">
+        {filtered.map((b) => (
+          <li key={b.id}>
+            <BookmarkCard
+              bookmark={b}
+              selected={selectedIds.has(b.id)}
+              selectMode={selectMode}
+              onCycleStatus={onCycleStatus}
+              onToggleFavorite={onToggleFavorite}
+              onDelete={onDelete}
+              onSelect={toggleSelected}
+              onClick={onClick}
+            />
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }

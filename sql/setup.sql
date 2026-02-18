@@ -32,6 +32,17 @@ create index idx_bookmarks_created on bookmarks(created_at desc);
 create index idx_bookmarks_user on bookmarks(user_id);
 create index idx_bookmarks_content_status on bookmarks(content_status) where content_status in ('pending', 'failed');
 
+-- Full-text search vector (title A > excerpt B > content body C)
+alter table bookmarks
+  add column if not exists search_vector tsvector
+    generated always as (
+      setweight(to_tsvector('english', coalesce(title, '')), 'A') ||
+      setweight(to_tsvector('english', coalesce(excerpt, '')), 'B') ||
+      setweight(to_tsvector('english', coalesce(content->>'text', '')), 'C')
+    ) stored;
+
+create index bookmarks_search_idx on bookmarks using gin (search_vector);
+
 -- Tag areas
 create table tag_areas (
   id uuid primary key default gen_random_uuid(),

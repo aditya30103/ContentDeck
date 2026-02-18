@@ -168,7 +168,8 @@ export const DEMO_BOOKMARKS: Bookmark[] = [
     url: 'https://newsletter.pragmaticengineer.com/p/measuring-developer-productivity',
     title: 'Measuring Developer Productivity: What Actually Works',
     image: null,
-    excerpt: null,
+    excerpt:
+      'DORA metrics, cycle time, and deployment frequency — the signals that actually predict team health.',
     source_type: 'substack',
     status: 'done',
     is_favorited: true,
@@ -202,7 +203,8 @@ export const DEMO_BOOKMARKS: Bookmark[] = [
     url: 'https://lethain.com/elegant-puzzle/',
     title: 'An Elegant Puzzle: Systems of Engineering Management',
     image: null,
-    excerpt: null,
+    excerpt:
+      'Systems thinking applied to engineering management — staffing ratios, team sizing, and technical debt as inventory.',
     source_type: 'blog',
     status: 'unread',
     is_favorited: false,
@@ -224,7 +226,8 @@ export const DEMO_BOOKMARKS: Bookmark[] = [
     url: 'https://blog.jim-nielsen.com/2025/designing-with-the-browser/',
     title: 'Designing in the Browser: A Practical Guide',
     image: null,
-    excerpt: null,
+    excerpt:
+      'Skip the mockup tools — designing directly in CSS gives you real typography, real spacing, and real interactions.',
     source_type: 'blog',
     status: 'unread',
     is_favorited: false,
@@ -363,7 +366,8 @@ export const DEMO_BOOKMARKS: Bookmark[] = [
     url: 'https://substack.com/@stratechery/p/ai-and-the-big-five',
     title: 'AI and the Big Five — Stratechery',
     image: null,
-    excerpt: null,
+    excerpt:
+      'How Microsoft, Google, Amazon, Apple, and Meta are positioning around large language models and generative AI infrastructure.',
     source_type: 'substack',
     status: 'unread',
     is_favorited: false,
