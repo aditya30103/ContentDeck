@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, BookOpen, Type } from 'lucide-react';
 import { useReaderPrefs } from '../../hooks/useReaderPrefs';
+import { parseContentBlocks } from '../../lib/reader';
 import type { Bookmark, Status } from '../../types';
 import { STATUS_NEXT } from '../../types';
 
@@ -47,6 +48,28 @@ function getHeaderThemeClasses(theme: 'light' | 'dark' | 'sepia'): string {
   }
 }
 
+function getSubtleTextClass(theme: 'light' | 'dark' | 'sepia'): string {
+  switch (theme) {
+    case 'dark':
+      return 'text-surface-400';
+    case 'sepia':
+      return 'text-[#7a6a55]';
+    default:
+      return 'text-surface-500';
+  }
+}
+
+function getDividerClass(theme: 'light' | 'dark' | 'sepia'): string {
+  switch (theme) {
+    case 'dark':
+      return 'border-surface-800';
+    case 'sepia':
+      return 'border-[#d6ccb4]';
+    default:
+      return 'border-surface-200';
+  }
+}
+
 export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: ReaderModalProps) {
   const { fontSize, fontFamily, theme, update } = useReaderPrefs();
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -81,7 +104,7 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
   if (!open) return null;
 
   const contentText = bookmark.content?.text ?? '';
-  const paragraphs = contentText.split(/\n{2,}/).filter(Boolean);
+  const blocks = parseContentBlocks(contentText);
   const wordCount = bookmark.content?.word_count ?? 0;
   const readingTime =
     bookmark.content?.reading_time ?? (wordCount > 0 ? Math.ceil(wordCount / WPM) : null);
@@ -103,10 +126,19 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
 
   const themeClasses = getThemeClasses(theme);
   const headerThemeClasses = getHeaderThemeClasses(theme);
+  const subtleText = getSubtleTextClass(theme);
+  const divider = getDividerClass(theme);
   const fontSizeClass = FONT_SIZE_CLASSES[fontSize];
   const fontFamilyClass = FONT_FAMILY_CLASSES[fontFamily];
 
   const statusNext = STATUS_NEXT[bookmark.status];
+
+  // Font size button labels — visually different sizes
+  const fontSizeLabels: Record<'sm' | 'md' | 'lg', string> = {
+    sm: 'text-xs',
+    md: 'text-sm',
+    lg: 'text-base',
+  };
 
   return (
     <div
@@ -138,13 +170,13 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
 
         {/* Controls */}
         <div className="flex items-center gap-1 shrink-0">
-          {/* Font size */}
+          {/* Font size — visually distinct A labels */}
           <div className="flex items-center gap-0.5" aria-label="Font size">
             {(['sm', 'md', 'lg'] as const).map((size) => (
               <button
                 key={size}
                 onClick={() => update({ fontSize: size })}
-                className={`px-1.5 py-1 rounded text-xs font-medium min-w-[28px] min-h-[36px] flex items-center justify-center transition-colors ${
+                className={`px-1.5 rounded min-w-[28px] min-h-[36px] flex items-center justify-center transition-colors font-semibold ${fontSizeLabels[size]} ${
                   fontSize === size
                     ? 'bg-primary-600 text-white'
                     : theme === 'dark'
@@ -154,7 +186,7 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
                 aria-label={`Font size ${size}`}
                 aria-pressed={fontSize === size}
               >
-                {size === 'sm' ? 'A' : size === 'md' ? 'A' : 'A'}
+                A
               </button>
             ))}
           </div>
@@ -208,47 +240,83 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
 
       {/* Content */}
       <div ref={contentRef} className="flex-1 overflow-y-auto" onScroll={handleScroll}>
-        <div className={`max-w-2xl mx-auto px-6 py-10 ${fontSizeClass} ${fontFamilyClass}`}>
-          {/* Article header */}
+        {/* max-w-prose = 65ch — research-backed optimal line length for reading */}
+        <div className={`max-w-prose mx-auto px-6 py-10 ${fontSizeClass} ${fontFamilyClass}`}>
+          {/* Article title */}
           <h1 className="text-2xl sm:text-3xl font-bold leading-tight mb-4">
             {bookmark.title ?? 'Untitled'}
           </h1>
 
           {/* Meta */}
           <div
-            className={`flex flex-wrap gap-x-3 gap-y-1 text-sm mb-8 pb-6 border-b ${
-              theme === 'dark'
-                ? 'text-surface-400 border-surface-800'
-                : theme === 'sepia'
-                  ? 'text-[#7a6a55] border-[#d6ccb4]'
-                  : 'text-surface-500 border-surface-200'
-            }`}
+            className={`flex flex-wrap gap-x-3 gap-y-1 text-sm mb-8 pb-6 border-b ${subtleText} ${divider}`}
           >
             {author && <span>{author}</span>}
             {readingTime && <span>{readingTime} min read</span>}
             {wordCount > 0 && <span>{wordCount.toLocaleString()} words</span>}
           </div>
 
-          {/* Paragraphs */}
-          {paragraphs.length > 0 ? (
-            <div className="space-y-4 leading-relaxed">
-              {paragraphs.map((para, i) => (
-                <p key={i}>
-                  {para.split('\n').map((line, j, arr) => (
-                    <span key={j}>
-                      {line}
-                      {j < arr.length - 1 && <br />}
-                    </span>
-                  ))}
-                </p>
-              ))}
+          {/* Structured content */}
+          {blocks.length > 0 ? (
+            <div>
+              {blocks.map((block, i) => {
+                if (block.type === 'heading') {
+                  return (
+                    <h2
+                      key={i}
+                      className={`text-lg font-semibold leading-snug mt-10 mb-3 first:mt-0 ${
+                        theme === 'dark'
+                          ? 'text-surface-100'
+                          : theme === 'sepia'
+                            ? 'text-[#2e2010]'
+                            : 'text-surface-900'
+                      }`}
+                    >
+                      {block.text}
+                    </h2>
+                  );
+                }
+
+                if (block.type === 'list') {
+                  return (
+                    <ul
+                      key={i}
+                      className={`list-disc ml-6 space-y-2 mb-5 leading-[1.75] ${subtleText}`}
+                    >
+                      {block.items.map((item, j) => (
+                        <li key={j} className="pl-1">
+                          <span
+                            className={
+                              theme === 'dark'
+                                ? 'text-surface-200'
+                                : theme === 'sepia'
+                                  ? 'text-[#433422]'
+                                  : 'text-surface-800'
+                            }
+                          >
+                            {item}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                }
+
+                // paragraph
+                return (
+                  <p key={i} className="mb-5 leading-[1.8]">
+                    {block.text.split('\n').map((line, j, arr) => (
+                      <span key={j}>
+                        {line}
+                        {j < arr.length - 1 && <br />}
+                      </span>
+                    ))}
+                  </p>
+                );
+              })}
             </div>
           ) : (
-            <p
-              className={`text-center py-12 ${theme === 'dark' ? 'text-surface-500' : 'text-surface-400'}`}
-            >
-              No extracted content available.
-            </p>
+            <p className={`text-center py-12 ${subtleText}`}>No extracted content available.</p>
           )}
 
           {/* Bottom padding for footer */}
@@ -260,9 +328,7 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
       <footer
         className={`flex items-center justify-between px-4 py-2 border-t ${headerThemeClasses} shrink-0`}
       >
-        <span
-          className={`text-xs ${theme === 'dark' ? 'text-surface-500' : theme === 'sepia' ? 'text-[#7a6a55]' : 'text-surface-400'}`}
-        >
+        <span className={`text-xs ${subtleText}`}>
           {minutesRemaining !== null && minutesRemaining > 0
             ? `${minutesRemaining} min remaining`
             : wordCount > 0
