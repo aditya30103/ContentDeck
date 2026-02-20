@@ -34,6 +34,10 @@ vi.mock('@vercel/speed-insights/react', () => ({
   SpeedInsights: () => null,
 }));
 
+vi.mock('@vercel/analytics/react', () => ({
+  Analytics: () => null,
+}));
+
 // Mock useTheme to avoid side effects
 vi.mock('../../hooks/useTheme', () => ({
   useTheme: vi.fn(),

@@ -11,6 +11,7 @@ import AuthScreen from './components/auth/AuthScreen';
 import Dashboard from './pages/Dashboard';
 import { createMockSupabaseClient } from './lib/mock-supabase';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { Analytics } from '@vercel/analytics/react';
 
 const DEMO_KEY = 'contentdeck_demo';
 
@@ -65,6 +66,7 @@ export default function App() {
           onGitHub={signInWithGitHub}
         />
         <SpeedInsights />
+        <Analytics />
       </ToastProvider>
     );
   }
@@ -92,6 +94,7 @@ export default function App() {
         </UIProvider>
       </SupabaseProvider>
       <SpeedInsights />
+      <Analytics />
     </ErrorBoundary>
   );
 }
