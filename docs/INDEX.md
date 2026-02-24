@@ -2,9 +2,9 @@
 
 > Start here. This file orients each session.
 
-**Version:** v3.0 | **Status:** Phase 1 complete — all foundation features shipped
-**Next up:** Phase 2 (Intelligence) — AI summarisation, smart recommendations, Obsidian sync
-**Active phase:** [Phase 2 — Intelligence](plan/phase-2.md)
+**Version:** v3.1 | **Status:** Phase 1 complete + user-feedback sessions ongoing
+**Next up:** Pre–Phase 2 backlog (Sessions 3–4 in user-feedback.md), then Phase 2 (Intelligence)
+**Active phase:** [Phase 2 — Intelligence](plan/phase-2.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
 
 ---
 
@@ -47,7 +47,8 @@ docs/
 │   ├── v3.0-full-text-search.md    # 1.3 Full-text search
 │   ├── v3.0-reader-mode.md         # 1.5 Reader mode
 │   ├── v3.0-testing-ci.md         # 1.6 Testing & CI (Vitest + GitHub Actions)
-│   └── v3.0-bug-fixes-session1.md # Session 1: metadata races, filter independence, PWA back button
+│   ├── v3.0-bug-fixes-session1.md # Session 1: metadata races, filter independence, PWA back button
+│   └── v3.1-book-capture-without-url.md # Session 2: optional URL for books, author field
 ├── guides/                         # How-to references
 │   ├── workflow.md                 # Development practices, session workflow
 │   └── supabase-auth-setup.md      # Supabase Auth provider configuration
@@ -62,6 +63,7 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
+| v3.1 | Book capture without URL (optional URL, author field, sentinel pattern, 154 tests) | [log/v3.1-book-capture-without-url.md](log/v3.1-book-capture-without-url.md) |
 | v3.0 | Bug fixes: metadata races, filter independence, PWA back button (8 bugs, 139 tests) | [log/v3.0-bug-fixes-session1.md](log/v3.0-bug-fixes-session1.md) |
 | v3.0 | Reader mode (full-screen, typography controls, progress, sepia theme) | [log/v3.0-reader-mode.md](log/v3.0-reader-mode.md) |
 | v3.0 | Full-text search (excerpt + content.text, debounce, result count, tsvector) | [log/v3.0-full-text-search.md](log/v3.0-full-text-search.md) |
