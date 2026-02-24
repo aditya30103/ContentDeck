@@ -116,6 +116,8 @@ async function fetchTwitterMetadata(url: string): Promise<MetadataResult> {
           ?.replace(/&amp;/g, '&')
           ?.replace(/&lt;/g, '<')
           ?.replace(/&gt;/g, '>')
+          // Twitter appends a t.co tracking URL to every tweet with media/links
+          ?.replace(/https?:\/\/t\.co\/\S+/g, '')
           ?.trim();
 
         return {

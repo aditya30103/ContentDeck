@@ -202,3 +202,97 @@ describe('BookmarkList — full-text search', () => {
     expect(() => renderList(bookmarks)).not.toThrow();
   });
 });
+
+describe('BookmarkList — __untagged__ (Uncategorized) filter', () => {
+  const area = {
+    id: 'a1',
+    name: 'Tech',
+    emoji: '💻',
+    color: '#000',
+    sort_order: 0,
+    user_id: 'u1',
+    created_at: '',
+    description: null,
+  };
+
+  beforeEach(() => {
+    mockSearchQuery = '';
+    mockCurrentSource = 'all';
+    mockCurrentStatus = 'all';
+    mockCurrentSort = 'newest';
+    mockShowFavorites = false;
+    mockSelectMode = false;
+    mockSelectedIds = new Set();
+    mockCurrentTag = '__untagged__';
+  });
+
+  it('shows bookmarks with no areas (regardless of tags)', () => {
+    // A bookmark with tags but NO area — should appear in Uncategorized
+    const bookmarks = [
+      makeBookmark({ id: 'b1', title: 'Has Tags No Area', tags: ['react', 'frontend'], areas: [] }),
+      makeBookmark({ id: 'b2', title: 'Clean Slate', tags: [], areas: [] }),
+      makeBookmark({ id: 'b3', title: 'Has Area', tags: [], areas: [area] }),
+    ];
+    renderList(bookmarks);
+    expect(screen.getByText('Has Tags No Area')).toBeInTheDocument();
+    expect(screen.getByText('Clean Slate')).toBeInTheDocument();
+    expect(screen.queryByText('Has Area')).not.toBeInTheDocument();
+  });
+
+  it('hides bookmarks that have an area assigned, even with no tags', () => {
+    const bookmarks = [makeBookmark({ id: 'b1', title: 'Area No Tags', tags: [], areas: [area] })];
+    renderList(bookmarks);
+    expect(screen.queryByText('Area No Tags')).not.toBeInTheDocument();
+  });
+});
+
+describe('BookmarkList — favorites + area filter independence', () => {
+  const area = {
+    id: 'a1',
+    name: 'Tech',
+    emoji: '💻',
+    color: '#000',
+    sort_order: 0,
+    user_id: 'u1',
+    created_at: '',
+    description: null,
+  };
+
+  beforeEach(() => {
+    mockSearchQuery = '';
+    mockCurrentSource = 'all';
+    mockCurrentStatus = 'all';
+    mockCurrentSort = 'newest';
+    mockSelectMode = false;
+    mockSelectedIds = new Set();
+  });
+
+  it('shows only favorited bookmarks in the Tech area when both filters active', () => {
+    mockShowFavorites = true;
+    mockCurrentTag = 'Tech';
+    const bookmarks = [
+      makeBookmark({ id: 'b1', title: 'Fav + Tech', is_favorited: true, areas: [area] }),
+      makeBookmark({ id: 'b2', title: 'Fav no area', is_favorited: true, areas: [] }),
+      makeBookmark({ id: 'b3', title: 'Tech not fav', is_favorited: false, areas: [area] }),
+    ];
+    renderList(bookmarks);
+    expect(screen.getByText('Fav + Tech')).toBeInTheDocument();
+    expect(screen.queryByText('Fav no area')).not.toBeInTheDocument();
+    expect(screen.queryByText('Tech not fav')).not.toBeInTheDocument();
+  });
+
+  it('area filter stacks with status filter', () => {
+    mockShowFavorites = false;
+    mockCurrentTag = 'Tech';
+    mockCurrentStatus = 'unread';
+    const bookmarks = [
+      makeBookmark({ id: 'b1', title: 'Unread Tech', status: 'unread', areas: [area] }),
+      makeBookmark({ id: 'b2', title: 'Done Tech', status: 'done', areas: [area] }),
+      makeBookmark({ id: 'b3', title: 'Unread no area', status: 'unread', areas: [] }),
+    ];
+    renderList(bookmarks);
+    expect(screen.getByText('Unread Tech')).toBeInTheDocument();
+    expect(screen.queryByText('Done Tech')).not.toBeInTheDocument();
+    expect(screen.queryByText('Unread no area')).not.toBeInTheDocument();
+  });
+});

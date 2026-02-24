@@ -108,8 +108,12 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
     let cancelled = false;
 
     async function enrichAndTag() {
-      // Phase 1: Fetch missing metadata
-      const missing = currentBookmarks.filter((b) => !b.title);
+      // Phase 1: Fetch missing metadata.
+      // "Missing" means: no title, OR a YouTube bookmark with no channel metadata
+      // (title may have been set by oEmbed but channel/duration weren't saved).
+      const missing = currentBookmarks.filter(
+        (b) => !b.title || (b.source_type === 'youtube' && !b.metadata?.channel),
+      );
       if (missing.length > 0) {
         setMetaProgress({ current: 0, total: missing.length });
         const BATCH_SIZE = 3;
@@ -126,7 +130,8 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
                 if (result.excerpt && !b.excerpt) updates.excerpt = result.excerpt;
                 if (result.metadata) updates.metadata = { ...b.metadata, ...result.metadata };
                 if (Object.keys(updates).length > 0) {
-                  void db.from('bookmarks').update(updates).eq('id', b.id);
+                  // Await the DB write so it completes before invalidateQueries fires.
+                  await db.from('bookmarks').update(updates).eq('id', b.id);
                 }
               } catch {
                 /* skip */
@@ -139,7 +144,7 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
           });
         }
         setMetaProgress(null);
-        // Refresh cache so phase 2 reads enriched bookmarks
+        // All DB writes are complete — safe to refetch now.
         await queryClient.invalidateQueries({ queryKey: ['bookmarks'] });
       }
 

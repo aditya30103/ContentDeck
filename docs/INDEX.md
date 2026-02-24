@@ -46,7 +46,8 @@ docs/
 │   ├── v3.0-areas-tagging-redesign.md # Areas & tagging two-tier model
 │   ├── v3.0-full-text-search.md    # 1.3 Full-text search
 │   ├── v3.0-reader-mode.md         # 1.5 Reader mode
-│   └── v3.0-testing-ci.md         # 1.6 Testing & CI (Vitest + GitHub Actions)
+│   ├── v3.0-testing-ci.md         # 1.6 Testing & CI (Vitest + GitHub Actions)
+│   └── v3.0-bug-fixes-session1.md # Session 1: metadata races, filter independence, PWA back button
 ├── guides/                         # How-to references
 │   ├── workflow.md                 # Development practices, session workflow
 │   └── supabase-auth-setup.md      # Supabase Auth provider configuration
@@ -61,6 +62,7 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
+| v3.0 | Bug fixes: metadata races, filter independence, PWA back button (8 bugs, 139 tests) | [log/v3.0-bug-fixes-session1.md](log/v3.0-bug-fixes-session1.md) |
 | v3.0 | Reader mode (full-screen, typography controls, progress, sepia theme) | [log/v3.0-reader-mode.md](log/v3.0-reader-mode.md) |
 | v3.0 | Full-text search (excerpt + content.text, debounce, result count, tsvector) | [log/v3.0-full-text-search.md](log/v3.0-full-text-search.md) |
 | v3.0 | Testing & CI (Vitest 95 tests, GitHub Actions pipeline) | [log/v3.0-testing-ci.md](log/v3.0-testing-ci.md) |

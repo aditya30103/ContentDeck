@@ -125,6 +125,36 @@ describe('fetchMetadata — Twitter', () => {
     expect(result.excerpt).toBe('Hello world tweet text');
   });
 
+  it('strips trailing t.co URL from tweet text', async () => {
+    mockFetch.mockResolvedValueOnce(
+      jsonResponse({
+        author_name: 'Jane Smith',
+        html: '<blockquote class="twitter-tweet"><p lang="en">Great article on AI safety https://t.co/abc123XYZ</p></blockquote>',
+      }),
+    );
+
+    const result = await fetchMetadata('https://twitter.com/user/status/789', 'twitter');
+
+    expect(result.title).toContain('Jane Smith');
+    expect(result.title).toContain('Great article on AI safety');
+    expect(result.title).not.toContain('https://t.co/');
+    expect(result.excerpt).not.toContain('https://t.co/');
+  });
+
+  it('strips t.co URL mid-tweet and trims cleanly', async () => {
+    mockFetch.mockResolvedValueOnce(
+      jsonResponse({
+        author_name: 'Dev User',
+        html: '<blockquote class="twitter-tweet"><p lang="en">Check this out https://t.co/xyz999 really interesting</p></blockquote>',
+      }),
+    );
+
+    const result = await fetchMetadata('https://x.com/user/status/111', 'twitter');
+
+    expect(result.title).not.toContain('https://t.co/');
+    expect(result.excerpt).not.toContain('https://t.co/');
+  });
+
   it('falls back to Microlink when oEmbed fails', async () => {
     mockFetch.mockResolvedValueOnce(jsonResponse({}, 404));
     mockFetch.mockResolvedValueOnce(
