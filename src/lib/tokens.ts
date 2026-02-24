@@ -32,18 +32,23 @@ function jsStringEscape(s: string): string {
 export function generateBookmarklet(functionUrl: string, token: string): string {
   const safeUrl = jsStringEscape(functionUrl);
   const safeToken = jsStringEscape(token);
-  // Minified bookmarklet — sends current page URL + title to the edge function
+  // GET with query params — no custom headers, no CORS preflight.
+  // POST + Content-Type:application/json triggers a preflight OPTIONS which is
+  // blocked by strict Content-Security-Policy headers on many sites (GitHub,
+  // Google, news sites, etc.), causing onerror to fire. Simple GET avoids this
+  // entirely. The edge function reads query params first (same as iOS Shortcut).
   const code = `
 (function(){
+  var u=encodeURIComponent(location.href);
+  var t=encodeURIComponent(document.title);
   var x=new XMLHttpRequest();
-  x.open('POST','${safeUrl}');
-  x.setRequestHeader('Content-Type','application/json');
+  x.open('GET','${safeUrl}?token=${safeToken}&url='+u+'&title='+t);
   x.onload=function(){
     if(x.status===201){alert('Saved to ContentDeck!')}
     else{alert('Error: '+x.responseText)}
   };
-  x.onerror=function(){alert('Network error')};
-  x.send(JSON.stringify({token:'${safeToken}',url:location.href,title:document.title}));
+  x.onerror=function(){alert('Network error — check that your token is valid')};
+  x.send();
 })()`.replace(/\n\s*/g, '');
   return `javascript:${encodeURIComponent(code)}`;
 }
