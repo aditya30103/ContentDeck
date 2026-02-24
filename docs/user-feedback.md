@@ -165,9 +165,10 @@ Free model rate limits on OpenRouter hit silently. The AI tagging fires for ever
 | 8 | Fix filter cross-clearing in Sidebar + MobileNav | Easy |
 | 9 | Quality: add tests for the above | Medium |
 
-### Session 2 — Book source type (Feature P1)
-### Session 3 — GitHub + arXiv + Obsidian wikilinks (Feature P2)
-### Session 4 — Remaining quality + test coverage
+### Session 2 — Book source type (Feature P1) ✓ DONE (PR #19)
+### Pre–Phase 2 backlog (schedule before AI features):
+- **Session 3** — GitHub + arXiv source types + Obsidian wikilinks (Feature P2)
+- **Session 4** — Quality coverage: race condition tests, metadata failure tests (Quality P1)
 
 ---
 
@@ -191,3 +192,9 @@ Free model rate limits on OpenRouter hit silently. The AI tagging fires for ever
 ### [DONE] Favorites × Area filter can't combine (PR #16 — Session 1)
 - Sidebar and MobileNav nav actions no longer cross-clear filter dimensions
 - Favorites is now a toggle; status tabs only change status
+
+### [DONE] Book capture without URL (PR #19 — Session 2)
+- URL optional for book source type; author field added
+- isBookWithoutUrl() sentinel pattern; URL-specific UI hidden for URL-less books
+- Obsidian export handles books cleanly (no url frontmatter, no Open original link)
+- 15 new tests; 154 total passing
