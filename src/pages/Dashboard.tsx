@@ -9,6 +9,7 @@ import AreaManager from '../components/areas/AreaManager';
 import DetailPanel from '../components/detail/DetailPanel';
 import AddBookmarkModal from '../components/modals/AddBookmarkModal';
 import EditBookmarkModal from '../components/modals/EditBookmarkModal';
+import FeedbackModal from '../components/modals/FeedbackModal';
 import SettingsModal from '../components/modals/SettingsModal';
 import StatsModal from '../components/modals/StatsModal';
 import BulkActionBar from '../components/modals/BulkActionBar';
@@ -69,6 +70,8 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
   const [showSearch, setShowSearch] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackBookmark, setFeedbackBookmark] = useState<Bookmark | null>(null);
   const [showAreaManager, setShowAreaManager] = useState(false);
   const [editingArea, setEditingArea] = useState<TagArea | null>(null);
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null);
@@ -347,6 +350,10 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
           onToggleSearch={() => setShowSearch((s) => !s)}
           onSettings={() => setShowSettings(true)}
           onStats={() => setShowStats(true)}
+          onFeedback={() => {
+            setFeedbackBookmark(activeBookmark);
+            setShowFeedback(true);
+          }}
           showSearch={showSearch}
         >
           {metaProgress && (
@@ -442,6 +449,15 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
         isPending={updateBookmark.isPending}
         allAreas={areas}
         allTags={allTags}
+      />
+
+      <FeedbackModal
+        open={showFeedback}
+        onClose={() => {
+          setShowFeedback(false);
+          setFeedbackBookmark(null);
+        }}
+        activeBookmark={feedbackBookmark}
       />
 
       <SettingsModal

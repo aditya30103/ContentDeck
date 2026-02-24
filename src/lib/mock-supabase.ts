@@ -9,10 +9,23 @@ import {
   DEMO_STATUS_HISTORY,
   DEMO_BOOKMARK_TAGS,
 } from './demo-data';
-import type { Bookmark, TagArea, StatusHistoryEntry, BookmarkTag, UserToken } from '../types';
+import type {
+  Bookmark,
+  TagArea,
+  StatusHistoryEntry,
+  BookmarkTag,
+  UserToken,
+  FeedbackItem,
+} from '../types';
 
-type TableName = 'bookmarks' | 'tag_areas' | 'status_history' | 'bookmark_tags' | 'user_tokens';
-type Row = Bookmark | TagArea | StatusHistoryEntry | BookmarkTag | UserToken;
+type TableName =
+  | 'bookmarks'
+  | 'tag_areas'
+  | 'status_history'
+  | 'bookmark_tags'
+  | 'user_tokens'
+  | 'feedback';
+type Row = Bookmark | TagArea | StatusHistoryEntry | BookmarkTag | UserToken | FeedbackItem;
 
 interface TableStore {
   bookmarks: Bookmark[];
@@ -20,6 +33,7 @@ interface TableStore {
   status_history: StatusHistoryEntry[];
   bookmark_tags: BookmarkTag[];
   user_tokens: UserToken[];
+  feedback: FeedbackItem[];
 }
 
 let nextId = 1;
@@ -251,6 +265,7 @@ export function createMockSupabaseClient(): SupabaseClient {
     status_history: deepClone(DEMO_STATUS_HISTORY),
     bookmark_tags: deepClone(DEMO_BOOKMARK_TAGS),
     user_tokens: [],
+    feedback: [],
   };
 
   const mock = {

@@ -108,3 +108,48 @@ export const SOURCE_LIST: SourceType[] = [
   'book',
 ];
 export const STATUS_LIST: Status[] = ['unread', 'reading', 'done'];
+
+// ---- Feedback ----
+
+export type FeedbackType = 'bug' | 'suggestion' | 'other';
+export type FeedbackSeverity = 'blocking' | 'major' | 'minor' | 'polish';
+export type FeedbackStatus = 'open' | 'investigating' | 'resolved' | 'wont_fix';
+
+export interface AppContext {
+  statusFilter: Status | 'all';
+  showFavorites: boolean;
+  selectedTag: string | null;
+  searchQuery: string;
+  sort: SortOption;
+  viewMode: ViewMode;
+  activeBookmarkId: string | null;
+  activeBookmarkTitle: string | null;
+}
+
+export interface SystemContext {
+  userAgent: string;
+  viewport: { width: number; height: number };
+  online: boolean;
+  timestamp: string;
+}
+
+export interface FeedbackItem {
+  id: string;
+  user_id: string;
+  feedback_type: FeedbackType;
+  title: string;
+  description: string | null;
+  severity: FeedbackSeverity;
+  app_context: AppContext;
+  system_context: SystemContext;
+  active_bookmark_id: string | null;
+  status: FeedbackStatus;
+  resolution_note: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type FeedbackInsert = Omit<
+  FeedbackItem,
+  'id' | 'user_id' | 'status' | 'resolution_note' | 'created_at' | 'updated_at'
+>;

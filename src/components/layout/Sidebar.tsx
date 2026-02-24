@@ -11,6 +11,7 @@ import {
   LogOut,
   LayoutGrid,
   List,
+  MessageSquare,
 } from 'lucide-react';
 import { useUI } from '../../context/UIProvider';
 import { useTheme } from '../../hooks/useTheme';
@@ -22,6 +23,7 @@ interface SidebarProps {
   onSignOut: () => void;
   onSettings: () => void;
   onStats: () => void;
+  onFeedback: () => void;
 }
 
 const statusNav: { status: Status | 'all'; label: string; icon: React.ElementType }[] = [
@@ -31,7 +33,14 @@ const statusNav: { status: Status | 'all'; label: string; icon: React.ElementTyp
   { status: 'done', label: 'Done', icon: CheckCircle },
 ];
 
-export default function Sidebar({ counts, onAdd, onSignOut, onSettings, onStats }: SidebarProps) {
+export default function Sidebar({
+  counts,
+  onAdd,
+  onSignOut,
+  onSettings,
+  onStats,
+  onFeedback,
+}: SidebarProps) {
   const {
     currentStatus,
     setStatus,
@@ -175,6 +184,13 @@ export default function Sidebar({ counts, onAdd, onSignOut, onSettings, onStats 
         >
           <BarChart3 size={18} />
           Statistics
+        </button>
+        <button
+          onClick={onFeedback}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors min-h-[44px]"
+        >
+          <MessageSquare size={18} />
+          Feedback
         </button>
         <button
           onClick={onSettings}

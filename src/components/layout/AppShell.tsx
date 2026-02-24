@@ -9,6 +9,7 @@ interface AppShellProps {
   onToggleSearch: () => void;
   onSettings: () => void;
   onStats: () => void;
+  onFeedback: () => void;
   showSearch: boolean;
   children: React.ReactNode;
 }
@@ -20,6 +21,7 @@ export default function AppShell({
   onToggleSearch,
   onSettings,
   onStats,
+  onFeedback,
   showSearch,
   children,
 }: AppShellProps) {
@@ -32,6 +34,7 @@ export default function AppShell({
         onSignOut={onSignOut}
         onSettings={onSettings}
         onStats={onStats}
+        onFeedback={onFeedback}
       />
 
       {/* Main Content */}
@@ -41,6 +44,7 @@ export default function AppShell({
           onAdd={onAdd}
           onToggleSearch={onToggleSearch}
           onSettings={onSettings}
+          onFeedback={onFeedback}
           showSearch={showSearch}
         />
 
