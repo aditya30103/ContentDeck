@@ -50,7 +50,8 @@ docs/
 │   ├── v3.0-testing-ci.md         # 1.6 Testing & CI (Vitest + GitHub Actions)
 │   ├── v3.0-bug-fixes-session1.md # Session 1: metadata races, filter independence, PWA back button
 │   ├── v3.1-book-capture-without-url.md # Session 2: optional URL for books, author field
-│   └── v3.1-feedback-capture.md   # In-app feedback capture system (#20)
+│   ├── v3.1-feedback-capture.md   # In-app feedback capture system (#20)
+│   └── v3.1-pwa-autoupdate-feedback-status-fix.md # Session 3: PWA auto-update + feedback status save
 ├── guides/                         # How-to references
 │   ├── workflow.md                 # Development practices, session workflow
 │   └── supabase-auth-setup.md      # Supabase Auth provider configuration
@@ -65,6 +66,7 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
+| v3.1 | PWA auto-update (skipWaiting on install, informational banner) + feedback status save fix (controlled select) | [log/v3.1-pwa-autoupdate-feedback-status-fix.md](log/v3.1-pwa-autoupdate-feedback-status-fix.md) |
 | v3.1 | In-app feedback capture (Feedback button, auto-context snapshot, Settings review tab, 163 tests) | [log/v3.1-feedback-capture.md](log/v3.1-feedback-capture.md) |
 | v3.1 | Book capture without URL (optional URL, author field, sentinel pattern, 154 tests) | [log/v3.1-book-capture-without-url.md](log/v3.1-book-capture-without-url.md) |
 | v3.0 | Bug fixes: metadata races, filter independence, PWA back button (8 bugs, 139 tests) | [log/v3.0-bug-fixes-session1.md](log/v3.0-bug-fixes-session1.md) |
