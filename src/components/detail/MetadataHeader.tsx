@@ -8,7 +8,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { SourceBadge, StatusBadge } from '../ui/Badge';
-import { getDomain, getFaviconUrl, timeAgo, formatDate } from '../../lib/utils';
+import { getDomain, getFaviconUrl, timeAgo, formatDate, isBookWithoutUrl } from '../../lib/utils';
 import type { Bookmark, Status } from '../../types';
 import { STATUS_NEXT } from '../../types';
 
@@ -27,7 +27,8 @@ export default function MetadataHeader({
   onRefreshMetadata,
   isRefreshing,
 }: MetadataHeaderProps) {
-  const domain = getDomain(b.url);
+  const noUrl = isBookWithoutUrl(b);
+  const domain = noUrl ? null : getDomain(b.url);
 
   return (
     <div className="space-y-3">
@@ -40,33 +41,35 @@ export default function MetadataHeader({
 
       {/* Title */}
       <h2 className="text-lg font-semibold text-surface-900 dark:text-surface-100 leading-snug">
-        {b.title || b.url}
+        {b.title || (noUrl ? 'Untitled Book' : b.url)}
       </h2>
 
-      {/* Domain row */}
-      <div className="flex items-center gap-2 text-sm text-surface-500 dark:text-surface-400">
-        <img src={getFaviconUrl(b.url)} alt="" className="w-4 h-4" loading="lazy" />
-        <span>{domain}</span>
-        <div className="ml-auto flex items-center gap-2">
-          <button
-            onClick={() => onRefreshMetadata(b)}
-            disabled={isRefreshing}
-            className="inline-flex items-center gap-1 text-surface-400 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-medium disabled:opacity-50 min-w-[32px] min-h-[32px] justify-center"
-            aria-label="Refresh metadata"
-            title="Refresh metadata"
-          >
-            <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
-          </button>
-          <a
-            href={b.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-primary-600 dark:text-primary-400 hover:underline text-xs font-medium"
-          >
-            Open <ExternalLink size={12} />
-          </a>
+      {/* Domain row — hidden for URL-less books */}
+      {!noUrl && (
+        <div className="flex items-center gap-2 text-sm text-surface-500 dark:text-surface-400">
+          <img src={getFaviconUrl(b.url)} alt="" className="w-4 h-4" loading="lazy" />
+          <span>{domain}</span>
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={() => onRefreshMetadata(b)}
+              disabled={isRefreshing}
+              className="inline-flex items-center gap-1 text-surface-400 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-medium disabled:opacity-50 min-w-[32px] min-h-[32px] justify-center"
+              aria-label="Refresh metadata"
+              title="Refresh metadata"
+            >
+              <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
+            </button>
+            <a
+              href={b.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-primary-600 dark:text-primary-400 hover:underline text-xs font-medium"
+            >
+              Open <ExternalLink size={12} />
+            </a>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Badges + Actions row */}
       <div className="flex items-center gap-2 flex-wrap">
@@ -117,7 +120,7 @@ export default function MetadataHeader({
           </span>
         )}
 
-        {b.content_status === 'failed' && (
+        {b.content_status === 'failed' && !noUrl && (
           <button
             onClick={() => onRefreshMetadata(b)}
             disabled={isRefreshing}
@@ -133,6 +136,7 @@ export default function MetadataHeader({
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-surface-400 dark:text-surface-500">
         <span>Added {timeAgo(b.created_at)}</span>
         <span title={formatDate(b.created_at)}>{formatDate(b.created_at)}</span>
+        {b.metadata?.author && <span>{b.metadata.author}</span>}
         {b.metadata?.reading_time && (
           <span className="flex items-center gap-1">
             <Clock size={12} /> {b.metadata.reading_time} min read

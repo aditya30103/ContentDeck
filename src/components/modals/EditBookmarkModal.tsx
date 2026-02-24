@@ -27,6 +27,7 @@ export default function EditBookmarkModal({
 }: EditBookmarkModalProps) {
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
   const [sourceType, setSourceType] = useState<SourceType>('blog');
   const [status, setStatus] = useState<Status>('unread');
   const [tags, setTags] = useState<string[]>([]);
@@ -35,8 +36,10 @@ export default function EditBookmarkModal({
   // Sync form state when bookmark changes
   useEffect(() => {
     if (bookmark) {
-      setUrl(bookmark.url);
+      // Show empty string for sentinel URL so the field is blank for books
+      setUrl(bookmark.url.startsWith('http') ? bookmark.url : '');
       setTitle(bookmark.title ?? '');
+      setAuthor(bookmark.metadata?.author ?? '');
       setSourceType(bookmark.source_type);
       setStatus(bookmark.status);
       setTags(bookmark.tags ?? []);
@@ -46,16 +49,26 @@ export default function EditBookmarkModal({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!bookmark || !url.trim()) return;
+    if (!bookmark) return;
+
+    const isBook = sourceType === 'book';
+    // URL required only when not a book
+    if (!isBook && !url.trim()) return;
+
+    const savedUrl = url.trim() || (isBook ? 'book://no-url' : '');
+    const updatedMetadata = author.trim()
+      ? { ...bookmark.metadata, author: author.trim() }
+      : bookmark.metadata;
 
     onSave(
       bookmark.id,
       {
-        url: url.trim(),
+        url: savedUrl,
         title: title.trim() || null,
         source_type: sourceType,
         status,
         tags,
+        metadata: updatedMetadata,
       },
       selectedAreas.map((a) => a.id),
     );
@@ -63,6 +76,9 @@ export default function EditBookmarkModal({
   }
 
   if (!bookmark) return null;
+
+  const isBook = sourceType === 'book';
+  const canSubmit = isBook ? true : url.trim().length > 0;
 
   return (
     <Modal open={open} onClose={onClose} title="Edit Bookmark">
@@ -73,14 +89,16 @@ export default function EditBookmarkModal({
             htmlFor="edit-url"
             className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1"
           >
-            URL
+            URL{' '}
+            {isBook && <span className="text-surface-400 font-normal">(optional for books)</span>}
           </label>
           <input
             id="edit-url"
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            required
+            placeholder={isBook ? 'https://... (optional)' : 'https://...'}
+            required={!isBook}
             className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 min-h-[44px]"
           />
         </div>
@@ -98,10 +116,30 @@ export default function EditBookmarkModal({
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Page title"
+            placeholder="Title"
             className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 min-h-[44px]"
           />
         </div>
+
+        {/* Author — book only */}
+        {isBook && (
+          <div>
+            <label
+              htmlFor="edit-author"
+              className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1"
+            >
+              Author <span className="text-surface-400 font-normal">(optional)</span>
+            </label>
+            <input
+              id="edit-author"
+              type="text"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+              placeholder="Author name"
+              className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 min-h-[44px]"
+            />
+          </div>
+        )}
 
         {/* Source Type + Status row */}
         <div className="grid grid-cols-2 gap-3">
@@ -177,7 +215,7 @@ export default function EditBookmarkModal({
           <Button type="button" variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" disabled={!url.trim() || isPending}>
+          <Button type="submit" disabled={!canSubmit || isPending}>
             {isPending ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>

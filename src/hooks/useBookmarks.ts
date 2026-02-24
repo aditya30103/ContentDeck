@@ -3,7 +3,7 @@ import { useSupabase } from '../context/SupabaseProvider';
 import { useToast } from '../components/ui/Toast';
 import { fetchMetadata } from '../lib/metadata';
 import { suggestTags } from '../lib/ai';
-import { detectSourceType } from '../lib/utils';
+import { detectSourceType, isBookWithoutUrl } from '../lib/utils';
 import type { Bookmark, TagArea, Status, NoteType, Note, BookmarkMetadata } from '../types';
 
 const QUERY_KEY = ['bookmarks'] as const;
@@ -74,23 +74,27 @@ export function useBookmarks() {
 
   const addBookmark = useMutation({
     mutationFn: async (bookmark: {
-      url: string;
+      url?: string;
       title?: string;
       source_type?: string;
       tags?: string[];
       notes?: Bookmark['notes'];
+      metadata?: BookmarkMetadata;
     }) => {
+      const url = bookmark.url || 'book://no-url';
+      const sourceType =
+        bookmark.source_type || (url.startsWith('http') ? detectSourceType(url) : 'book');
       const { data, error } = (await db
         .from('bookmarks')
         .insert({
-          url: bookmark.url,
+          url,
           title: bookmark.title || null,
-          source_type: bookmark.source_type || detectSourceType(bookmark.url),
+          source_type: sourceType,
           tags: bookmark.tags || [],
           notes: bookmark.notes || [],
           status: 'unread',
           is_favorited: false,
-          metadata: {},
+          metadata: bookmark.metadata || {},
           synced: false,
         })
         .select()
@@ -390,6 +394,14 @@ export function useBookmarks() {
 
   /** Fetch metadata then AI-tag — used on add so AI has title context */
   async function autoFetchMetadataAndTag(bookmark: Bookmark) {
+    // Skip metadata fetch for URL-less books — no URL to scrape
+    if (isBookWithoutUrl(bookmark)) {
+      if (bookmark.tags.length === 0 && bookmark.title && localStorage.getItem('openrouter_key')) {
+        void autoSuggestTags(bookmark);
+      }
+      return;
+    }
+
     let enriched = bookmark;
     try {
       const result = await fetchMetadata(bookmark.url, bookmark.source_type);
@@ -446,7 +458,7 @@ export function useBookmarks() {
   }
 
   const isDemo = localStorage.getItem('contentdeck_demo') === 'true';
-  const SKIP_EXTRACTION_SOURCES = ['youtube', 'twitter'];
+  const SKIP_EXTRACTION_SOURCES = ['youtube', 'twitter', 'book'];
 
   async function triggerExtraction(bookmark: Bookmark) {
     if (isDemo) return;
