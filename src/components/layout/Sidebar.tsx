@@ -88,6 +88,9 @@ export default function Sidebar({ counts, onAdd, onSignOut, onSettings, onStats 
             );
           })}
 
+          {/* Divider between status filters and Favorites */}
+          <div className="my-1 border-t border-surface-200 dark:border-surface-800" />
+
           {/* Favorites — toggles independently; does not reset status or area */}
           <button
             aria-current={showFavorites ? 'page' : undefined}

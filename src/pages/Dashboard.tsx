@@ -51,8 +51,16 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
   } = useBookmarks();
   const { areas, createArea, updateArea, deleteArea, reorderAreas } = useTagAreas();
   const { stats, isLoading: statsLoading } = useStats(bookmarks);
-  const { currentStatus, currentView, selectMode, selectedIds, clearSelection, setTag, setView } =
-    useUI();
+  const {
+    currentStatus,
+    currentView,
+    selectMode,
+    selectedIds,
+    clearSelection,
+    setTag,
+    setView,
+    showFavorites,
+  } = useUI();
   const toast = useToast();
   const queryClient = useQueryClient();
   const db = useSupabase();
@@ -217,11 +225,14 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
     return map;
   }, [bookmarks]);
 
-  // Status-filtered bookmarks for source tabs
+  // Bookmarks filtered by status + favorites for source tabs, area counts, and status pills.
+  // BookmarkList handles its own filtering internally, so this is only for count-display components.
   const statusFiltered = useMemo(() => {
-    if (currentStatus === 'all') return bookmarks;
-    return bookmarks.filter((b) => b.status === currentStatus);
-  }, [bookmarks, currentStatus]);
+    let result = bookmarks;
+    if (currentStatus !== 'all') result = result.filter((b) => b.status === currentStatus);
+    if (showFavorites) result = result.filter((b) => b.is_favorited);
+    return result;
+  }, [bookmarks, currentStatus, showFavorites]);
 
   // Keep selectedBookmark in sync with bookmarks data
   const activeBookmark = useMemo(() => {
