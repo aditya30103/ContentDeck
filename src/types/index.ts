@@ -16,6 +16,7 @@ export interface BookmarkMetadata {
   channel?: string;
   word_count?: number;
   reading_time?: number;
+  author?: string;
 }
 
 export interface BookmarkContent {

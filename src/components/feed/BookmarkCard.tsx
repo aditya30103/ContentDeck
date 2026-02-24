@@ -1,6 +1,6 @@
 import { Heart, Trash2, ExternalLink, Clock, FileText } from 'lucide-react';
 import { SourceBadge, StatusBadge } from '../ui/Badge';
-import { timeAgo, getDomain, getFaviconUrl, truncate } from '../../lib/utils';
+import { timeAgo, getDomain, getFaviconUrl, truncate, isBookWithoutUrl } from '../../lib/utils';
 import { useUI } from '../../context/UIProvider';
 import type { Bookmark, Status } from '../../types';
 import { STATUS_NEXT } from '../../types';
@@ -27,7 +27,8 @@ export default function BookmarkCard({
   onClick,
 }: BookmarkCardProps) {
   const { setTag } = useUI();
-  const domain = getDomain(b.url);
+  const noUrl = isBookWithoutUrl(b);
+  const domain = noUrl ? null : getDomain(b.url);
   const readingTime = b.metadata?.reading_time;
 
   function handleClick() {
@@ -91,13 +92,18 @@ export default function BookmarkCard({
 
         {/* Title */}
         <h3 className="text-sm font-medium text-surface-900 dark:text-surface-100 line-clamp-2 mb-1">
-          {b.title || truncate(b.url, 60)}
+          {b.title || (noUrl ? 'Untitled Book' : truncate(b.url, 60))}
         </h3>
 
         {/* Domain + metadata */}
         <div className="flex items-center gap-2 text-xs text-surface-500 dark:text-surface-400">
-          <img src={getFaviconUrl(b.url)} alt="" className="w-3.5 h-3.5" loading="lazy" />
-          <span>{domain}</span>
+          {!noUrl && (
+            <img src={getFaviconUrl(b.url)} alt="" className="w-3.5 h-3.5" loading="lazy" />
+          )}
+          {domain && <span>{domain}</span>}
+          {b.metadata?.author && (
+            <span>{noUrl ? b.metadata.author : `· ${b.metadata.author}`}</span>
+          )}
           {b.metadata?.duration && (
             <span className="flex items-center gap-0.5">
               &middot; <Clock size={11} /> {b.metadata.duration}
@@ -165,16 +171,18 @@ export default function BookmarkCard({
         >
           <Heart size={16} fill={b.is_favorited ? 'currentColor' : 'none'} />
         </button>
-        <a
-          href={b.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 text-surface-400 min-w-[36px] min-h-[36px] flex items-center justify-center"
-          aria-label="Open in new tab"
-        >
-          <ExternalLink size={16} />
-        </a>
+        {!noUrl && (
+          <a
+            href={b.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 text-surface-400 min-w-[36px] min-h-[36px] flex items-center justify-center"
+            aria-label="Open in new tab"
+          >
+            <ExternalLink size={16} />
+          </a>
+        )}
         <button
           onClick={handleDelete}
           className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-surface-400 hover:text-red-500 min-w-[36px] min-h-[36px] flex items-center justify-center"

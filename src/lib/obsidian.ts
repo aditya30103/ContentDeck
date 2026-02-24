@@ -1,5 +1,5 @@
 import type { Bookmark } from '../types';
-import { formatDate, getDomain } from './utils';
+import { formatDate, getDomain, isBookWithoutUrl } from './utils';
 import { SOURCE_LABELS } from '../types';
 
 /** Escape a string for use as a YAML double-quoted value */
@@ -16,9 +16,11 @@ function yamlEscape(s: string): string {
 export function generateMarkdown(bookmark: Bookmark): string {
   const lines: string[] = [];
 
+  const noUrl = isBookWithoutUrl(bookmark);
+
   // YAML frontmatter
   lines.push('---');
-  lines.push(`url: "${yamlEscape(bookmark.url)}"`);
+  if (!noUrl) lines.push(`url: "${yamlEscape(bookmark.url)}"`);
   if (bookmark.title) lines.push(`title: "${yamlEscape(bookmark.title)}"`);
   lines.push(`source: ${SOURCE_LABELS[bookmark.source_type]}`);
   lines.push(`status: ${bookmark.status}`);
@@ -33,17 +35,20 @@ export function generateMarkdown(bookmark: Bookmark): string {
   if (bookmark.metadata?.reading_time)
     lines.push(`reading_time: ${bookmark.metadata.reading_time} min`);
   if (bookmark.metadata?.channel) lines.push(`channel: "${yamlEscape(bookmark.metadata.channel)}"`);
+  if (bookmark.metadata?.author) lines.push(`author: "${yamlEscape(bookmark.metadata.author)}"`);
 
   lines.push('---');
   lines.push('');
 
   // Title
-  lines.push(`# ${bookmark.title || bookmark.url}`);
+  lines.push(`# ${bookmark.title || (noUrl ? 'Untitled Book' : bookmark.url)}`);
   lines.push('');
 
-  // Link
-  lines.push(`> [Open original](${bookmark.url}) — ${getDomain(bookmark.url)}`);
-  lines.push('');
+  // Link — omitted for URL-less books
+  if (!noUrl) {
+    lines.push(`> [Open original](${bookmark.url}) — ${getDomain(bookmark.url)}`);
+    lines.push('');
+  }
 
   // Excerpt
   if (bookmark.excerpt) {
@@ -88,7 +93,8 @@ export function generateMarkdown(bookmark: Bookmark): string {
 
 /** Generate a safe filename from a bookmark title */
 function safeFilename(bookmark: Bookmark): string {
-  const name = bookmark.title || getDomain(bookmark.url);
+  const name =
+    bookmark.title || (isBookWithoutUrl(bookmark) ? 'Untitled Book' : getDomain(bookmark.url));
   return (
     name
       .replace(/[<>:"/\\|?*]/g, '')

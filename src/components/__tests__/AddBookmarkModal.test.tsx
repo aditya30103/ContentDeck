@@ -67,3 +67,79 @@ describe('AddBookmarkModal', () => {
     expect(screen.getByText('twitter')).toBeInTheDocument();
   });
 });
+
+describe('AddBookmarkModal — book mode', () => {
+  it('shows book mode toggle button', () => {
+    render(<AddBookmarkModal {...defaultProps} />);
+    expect(screen.getByText('Log a book without a URL')).toBeInTheDocument();
+  });
+
+  it('enters book mode when toggle is clicked', async () => {
+    const user = userEvent.setup();
+    render(<AddBookmarkModal {...defaultProps} />);
+    await user.click(screen.getByText('Log a book without a URL'));
+    expect(screen.getByText('Logging a book (no URL needed)')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Book title')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Author name')).toBeInTheDocument();
+    expect(screen.getByText('Log Book')).toBeInTheDocument();
+  });
+
+  it('submit button enabled when title is filled (book mode, no URL)', async () => {
+    const user = userEvent.setup();
+    render(<AddBookmarkModal {...defaultProps} />);
+    await user.click(screen.getByText('Log a book without a URL'));
+    expect(screen.getByText('Log Book').closest('button')).toBeDisabled();
+    await user.type(screen.getByPlaceholderText('Book title'), 'Atomic Habits');
+    expect(screen.getByText('Log Book').closest('button')).not.toBeDisabled();
+  });
+
+  it('calls onAdd with source_type book and no url when no URL is entered', async () => {
+    const user = userEvent.setup();
+    const onAdd = vi.fn();
+    render(<AddBookmarkModal {...defaultProps} onAdd={onAdd} />);
+    await user.click(screen.getByText('Log a book without a URL'));
+    await user.type(screen.getByPlaceholderText('Book title'), 'Deep Work');
+    await user.type(screen.getByPlaceholderText('Author name'), 'Cal Newport');
+    await user.click(screen.getByText('Log Book'));
+    expect(onAdd).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Deep Work',
+        source_type: 'book',
+        metadata: { author: 'Cal Newport' },
+      }),
+    );
+    const call = onAdd.mock.calls[0]?.[0] as { url?: string };
+    expect(call.url).toBeUndefined();
+  });
+
+  it('calls onAdd with url when URL is provided in book mode', async () => {
+    const user = userEvent.setup();
+    const onAdd = vi.fn();
+    render(<AddBookmarkModal {...defaultProps} onAdd={onAdd} />);
+    await user.click(screen.getByText('Log a book without a URL'));
+    await user.type(
+      screen.getByPlaceholderText('https://... (optional)'),
+      'https://books.example.com/atomic-habits',
+    );
+    await user.type(screen.getByPlaceholderText('Book title'), 'Atomic Habits');
+    await user.click(screen.getByText('Log Book'));
+    expect(onAdd).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: 'https://books.example.com/atomic-habits',
+        title: 'Atomic Habits',
+        source_type: 'book',
+      }),
+    );
+  });
+
+  it('omits metadata when no author is entered in book mode', async () => {
+    const user = userEvent.setup();
+    const onAdd = vi.fn();
+    render(<AddBookmarkModal {...defaultProps} onAdd={onAdd} />);
+    await user.click(screen.getByText('Log a book without a URL'));
+    await user.type(screen.getByPlaceholderText('Book title'), 'No Author Book');
+    await user.click(screen.getByText('Log Book'));
+    const call = onAdd.mock.calls[0]?.[0] as { metadata?: unknown };
+    expect(call.metadata).toBeUndefined();
+  });
+});

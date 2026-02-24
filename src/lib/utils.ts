@@ -60,6 +60,11 @@ export function getFaviconUrl(url: string): string {
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
 }
 
+/** Check if a bookmark is a book entry without a real URL */
+export function isBookWithoutUrl(bookmark: { source_type: string; url: string }): boolean {
+  return bookmark.source_type === 'book' && !bookmark.url.startsWith('http');
+}
+
 /** Truncate text to a max length */
 export function truncate(text: string, max: number): string {
   if (text.length <= max) return text;
