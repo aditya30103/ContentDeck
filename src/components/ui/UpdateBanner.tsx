@@ -3,17 +3,15 @@ import { RefreshCw } from 'lucide-react';
 
 export default function UpdateBanner() {
   const [showUpdate, setShowUpdate] = useState(false);
-  const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
     void navigator.serviceWorker.register('/sw.js').then((reg) => {
-      setRegistration(reg);
-
-      // Check for waiting worker on load
+      // Check for waiting worker on load — auto-apply it
       if (reg.waiting) {
         setShowUpdate(true);
+        reg.waiting.postMessage('SKIP_WAITING'); // don't wait for user tap
         return;
       }
 
@@ -45,24 +43,12 @@ export default function UpdateBanner() {
     };
   }, []);
 
-  function handleUpdate() {
-    if (registration?.waiting) {
-      registration.waiting.postMessage('SKIP_WAITING');
-    }
-  }
-
   if (!showUpdate) return null;
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-center gap-3 px-4 py-2.5 bg-primary-600 text-white text-sm font-medium shadow-lg">
-      <RefreshCw size={16} />
-      <span>A new version is available</span>
-      <button
-        onClick={handleUpdate}
-        className="px-3 py-1 rounded-md bg-white/20 hover:bg-white/30 font-semibold transition-colors min-h-[32px]"
-      >
-        Update Now
-      </button>
+      <RefreshCw size={16} className="animate-spin" />
+      <span>Updating to latest version…</span>
     </div>
   );
 }
