@@ -106,7 +106,7 @@ function FeedbackCard({ item }: { item: FeedbackItem }) {
         </p>
       )}
 
-      {/* Inline context fields */}
+      {/* Inline context summary */}
       <div className="pl-6 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-surface-400 dark:text-surface-500">
         {item.app_context.viewMode && <span>View: {item.app_context.viewMode}</span>}
         {item.app_context.statusFilter && item.app_context.statusFilter !== 'all' && (
@@ -118,6 +118,16 @@ function FeedbackCard({ item }: { item: FeedbackItem }) {
           </span>
         )}
       </div>
+
+      {/* Full context disclosure */}
+      <details className="pl-6 text-xs">
+        <summary className="cursor-pointer text-surface-400 dark:text-surface-500 hover:text-surface-600 dark:hover:text-surface-300 select-none">
+          Full context
+        </summary>
+        <pre className="mt-2 p-2 rounded bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-400 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
+          {JSON.stringify({ app: item.app_context, system: item.system_context }, null, 2)}
+        </pre>
+      </details>
 
       {/* Status change */}
       <div className="pl-6 flex items-center gap-2">
