@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MessageSquare, Bug, Lightbulb, HelpCircle } from 'lucide-react';
 import { useFeedback } from '../../hooks/useFeedback';
 import type { FeedbackItem, FeedbackStatus, FeedbackType } from '../../types';
@@ -45,11 +45,18 @@ function SkeletonCard() {
 
 function FeedbackCard({ item }: { item: FeedbackItem }) {
   const { updateStatus } = useFeedback();
+  const [selectedStatus, setSelectedStatus] = useState<FeedbackStatus>(item.status);
   const [resolutionNote, setResolutionNote] = useState(item.resolution_note ?? '');
   const [showNoteInput, setShowNoteInput] = useState(false);
   const Icon = TYPE_ICON[item.feedback_type];
 
+  // Sync select back to DB value after refetch (e.g. on error rollback)
+  useEffect(() => {
+    setSelectedStatus(item.status);
+  }, [item.status]);
+
   function handleStatusChange(newStatus: FeedbackStatus) {
+    setSelectedStatus(newStatus);
     if (newStatus === 'resolved' || newStatus === 'wont_fix') {
       setShowNoteInput(true);
     } else {
@@ -61,10 +68,7 @@ function FeedbackCard({ item }: { item: FeedbackItem }) {
   function handleNoteSubmit() {
     updateStatus.mutate({
       id: item.id,
-      status: showNoteInput
-        ? (((document.getElementById(`status-select-${item.id}`) as HTMLSelectElement | null)
-            ?.value as FeedbackStatus) ?? item.status)
-        : item.status,
+      status: selectedStatus,
       resolution_note: resolutionNote || undefined,
     });
     setShowNoteInput(false);
@@ -139,7 +143,7 @@ function FeedbackCard({ item }: { item: FeedbackItem }) {
         </label>
         <select
           id={`status-select-${item.id}`}
-          value={item.status}
+          value={selectedStatus}
           onChange={(e) => handleStatusChange(e.target.value as FeedbackStatus)}
           className="text-xs px-2 py-1 rounded border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-700 dark:text-surface-300 min-h-[32px]"
         >
