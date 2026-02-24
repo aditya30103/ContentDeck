@@ -56,9 +56,8 @@ export default function BookmarkList({
     // Tag/Area filter
     if (currentTag) {
       if (currentTag === '__untagged__') {
-        result = result.filter(
-          (b) => (!b.tags || b.tags.length === 0) && (!b.areas || b.areas.length === 0),
-        );
+        // "Uncategorized" means not assigned to any area — tags are a separate dimension.
+        result = result.filter((b) => !b.areas || b.areas.length === 0);
       } else {
         result = result.filter(
           (b) =>

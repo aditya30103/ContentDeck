@@ -86,12 +86,23 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
     if (open) {
       document.addEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'hidden';
+      // Push a history entry so the PWA back gesture closes the reader
+      // instead of navigating away from the app.
+      history.pushState({ reader: true }, '');
     }
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
   }, [open, handleKeyDown]);
+
+  // Intercept browser/PWA back gesture while reader is open.
+  useEffect(() => {
+    if (!open) return;
+    const handlePopState = () => onClose();
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [open, onClose]);
 
   // Reset scroll when bookmark changes
   useEffect(() => {

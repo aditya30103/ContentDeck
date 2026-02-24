@@ -65,16 +65,13 @@ export default function Sidebar({ counts, onAdd, onSignOut, onSettings, onStats 
         <div className="space-y-0.5">
           {statusNav.map(({ status, label, icon: Icon }) => {
             const count = status === 'all' ? totalCount : (counts[status] ?? 0);
-            const active = currentStatus === status && !currentTag && !showFavorites;
+            // Active reflects only the status dimension — area/favorites filters are independent.
+            const active = currentStatus === status;
             return (
               <button
                 key={status}
                 aria-current={active ? 'page' : undefined}
-                onClick={() => {
-                  setStatus(status);
-                  setTag(null);
-                  setFavorites(false);
-                }}
+                onClick={() => setStatus(status)}
                 className={`
                   w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px]
                   ${
@@ -91,14 +88,10 @@ export default function Sidebar({ counts, onAdd, onSignOut, onSettings, onStats 
             );
           })}
 
-          {/* Favorites */}
+          {/* Favorites — toggles independently; does not reset status or area */}
           <button
             aria-current={showFavorites ? 'page' : undefined}
-            onClick={() => {
-              setFavorites(true);
-              setStatus('all');
-              setTag(null);
-            }}
+            onClick={() => setFavorites(!showFavorites)}
             className={`
               w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px]
               ${

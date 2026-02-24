@@ -103,10 +103,11 @@ export function useBookmarks() {
         old ? [newBookmark, ...old] : [newBookmark],
       );
       toast.success('Bookmark added');
-      // Auto-extract content in background
-      void triggerExtraction(newBookmark);
-      // Auto-fetch metadata, then AI-tag with the enriched bookmark
-      void autoFetchMetadataAndTag(newBookmark);
+      // Fetch metadata first (awaited), THEN trigger extraction.
+      // Extraction's invalidateQueries must not race with the metadata DB write.
+      void autoFetchMetadataAndTag(newBookmark).then(() => {
+        void triggerExtraction(newBookmark);
+      });
     },
     onError: () => toast.error('Failed to add bookmark'),
   });
@@ -396,10 +397,16 @@ export function useBookmarks() {
       if (updates) {
         const { error } = await db.from('bookmarks').update(updates).eq('id', bookmark.id);
         if (!error) {
-          enriched = { ...bookmark, ...updates } as Bookmark;
+          // Merge updates into the CURRENT cache state for this bookmark so we
+          // don't clobber fields (e.g. areas) that were set after the initial insert.
           queryClient.setQueryData<Bookmark[]>(QUERY_KEY, (old) =>
-            old?.map((b) => (b.id === bookmark.id ? enriched : b)),
+            old?.map((b) => (b.id === bookmark.id ? { ...b, ...updates } : b)),
           );
+          enriched = {
+            ...(queryClient
+              .getQueryData<Bookmark[]>(QUERY_KEY)
+              ?.find((b) => b.id === bookmark.id) ?? bookmark),
+          };
         }
       }
     } catch {

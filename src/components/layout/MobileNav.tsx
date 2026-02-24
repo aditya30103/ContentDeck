@@ -23,14 +23,12 @@ export default function MobileNav({ counts }: MobileNavProps) {
     >
       <div className="flex items-center">
         {tabs.map(({ status, label, icon: Icon }) => {
-          const active = currentStatus === status && !showFavorites;
+          // Active reflects only the status dimension — favorites is independent.
+          const active = currentStatus === status;
           return (
             <button
               key={status}
-              onClick={() => {
-                setStatus(status);
-                setFavorites(false);
-              }}
+              onClick={() => setStatus(status)}
               className={`flex-1 flex flex-col items-center gap-0.5 py-2 min-h-[56px] transition-colors
                 ${active ? 'text-primary-600 dark:text-primary-400' : 'text-surface-400 dark:text-surface-500'}
               `}
@@ -44,12 +42,9 @@ export default function MobileNav({ counts }: MobileNavProps) {
           );
         })}
 
-        {/* Favorites */}
+        {/* Favorites — toggles independently; does not reset status or area */}
         <button
-          onClick={() => {
-            setFavorites(true);
-            setStatus('all');
-          }}
+          onClick={() => setFavorites(!showFavorites)}
           className={`flex-1 flex flex-col items-center gap-0.5 py-2 min-h-[56px] transition-colors
             ${showFavorites ? 'text-primary-600 dark:text-primary-400' : 'text-surface-400 dark:text-surface-500'}
           `}
