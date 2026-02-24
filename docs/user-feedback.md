@@ -189,6 +189,11 @@ Free model rate limits on OpenRouter hit silently. The AI tagging fires for ever
 ### [DONE] PWA back button closes app (PR #16 — Session 1)
 - ReaderModal pushes history entry on open; popstate listener closes reader instead of navigating away
 
+### [DONE] Favorites filter not propagating to AreasView/SourceTabs/StatusFilters (main, 2026-02-24)
+- Root cause: Dashboard.tsx never read showFavorites from useUI(), so statusFiltered was status-only
+- AreasView area counts, SourceTabs source counts, StatusFilters pills all showed wrong totals
+- Fix: showFavorites included in statusFiltered useMemo; sidebar divider added before Favorites
+
 ### [DONE] Favorites × Area filter can't combine (PR #16 — Session 1)
 - Sidebar and MobileNav nav actions no longer cross-clear filter dimensions
 - Favorites is now a toggle; status tabs only change status
