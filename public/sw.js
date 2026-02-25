@@ -1,4 +1,4 @@
-const CACHE_NAME = 'contentdeck-v3.0.9'
+const CACHE_NAME = 'contentdeck-v3.1.0'
 
 self.addEventListener('install', () => {
   self.skipWaiting() // Auto-activate immediately — personal tool, seamless updates desired

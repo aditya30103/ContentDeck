@@ -16,6 +16,8 @@ Complete workflow for developing features professionally: branch → plan → im
 
 ## Phase 1 — PLAN
 
+**USE PLAN MODE FOR PHASE 1 - dig into the codebase, write a detailed implementation plan, and get user approval before writing any code.**
+
 1. **Find or create a GitHub Issue** for this work:
    - Check existing issues: `gh issue list --repo aditya30103/ContentDeck`
    - If the issue exists, note its number (e.g. `#4`)

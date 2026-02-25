@@ -145,6 +145,8 @@ export interface FeedbackItem {
   active_bookmark_id: string | null;
   status: FeedbackStatus;
   resolution_note: string | null;
+  github_issue_number?: number | null;
+  github_issue_url?: string | null;
   created_at: string;
   updated_at: string;
 }

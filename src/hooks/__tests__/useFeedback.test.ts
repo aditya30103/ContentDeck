@@ -59,17 +59,23 @@ function createMockBuilder(): MockBuilder {
 
 function createMockSupabase() {
   const builders = new Map<string, MockBuilder>();
+  const invokeMock = vi.fn().mockResolvedValue({ data: null, error: null });
 
   return {
     from: vi.fn((table: string) => {
       if (!builders.has(table)) builders.set(table, createMockBuilder());
       return builders.get(table)!;
     }),
+    functions: { invoke: invokeMock },
     _getBuilder: (table: string) => {
       if (!builders.has(table)) builders.set(table, createMockBuilder());
       return builders.get(table)!;
     },
-    _resetBuilders: () => builders.clear(),
+    _getInvokeMock: () => invokeMock,
+    _resetBuilders: () => {
+      builders.clear();
+      invokeMock.mockReset().mockResolvedValue({ data: null, error: null });
+    },
   };
 }
 
@@ -116,6 +122,8 @@ const SAMPLE_FEEDBACK: FeedbackItem = {
   active_bookmark_id: null,
   status: 'open',
   resolution_note: null,
+  github_issue_number: null,
+  github_issue_url: null,
   created_at: '2026-02-24T10:00:00.000Z',
   updated_at: '2026-02-24T10:00:00.000Z',
 };
@@ -160,7 +168,8 @@ describe('useFeedback — submitFeedback', () => {
     const { result } = renderHook(() => useFeedback(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    // Set builder so insert succeeds (no error) AND re-fetch after invalidate returns the new item
+    // Builder resolves with an array — feedbackId will be undefined (no .id on array)
+    // invoke is not called; re-fetch returns the new item
     builder._resolve = { data: [SAMPLE_FEEDBACK], error: null };
 
     act(() => {
@@ -179,6 +188,63 @@ describe('useFeedback — submitFeedback', () => {
     expect(mockToast.success).toHaveBeenCalledWith('Feedback submitted');
     // After invalidateQueries the query re-runs; builder now returns [SAMPLE_FEEDBACK]
     await waitFor(() => expect(result.current.feedbackItems[0]?.id).toBe('fb-1'));
+  });
+
+  it('calls create-github-issue with feedback_id after successful submit', async () => {
+    const builder = mockSupabaseClient._getBuilder('feedback');
+    builder._resolve = { data: [], error: null };
+
+    const { result } = renderHook(() => useFeedback(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    // Insert returns object with id; re-fetch (invalidateQueries) returns the new item
+    builder._resolve = { data: { id: 'fb-new-1' }, error: null };
+
+    act(() => {
+      result.current.submitFeedback.mutate({
+        feedback_type: 'bug',
+        title: 'Favorites filter broken',
+        description: null,
+        severity: 'major',
+        app_context: SAMPLE_FEEDBACK.app_context,
+        system_context: SAMPLE_FEEDBACK.system_context,
+        active_bookmark_id: null,
+      });
+    });
+
+    await waitFor(() => expect(result.current.submitFeedback.isSuccess).toBe(true));
+    expect(mockSupabaseClient._getInvokeMock()).toHaveBeenCalledWith('create-github-issue', {
+      body: { feedback_id: 'fb-new-1' },
+    });
+  });
+
+  it('succeeds and shows toast even if GH sync errors', async () => {
+    const builder = mockSupabaseClient._getBuilder('feedback');
+    builder._resolve = { data: [], error: null };
+
+    const { result } = renderHook(() => useFeedback(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    // GH sync will fail; insert still succeeds
+    mockSupabaseClient
+      ._getInvokeMock()
+      .mockResolvedValue({ data: null, error: { message: 'API error' } });
+    builder._resolve = { data: { id: 'fb-new-2' }, error: null };
+
+    act(() => {
+      result.current.submitFeedback.mutate({
+        feedback_type: 'bug',
+        title: 'Test',
+        description: null,
+        severity: 'minor',
+        app_context: SAMPLE_FEEDBACK.app_context,
+        system_context: SAMPLE_FEEDBACK.system_context,
+        active_bookmark_id: null,
+      });
+    });
+
+    await waitFor(() => expect(result.current.submitFeedback.isSuccess).toBe(true));
+    expect(mockToast.success).toHaveBeenCalledWith('Feedback submitted');
   });
 
   it('shows error toast on submit failure', async () => {

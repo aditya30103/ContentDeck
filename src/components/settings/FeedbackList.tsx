@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MessageSquare, Bug, Lightbulb, HelpCircle } from 'lucide-react';
+import { MessageSquare, Bug, Lightbulb, HelpCircle, GitBranch } from 'lucide-react';
 import { useFeedback } from '../../hooks/useFeedback';
 import type { FeedbackItem, FeedbackStatus, FeedbackType } from '../../types';
 
@@ -98,6 +98,19 @@ function FeedbackCard({ item }: { item: FeedbackItem }) {
               >
                 {item.severity}
               </span>
+            )}
+            {item.github_issue_url && item.github_issue_number && (
+              <a
+                href={item.github_issue_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded font-medium
+                           bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-400
+                           hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                aria-label={`GitHub issue #${item.github_issue_number}`}
+              >
+                <GitBranch size={11} />#{item.github_issue_number}
+              </a>
             )}
           </div>
         </div>
