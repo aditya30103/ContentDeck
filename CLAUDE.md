@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ContentDeck — a personal content bookmarking PWA dashboard for the Capture → Consume → Reflect → Export workflow. Bridges web browsing and Obsidian knowledge management.
 
-**Status: v3.0 — React + Vite + Tailwind + TypeScript. Supabase Auth, demo mode, PWA share target.**
+**Status: v3.2 — React + Vite + Tailwind + TypeScript. Supabase Auth, demo mode, PWA share target, Sentry error tracking, GitHub Issues sync.**
 
 See `docs/reference/audit.md` for the full audit trail (39/47 v1 issues resolved, 14 v2.0 bugs fixed, 8 v2.2 shipping fixes).
 
@@ -30,8 +30,10 @@ All project docs live in `docs/`. Start each session by reading `docs/INDEX.md`.
 - **State:** TanStack Query (server state) + React Context (UI state)
 - **Icons:** Lucide React
 - **Auth:** Supabase Auth (magic link + Google OAuth + GitHub OAuth)
-- **Backend:** Supabase (PostgreSQL + REST API + RLS per user)
+- **Backend:** Supabase (PostgreSQL + REST API + RLS per user + Edge Functions)
 - **AI:** OpenRouter (client-side, user-provided API key, free models)
+- **Error tracking:** Sentry (`@sentry/react` — all mutations, ErrorBoundary, unhandledrejection)
+- **Analytics:** Vercel Analytics + Speed Insights
 - **Hosting:** Vercel (auto-deploy from `main` branch, `vercel.json` for SPA rewrites + cache headers)
 
 ## Commands
@@ -64,7 +66,9 @@ src/
 
 supabase/
 └── functions/
-    └── save-bookmark/   # Edge function: token-authenticated bookmark save (bookmarklet + iOS Shortcut)
+    ├── save-bookmark/        # Token-authenticated bookmark save (bookmarklet + iOS Shortcut)
+    ├── extract-content/      # Article extraction via Readability (reader mode + full-text search)
+    └── create-github-issue/  # Feedback → GitHub Issue sync (GITHUB_PAT secret)
 ```
 
 ### Key patterns
@@ -81,16 +85,18 @@ supabase/
 - **PWA Share Target:** `manifest.json` `share_target` + `?url=` query param handling in App.tsx → AddBookmarkModal pre-fill
 - **Service worker:** Network-first for navigation, stale-while-revalidate for assets. Version in `CACHE_NAME` must be bumped manually on deploys.
 - **Loading state:** Inline CSS spinner in `index.html` shown until React mounts (no blank page)
-- **Edge Functions:** `save-bookmark` accepts `{ token, url, title? }`, validates token hash against `user_tokens`, inserts bookmark via service role key (bypasses RLS). Enables bookmarklet + iOS Shortcut.
+- **Edge Functions:** All deployed with `--no-verify-jwt`; verify auth in function code. `save-bookmark` accepts `{ token, url, title? }` via query params or JSON body, validates SHA-256 token hash. `extract-content` uses JWT + ownership check, runs Readability, stores in `content` JSONB. `create-github-issue` uses JWT + ownership check, POSTs to GitHub API, writes back `github_issue_number`/`url`.
+- **Sentry:** `enabled: !!VITE_SENTRY_DSN` — completely inert when DSN absent. Edge functions use `console.error` with context (no Sentry SDK in Deno runtime).
 
 ## Database (Supabase PostgreSQL)
 
-Schema defined in `sql/setup.sql`. Key tables:
-- `bookmarks` — user_id, url, title, source_type, status (unread/reading/done), is_favorited, notes (JSONB array), metadata (JSONB), synced
+Schema in `sql/setup.sql` + `sql/feedback.sql` + `sql/20260225_github_issue_tracking.sql`. Key tables:
+- `bookmarks` — user_id, url, title, source_type, status (unread/reading/done), is_favorited, notes (JSONB array), metadata (JSONB), content (JSONB — extracted text/word_count/reading_time), synced
 - `tag_areas` — user_id, name, emoji, color, sort_order
 - `bookmark_tags` — junction table (scoped via bookmark's user_id)
 - `status_history` — user_id, audit trail for streak/stats calculations
 - `user_tokens` — user_id, name, token_hash (SHA-256), last_used_at (for bookmarklet/iOS Shortcut auth)
+- `feedback` — user_id, title, type, severity, context (JSONB), status, github_issue_number, github_issue_url
 
 DB triggers:
 - `detect_source_type()` — auto-classifies URLs using `~*` (case-insensitive regex)
@@ -119,16 +125,19 @@ RLS policies:
 
 - **Supabase Auth** — magic link, Google OAuth, GitHub OAuth
 - **Supabase REST API** — all CRUD (RLS-protected, user-scoped)
-- **Supabase Edge Functions** — `save-bookmark` (token-authenticated external save)
+- **Supabase Edge Functions** — `save-bookmark` (token auth), `extract-content` (JWT auth), `create-github-issue` (JWT auth + GITHUB_PAT secret)
 - **OpenRouter** — AI tagging (free models: Llama 3.3 70B, Gemma 3, Mistral, Qwen)
 - **YouTube oEmbed** — video titles (no key needed)
 - **YouTube Data API v3** — video duration/channel (free 10K units/day)
 - **Twitter oEmbed** — tweet titles (no key needed)
 - **Microlink API** — generic title fetching (50 req/day free tier)
+- **GitHub API** — issue creation from in-app feedback (`GITHUB_PAT` Supabase secret)
+- **Sentry** — runtime error capture, source maps (free 5K events/month; `VITE_SENTRY_DSN` env var)
 
 ## Error Handling
 
-- **Error Boundary**: Wraps the entire app — catches render errors, shows reload button
+- **Sentry**: `captureException` in all 14 mutation `onError` callbacks, `ErrorBoundary.componentDidCatch`, global `unhandledrejection` listener, and fire-and-forget `.catch()` chains. No-op when `VITE_SENTRY_DSN` is absent.
+- **Error Boundary**: Wraps the entire app — catches render errors, shows reload button, reports to Sentry
 - **TanStack Query**: All mutations have optimistic update + automatic rollback on error + toast notification
 - **Notes mutations**: `addNote`/`deleteNote` fetch current state from DB (not cache) to prevent race conditions
 - **AI/Metadata**: Fire-and-forget with silent failure — non-critical features. Metadata fetch completes before AI tagging so the LLM has title + excerpt context.
