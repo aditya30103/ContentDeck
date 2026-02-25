@@ -2,10 +2,10 @@
 
 > Start here. This file orients each session.
 
-**Version:** v3.2 | **Status:** Phase 1 complete + user-feedback sessions ongoing
-**Next up:** Pre–Phase 2 backlog (Sessions 3–4 in user-feedback.md), then Phase 2 (Intelligence)
+**Version:** v3.2 | **Status:** Phase 1 complete · Pre-Phase 2 backlog in progress
+**Next up:** 2.0.1 Source types (GitHub, arXiv) · 2.0.2 Obsidian wikilinks · 2.0.3 Race condition tests → then Phase 2 AI features
 **Feedback:** In-app button in Sidebar/MobileHeader → Settings → Feedback tab to review
-**Active phase:** [Phase 2 — Intelligence](plan/phase-2.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
+**Active plan:** [Phase 2 — Intelligence](plan/phase-2.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
 
 ---
 
@@ -13,8 +13,8 @@
 
 | If you're... | Read these |
 |---|---|
-| Starting a new feature | [plan/phase-1.md](plan/phase-1.md) + [guides/workflow.md](guides/workflow.md) |
-| Planning next feature (1.3+) | [plan/phase-1.md](plan/phase-1.md) |
+| Starting a new feature | [plan/phase-2.md](plan/phase-2.md) + [guides/workflow.md](guides/workflow.md) |
+| Planning Phase 2 AI features | [plan/phase-2.md](plan/phase-2.md) |
 | Understanding the vision | [plan/vision.md](plan/vision.md) |
 | Debugging something that used to work | [log/](log/) — find the relevant implementation log |
 | Setting up Supabase Auth | [guides/supabase-auth-setup.md](guides/supabase-auth-setup.md) |
@@ -31,7 +31,7 @@ docs/
 ├── INDEX.md                        ← You are here
 ├── plan/                           # Future work — gets shorter as features ship
 │   ├── vision.md                   # Vision, architecture evolution, principles
-│   ├── phase-1.md                  # Phase 1: Foundation — ACTIVE (1.2-1.6)
+│   ├── phase-1.md                  # Phase 1: Foundation — COMPLETE ✅
 │   ├── phase-2.md                  # Phase 2: Intelligence (v3.5)
 │   ├── phase-3.md                  # Phase 3: Platform (v4.0)
 │   ├── phase-4.md                  # Phase 4: Social & Scale (v5.0)
@@ -52,7 +52,7 @@ docs/
 │   ├── v3.1-book-capture-without-url.md # Session 2: optional URL for books, author field
 │   ├── v3.1-feedback-capture.md   # In-app feedback capture system (#20)
 │   ├── v3.1-pwa-autoupdate-feedback-status-fix.md # Session 3: PWA auto-update + feedback status save
-│   └── v3.2-sentry-github-sync.md  # Sentry error tracking + GitHub Issues sync (#21 + #22)
+│   └── v3.2-sentry-github-sync.md  # Sentry + GitHub Issues sync (#21 #22) + full Sentry coverage (#25)
 ├── guides/                         # How-to references
 │   ├── workflow.md                 # Development practices, session workflow
 │   └── supabase-auth-setup.md      # Supabase Auth provider configuration
@@ -67,7 +67,8 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
-| v3.2 | Sentry error tracking (auto-capture, source maps) + GitHub Issues sync (edge function, badge in FeedbackList) | [log/v3.2-sentry-github-sync.md](log/v3.2-sentry-github-sync.md) |
+| v3.2 | Full Sentry coverage (all 14 mutations, unhandledrejection, fire-and-forget chains) | [log/v3.2-sentry-github-sync.md](log/v3.2-sentry-github-sync.md) |
+| v3.2 | Sentry error tracking (init, ErrorBoundary, source maps) + GitHub Issues sync (edge function, FeedbackList badge) | [log/v3.2-sentry-github-sync.md](log/v3.2-sentry-github-sync.md) |
 | v3.1 | PWA auto-update (skipWaiting on install, informational banner) + feedback status save fix (controlled select) | [log/v3.1-pwa-autoupdate-feedback-status-fix.md](log/v3.1-pwa-autoupdate-feedback-status-fix.md) |
 | v3.1 | In-app feedback capture (Feedback button, auto-context snapshot, Settings review tab, 163 tests) | [log/v3.1-feedback-capture.md](log/v3.1-feedback-capture.md) |
 | v3.1 | Book capture without URL (optional URL, author field, sentinel pattern, 154 tests) | [log/v3.1-book-capture-without-url.md](log/v3.1-book-capture-without-url.md) |
