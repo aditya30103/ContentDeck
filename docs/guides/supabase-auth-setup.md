@@ -1,11 +1,14 @@
 # Supabase Auth Setup Guide
 
-This guide walks you through configuring Supabase Auth for ContentDeck v3.0.
+This guide walks you through configuring Supabase Auth for ContentDeck v3.2.
 
 ## Prerequisites
 
 - A Supabase project (free tier works)
-- The `sql/setup.sql` schema already applied
+- The following SQL files applied in Supabase SQL Editor (in order):
+  1. `sql/setup.sql` — core schema (bookmarks, tag_areas, user_tokens, triggers)
+  2. `sql/feedback.sql` — feedback table
+  3. `sql/20260225_github_issue_tracking.sql` — adds `github_issue_number`/`url` to feedback
 
 ## 1. Enable Auth Providers
 
@@ -60,6 +63,7 @@ Create `.env.local` in the project root:
 ```
 VITE_SUPABASE_URL=https://<your-project-ref>.supabase.co
 VITE_SUPABASE_ANON_KEY=<your-anon-key>
+VITE_SENTRY_DSN=                    # optional — paste DSN from sentry.io project settings
 ```
 
 Find these in Supabase Dashboard > Settings > API.
@@ -70,6 +74,7 @@ In your Vercel project settings > Environment Variables, add:
 
 - `VITE_SUPABASE_URL` = your Supabase project URL
 - `VITE_SUPABASE_ANON_KEY` = your Supabase anon/public key
+- `VITE_SENTRY_DSN` = your Sentry DSN (optional — enables production error tracking)
 
 Redeploy after adding the variables.
 
@@ -84,27 +89,34 @@ Redeploy after adding the variables.
 
 ## 5. Edge Function Deployment
 
-The `save-bookmark` edge function enables the bookmarklet and iOS Shortcut to save bookmarks using a personal API token.
-
-### Deploy the edge function
+ContentDeck has three edge functions. All must be deployed with `--no-verify-jwt` because they handle their own auth (token-based or JWT-manual).
 
 ```bash
 npx supabase login
 npx supabase link --project-ref <your-project-ref>
-npx supabase functions deploy save-bookmark
+
+npx supabase functions deploy save-bookmark --no-verify-jwt
+npx supabase functions deploy extract-content --no-verify-jwt
+npx supabase functions deploy create-github-issue --no-verify-jwt
 ```
 
-The function uses `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, which are automatically available in the edge function environment.
+`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are automatically available in the edge function environment — no manual configuration needed.
 
-### Apply the user_tokens migration
+### GitHub Issues sync (optional)
 
-Run `sql/migrations/002_add_user_tokens.sql` in the Supabase SQL Editor.
+If you want in-app feedback to automatically create GitHub Issues:
 
-### Generate a token
+```bash
+npx supabase secrets set GITHUB_PAT=<your-personal-access-token> --project-ref <your-project-ref>
+```
+
+The PAT needs `repo` scope. Without it, `create-github-issue` will return a 502 but feedback is still saved normally.
+
+### Generate an API token (for bookmarklet + iOS Shortcut)
 
 1. Open Settings in the app
 2. Under "API Tokens", click "Generate API Token"
-3. Copy the token (it's only shown once)
+3. Copy the token (shown once only)
 4. Use the bookmarklet or iOS Shortcut setup instructions shown after generation
 
 ## Troubleshooting
