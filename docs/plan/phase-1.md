@@ -18,7 +18,7 @@
   - Uses Mozilla Readability (npm package, runs in Deno)
   - Extracts: title, author, text content, word count, reading time, lead image
   - Stores in new `content` JSONB column on bookmarks
-  - Triggered on bookmark insert (database webhook → edge function)
+  - Triggered client-side from `addBookmark.onSuccess` → `triggerExtraction(newBookmark)`
 - **Fallback chain**: Readability → Microlink → title-only
 - **Rate limiting**: Process max 10 URLs/minute per user (pg_cron queue)
 
@@ -65,7 +65,7 @@ CREATE INDEX bookmarks_search_idx ON bookmarks USING GIN (search_vector);
 ## 1.6 Testing & CI
 **Why**: Moving fast without breaking things requires automated verification.
 
-- **Vitest**: Unit tests for lib/ functions and hooks (utils, metadata, ai, useBookmarks) ✅ **DONE** — 62 tests across 4 files
+- **Vitest**: Unit tests for lib/ functions and hooks (utils, metadata, ai, useBookmarks) ✅ **DONE** — 62 tests across 4 files at Phase 1 close (grew to 165 by v3.2 as features shipped)
 - **React Testing Library**: Component tests for critical UI flows ✅ **DONE** — 33 tests across 5 files (App, AuthScreen, AddBookmarkModal, BookmarkCard, StatusFilters)
 - **Playwright**: E2E tests — **DEFERRED** (overkill for personal app with strong unit + component coverage)
 - **GitHub Actions**: CI pipeline on PRs and pushes to main ✅ **DONE** — format → lint → typecheck → test → build

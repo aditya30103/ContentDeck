@@ -12,22 +12,30 @@ ContentDeck today: a personal bookmark manager with status tracking and Obsidian
 ContentDeck tomorrow: **the bridge between consuming content and building knowledge** — a platform where you capture anything, an AI helps you understand it, and your insights flow into your permanent knowledge system.
 
 ```
-v2.2 (today)     v3.0              v3.5               v4.0              v5.0
-Bookmarks    →   Auth + Import  →  AI Intelligence  →  Multi-platform →  Social
-Save URLs        Real users        Summarize, link     Extension, API    Public lists
-Demo mode        Full-text search  Smart queue         Offline-first     Collaboration
-PWA share        Reader mode       Spaced review       Webhooks          Analytics
+v3.2 (now) ✅     v3.5 (next)        v4.0               v5.0
+Auth + PWA    →  AI Intelligence →  Multi-platform →   Social
+Edge functions   Summarize, link    Extension, API     Public lists
+Reader mode      Smart queue        Offline-first      Collaboration
+Sentry + CI      Spaced review      Webhooks           Analytics
+GitHub sync      Chat with library
 ```
 
 ---
 
 ## Architecture Evolution
 
-### Current (v2.2)
+### Current (v3.2)
 ```
-Browser (React SPA) → Supabase REST API → PostgreSQL
-                    → OpenRouter (AI tagging)
-                    → Microlink/oEmbed (metadata)
+Browser (React SPA) → Supabase REST API → PostgreSQL (RLS, triggers, full-text search)
+                    → Supabase Edge Functions:
+                         save-bookmark    (bookmarklet + iOS Shortcut, token auth)
+                         extract-content  (Readability article extraction)
+                         create-github-issue (feedback → GitHub Issues sync)
+                    → OpenRouter (AI tagging — Llama 3.3 70B / Gemma 3)
+                    → YouTube Data API + Twitter oEmbed + Microlink (metadata)
+                    → GitHub API (issue creation from in-app feedback)
+                    → Sentry (runtime error capture + source maps)
+                    → Vercel Analytics + Speed Insights
 ```
 
 ### Target (v5.0)
