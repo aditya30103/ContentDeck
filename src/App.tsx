@@ -84,7 +84,7 @@ export default function App() {
               Skip to main content
             </a>
             {isDemo ? <DemoBanner onSignIn={handleExitDemo} /> : <UpdateBanner />}
-            <Dashboard
+<Dashboard
               userEmail={userEmail}
               onSignOut={isDemo ? handleExitDemo : handleSignOut}
               isDemo={isDemo}
