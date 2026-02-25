@@ -2,7 +2,7 @@
 
 > Start here. This file orients each session.
 
-**Version:** v3.1 | **Status:** Phase 1 complete + user-feedback sessions ongoing
+**Version:** v3.2 | **Status:** Phase 1 complete + user-feedback sessions ongoing
 **Next up:** Pre–Phase 2 backlog (Sessions 3–4 in user-feedback.md), then Phase 2 (Intelligence)
 **Feedback:** In-app button in Sidebar/MobileHeader → Settings → Feedback tab to review
 **Active phase:** [Phase 2 — Intelligence](plan/phase-2.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
@@ -51,7 +51,8 @@ docs/
 │   ├── v3.0-bug-fixes-session1.md # Session 1: metadata races, filter independence, PWA back button
 │   ├── v3.1-book-capture-without-url.md # Session 2: optional URL for books, author field
 │   ├── v3.1-feedback-capture.md   # In-app feedback capture system (#20)
-│   └── v3.1-pwa-autoupdate-feedback-status-fix.md # Session 3: PWA auto-update + feedback status save
+│   ├── v3.1-pwa-autoupdate-feedback-status-fix.md # Session 3: PWA auto-update + feedback status save
+│   └── v3.2-sentry-github-sync.md  # Sentry error tracking + GitHub Issues sync (#21 + #22)
 ├── guides/                         # How-to references
 │   ├── workflow.md                 # Development practices, session workflow
 │   └── supabase-auth-setup.md      # Supabase Auth provider configuration
@@ -66,6 +67,7 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
+| v3.2 | Sentry error tracking (auto-capture, source maps) + GitHub Issues sync (edge function, badge in FeedbackList) | [log/v3.2-sentry-github-sync.md](log/v3.2-sentry-github-sync.md) |
 | v3.1 | PWA auto-update (skipWaiting on install, informational banner) + feedback status save fix (controlled select) | [log/v3.1-pwa-autoupdate-feedback-status-fix.md](log/v3.1-pwa-autoupdate-feedback-status-fix.md) |
 | v3.1 | In-app feedback capture (Feedback button, auto-context snapshot, Settings review tab, 163 tests) | [log/v3.1-feedback-capture.md](log/v3.1-feedback-capture.md) |
 | v3.1 | Book capture without URL (optional URL, author field, sentinel pattern, 154 tests) | [log/v3.1-book-capture-without-url.md](log/v3.1-book-capture-without-url.md) |

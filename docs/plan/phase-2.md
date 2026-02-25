@@ -42,7 +42,7 @@ Current tests mock `fetchMetadata` entirely — real failure modes and races are
 In-app feedback capture was shipped (v3.1, #20). These enhancements were explicitly deferred:
 
 - **html2canvas screenshots** — capture a screenshot at the moment the feedback modal opens; store in Supabase Storage; display as thumbnail in FeedbackList
-- **GitHub Issues sync** — push feedback items to GitHub Issues via API (needs `GITHUB_PAT` in Supabase secrets); auto-label by type/severity; link issue number back to feedback row
+- ~~**GitHub Issues sync**~~ — **SHIPPED v3.2** (#22): `create-github-issue` edge function, badge in FeedbackList, `github_issue_number`/`github_issue_url` columns on feedback table
 - **Frequency deduplication** — "Same as #N" button per feedback item; increment repeat counter; sort FeedbackList by frequency × recency in addition to date
 - **Feedback analytics** — weekly counts by type/severity surfaced in the Stats modal; trend sparkline
 

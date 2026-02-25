@@ -24,10 +24,25 @@ export function useFeedback() {
 
   const submitFeedback = useMutation({
     mutationFn: async (payload: FeedbackInsert) => {
-      const { error } = await db
+      const result = await db
         .from('feedback')
-        .insert(payload as unknown as Record<string, unknown>);
-      if (error) throw error;
+        .insert(payload as unknown as Record<string, unknown>)
+        .select('id')
+        .single();
+      if (result.error) throw result.error;
+
+      const feedbackId = (result.data as { id: string } | null)?.id;
+
+      // Non-blocking: fire GH issue sync. Failure is silent — feedback already saved.
+      if (feedbackId) {
+        try {
+          await db.functions.invoke('create-github-issue', {
+            body: { feedback_id: feedbackId },
+          });
+        } catch {
+          // GH sync is non-critical
+        }
+      }
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEY });
