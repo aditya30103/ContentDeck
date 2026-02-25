@@ -51,6 +51,7 @@ Deno.serve(async (req) => {
   } = await userClient.auth.getUser();
 
   if (authError || !user) {
+    console.error('extract-content: auth failed', { error: authError?.message });
     return jsonResponse({ error: 'Invalid or expired token' }, 401);
   }
 
@@ -75,11 +76,13 @@ Deno.serve(async (req) => {
     .single();
 
   if (fetchError || !bookmark) {
+    console.error('extract-content: bookmark not found', { bookmarkId, error: fetchError?.message });
     return jsonResponse({ error: 'Bookmark not found' }, 404);
   }
 
   // Verify ownership
   if (bookmark.user_id !== user.id) {
+    console.error('extract-content: ownership mismatch', { bookmarkId, userId: user.id });
     return jsonResponse({ error: 'Forbidden' }, 403);
   }
 
@@ -176,6 +179,7 @@ Deno.serve(async (req) => {
     );
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('extract-content: extraction failed', { bookmarkId, url: bookmark.url, error: errorMessage });
 
     await adminClient
       .from('bookmarks')

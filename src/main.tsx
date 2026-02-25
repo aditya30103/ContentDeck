@@ -15,6 +15,11 @@ Sentry.init({
   tracesSampleRate: 0.1,
 });
 
+// Catch unhandled promise rejections that Sentry's auto-capture misses in some browsers
+window.addEventListener('unhandledrejection', (event) => {
+  Sentry.captureException(event.reason);
+});
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

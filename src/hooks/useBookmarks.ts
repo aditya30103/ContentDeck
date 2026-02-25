@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import * as Sentry from '@sentry/react';
 import { useSupabase } from '../context/SupabaseProvider';
 import { useToast } from '../components/ui/Toast';
 import { fetchMetadata } from '../lib/metadata';
@@ -109,11 +110,18 @@ export function useBookmarks() {
       toast.success('Bookmark added');
       // Fetch metadata first (awaited), THEN trigger extraction.
       // Extraction's invalidateQueries must not race with the metadata DB write.
-      void autoFetchMetadataAndTag(newBookmark).then(() => {
-        void triggerExtraction(newBookmark);
-      });
+      void autoFetchMetadataAndTag(newBookmark)
+        .then(() => {
+          void triggerExtraction(newBookmark);
+        })
+        .catch((err: unknown) => {
+          Sentry.captureException(err);
+        });
     },
-    onError: () => toast.error('Failed to add bookmark'),
+    onError: (err) => {
+      Sentry.captureException(err);
+      toast.error('Failed to add bookmark');
+    },
   });
 
   const deleteBookmark = useMutation({
@@ -127,7 +135,8 @@ export function useBookmarks() {
       queryClient.setQueryData<Bookmark[]>(QUERY_KEY, (old) => old?.filter((b) => b.id !== id));
       return { prev };
     },
-    onError: (_err, _id, context) => {
+    onError: (err, _id, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
       toast.error('Failed to delete');
     },
@@ -147,7 +156,8 @@ export function useBookmarks() {
       );
       return { prev };
     },
-    onError: (_err, _vars, context) => {
+    onError: (err, _vars, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
       toast.error('Update failed');
     },
@@ -176,7 +186,8 @@ export function useBookmarks() {
       );
       return { prev };
     },
-    onError: (_err, _vars, context) => {
+    onError: (err, _vars, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
       toast.error('Update failed');
     },
@@ -197,7 +208,8 @@ export function useBookmarks() {
       );
       return { prev };
     },
-    onError: (_err, _vars, context) => {
+    onError: (err, _vars, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
       toast.error('Bulk update failed');
     },
@@ -218,7 +230,8 @@ export function useBookmarks() {
       );
       return { prev };
     },
-    onError: (_err, _ids, context) => {
+    onError: (err, _ids, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
       toast.error('Bulk delete failed');
     },
@@ -261,7 +274,8 @@ export function useBookmarks() {
       );
       return { prev };
     },
-    onError: (_err, _vars, context) => {
+    onError: (err, _vars, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
       toast.error('Failed to add note');
     },
@@ -296,7 +310,8 @@ export function useBookmarks() {
       );
       return { prev };
     },
-    onError: (_err, _vars, context) => {
+    onError: (err, _vars, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
       toast.error('Failed to delete note');
     },
@@ -316,7 +331,8 @@ export function useBookmarks() {
       );
       return { prev };
     },
-    onError: (_err, _id, context) => {
+    onError: (err, _id, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
@@ -335,7 +351,8 @@ export function useBookmarks() {
       );
       return { prev };
     },
-    onError: (_err, _vars, context) => {
+    onError: (err, _vars, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
       toast.error('Update failed');
     },

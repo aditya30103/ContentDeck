@@ -110,6 +110,7 @@ Deno.serve(async (req) => {
     .single();
 
   if (tokenError || !tokenRow) {
+    console.error('save-bookmark: token lookup failed', { tokenError: tokenError?.message });
     return jsonResponse({ error: 'Invalid token' }, 401);
   }
 
@@ -133,6 +134,7 @@ Deno.serve(async (req) => {
     .single();
 
   if (insertError) {
+    console.error('save-bookmark: insert failed', { url, userId: tokenRow.user_id, error: insertError.message });
     return jsonResponse({ error: 'Failed to save bookmark', detail: insertError.message }, 500);
   }
 

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import * as Sentry from '@sentry/react';
 import { useSupabase } from '../context/SupabaseProvider';
 import { useToast } from '../components/ui/Toast';
 import { generateToken, hashToken } from '../lib/tokens';
@@ -41,7 +42,10 @@ export function useTokens() {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       toast.success('Token created');
     },
-    onError: () => toast.error('Failed to create token'),
+    onError: (err) => {
+      Sentry.captureException(err);
+      toast.error('Failed to create token');
+    },
   });
 
   const deleteToken = useMutation({
@@ -55,7 +59,8 @@ export function useTokens() {
       queryClient.setQueryData<UserToken[]>(QUERY_KEY, (old) => old?.filter((t) => t.id !== id));
       return { prev };
     },
-    onError: (_err, _id, context) => {
+    onError: (err, _id, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
       toast.error('Failed to delete token');
     },

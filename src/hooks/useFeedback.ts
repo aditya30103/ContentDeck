@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import * as Sentry from '@sentry/react';
 import { useSupabase } from '../context/SupabaseProvider';
 import { useToast } from '../components/ui/Toast';
 import type { FeedbackItem, FeedbackInsert, FeedbackStatus } from '../types';
@@ -48,7 +49,10 @@ export function useFeedback() {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       toast.success('Feedback submitted');
     },
-    onError: () => toast.error('Failed to submit feedback'),
+    onError: (err) => {
+      Sentry.captureException(err);
+      toast.error('Failed to submit feedback');
+    },
   });
 
   const updateStatus = useMutation({
@@ -82,7 +86,8 @@ export function useFeedback() {
       );
       return { prev };
     },
-    onError: (_err, _vars, context) => {
+    onError: (err, _vars, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
       toast.error('Failed to update status');
     },
