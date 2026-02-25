@@ -52,7 +52,8 @@ docs/
 │   ├── v3.1-book-capture-without-url.md # Session 2: optional URL for books, author field
 │   ├── v3.1-feedback-capture.md   # In-app feedback capture system (#20)
 │   ├── v3.1-pwa-autoupdate-feedback-status-fix.md # Session 3: PWA auto-update + feedback status save
-│   └── v3.2-sentry-github-sync.md  # Sentry + GitHub Issues sync (#21 #22) + full Sentry coverage (#25)
+│   ├── v3.2-sentry-github-sync.md  # Sentry + GitHub Issues sync (#21 #22) + full Sentry coverage (#25)
+│   └── v3.2-bookmarklet-dedup.md   # Bookmarklet deduplication fix (#27)
 ├── guides/                         # How-to references
 │   ├── workflow.md                 # Development practices, session workflow
 │   └── supabase-auth-setup.md      # Supabase Auth provider configuration
@@ -67,6 +68,7 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
+| v3.2 | Bookmarklet deduplication — prevent duplicate saves on double-click (#27) | [log/v3.2-bookmarklet-dedup.md](log/v3.2-bookmarklet-dedup.md) |
 | v3.2 | Full Sentry coverage (all 14 mutations, unhandledrejection, fire-and-forget chains) | [log/v3.2-sentry-github-sync.md](log/v3.2-sentry-github-sync.md) |
 | v3.2 | Sentry error tracking (init, ErrorBoundary, source maps) + GitHub Issues sync (edge function, FeedbackList badge) | [log/v3.2-sentry-github-sync.md](log/v3.2-sentry-github-sync.md) |
 | v3.1 | PWA auto-update (skipWaiting on install, informational banner) + feedback status save fix (controlled select) | [log/v3.1-pwa-autoupdate-feedback-status-fix.md](log/v3.1-pwa-autoupdate-feedback-status-fix.md) |
