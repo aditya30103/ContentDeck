@@ -51,7 +51,7 @@ These are genuinely ahead of many solo developers:
 - **PWA-first distribution** — real-world deployment from v1
 - **Free-tier constraint** — forces good architecture decisions
 
-### What's now in place (as of v3.0)
+### What's now in place (as of v3.2)
 
 | Practice | Status |
 |----------|--------|
@@ -62,8 +62,10 @@ These are genuinely ahead of many solo developers:
 | Conventional commits | Adopted |
 | Quality pipeline | `format → lint → typecheck → test → build` |
 | Feature branches + PRs | All work goes through branches, PRs to main |
-| Vitest (unit + component) | 133 tests — unit + component across 12 files |
+| Vitest (unit + component) | 165 tests — unit + component across 12+ files |
 | GitHub Actions CI | `.github/workflows/ci.yml` — runs on PR + push to main |
+| Sentry error tracking | Active — all mutations, ErrorBoundary, unhandledrejection |
+| Vercel Analytics + Speed Insights | Active — web vitals per route |
 | `/feature` skill | Branch-to-PR workflow, mandatory tests + log creation |
 | `/ship` skill | Quality pipeline + mandatory docs/log update |
 | `/audit` skill | 9-category deep audit, async/cache/demo-parity emphasis |
@@ -76,10 +78,8 @@ These are genuinely ahead of many solo developers:
 | Practice | When to Adopt |
 |----------|---------------|
 | CHANGELOG.md | With next major version |
-| ~~GitHub Issues~~ | ✅ Active — labels + issues created 2026-02-18 |
 | Staging environment | Vercel preview deploys are already free per-branch |
 | Pre-commit hooks (lint-staged + husky) | With v3.5 |
-| Error tracking (Sentry) | With v3.5 |
 | E2E tests (Playwright) | With v4.0 |
 
 ---
@@ -104,7 +104,7 @@ Adopt practices in tiers. Each tier should feel habitual before moving to the ne
 - Easy rollback (revert a PR, not hunt through commits)
 - Vercel gives you free preview deployments per branch
 
-**Vitest (Unit + Component Tests).** 133 tests across 12 files. Unit tests in `src/lib/`, component tests in `src/components/__tests__/`. All new features require tests.
+**Vitest (Unit + Component Tests).** 165 tests across 12+ files. Unit tests in `src/lib/`, component tests in `src/components/__tests__/` and `src/hooks/__tests__/`. All new features require tests.
 
 **GitHub Actions CI.** `.github/workflows/ci.yml` runs `format → lint → typecheck → test → build` on every PR and push to `main`. Secrets (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) configured in GitHub Actions settings.
 
@@ -122,7 +122,7 @@ Branch names include the issue number: `feat/4-full-text-search`. PRs close issu
 
 **CHANGELOG.md.** Auto-generated from conventional commits. Deferred — revisit at next major version.
 
-**Error Tracking (Sentry).** Free tier gives 5K events/month. Adopt at v3.5 when Phase 2 features land.
+**Error Tracking (Sentry). ✅ Shipped v3.2.** Active in production — all mutation `onError` callbacks, ErrorBoundary, global `unhandledrejection` listener, and fire-and-forget `.catch()` chains.
 
 ---
 
@@ -340,7 +340,7 @@ Claude: [implements]
 
 This is the master plan. Each version adopts new practices alongside new features.
 
-### v2.2 (Current) — Foundation Tooling
+### v2.2 — Foundation Tooling ✅
 
 **Features:** Bookmarks, PWA share target, demo mode, Obsidian export
 **Practices adopted:**
@@ -351,23 +351,29 @@ This is the master plan. Each version adopts new practices alongside new feature
 - [x] EditorConfig
 - [x] Skills tracked in git
 
-### v3.0 — Professional Development
+### v3.0 — Professional Development ✅
 
 **Features:** Supabase Auth, content extraction, areas & tagging redesign, testing & CI
 **Practices adopted:**
 - [x] Feature branches + PRs for all work
-- [x] Vitest unit + component tests (95 tests across 9 files)
+- [x] Vitest unit + component tests (95 tests at Phase 1 close)
 - [x] GitHub Actions CI (`format → lint → typecheck → test → build` on every PR)
-- [ ] CHANGELOG.md (auto-generated from conventional commits) — deferred
-- [x] GitHub Issues for work tracking — adopted 2026-02-18, labels + 5 open issues (#4–#8)
+- [x] GitHub Issues for work tracking — labels + issues, branch names include issue number
+- [ ] CHANGELOG.md — deferred
 - [ ] Vercel preview deployments as staging — available, use per-branch
+
+### v3.2 (Current) — Observability & Hardening ✅
+
+**Features:** Reader mode improvements, book capture, feedback capture, PWA auto-update, Sentry, GitHub Issues sync
+**Practices adopted:**
+- [x] Sentry error tracking — all mutations, ErrorBoundary, unhandledrejection (165 tests)
+- [x] Vercel Analytics + Speed Insights
+- [x] Hook tests in `src/hooks/__tests__/` (useFeedback, useBookmarks patterns)
 
 ### v3.5 — Quality at Scale
 
-**Features:** AI summarization, smart content queue, spaced review, tag relationships
+**Features:** AI summarization, smart content queue, spaced review
 **Practices to adopt:**
-- [ ] Integration tests for hooks (TanStack Query + mock Supabase)
-- [ ] Error tracking (Sentry free tier — 5K events/month)
 - [ ] Test coverage reporting
 - [ ] Pre-commit hooks (lint-staged + husky)
 
@@ -515,5 +521,5 @@ Big features ship behind flags. Roll out to 10% of users, verify, then 100%. If 
 
 ---
 
-*Last updated: v3.0 — Phase 1 complete (133 tests), jsx-a11y added to ESLint, React Doctor 93/100.*
-*Next milestone: Phase 2 (Intelligence) — AI summarisation, smart recommendations, Obsidian sync.*
+*Last updated: v3.2 — Sentry + GitHub Issues sync shipped, 165 tests, full observability in production.*
+*Next milestone: Pre-Phase 2 backlog (source types, Obsidian wikilinks, race condition tests), then Phase 2 (Intelligence).*
