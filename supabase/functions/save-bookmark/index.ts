@@ -114,6 +114,18 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Invalid token' }, 401);
   }
 
+  // Deduplication: return existing bookmark if URL already saved for this user
+  const { data: existing } = await adminClient
+    .from('bookmarks')
+    .select('id')
+    .eq('user_id', tokenRow.user_id)
+    .eq('url', url)
+    .maybeSingle();
+
+  if (existing) {
+    return jsonResponse({ id: existing.id, status: 'already_saved' }, 201);
+  }
+
   // Insert bookmark with explicit user_id
   // The set_user_id() trigger uses COALESCE(NEW.user_id, auth.uid())
   // so it preserves our explicit user_id instead of overwriting with null
