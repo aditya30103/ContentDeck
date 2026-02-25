@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import * as Sentry from '@sentry/react';
 import { supabase } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -9,11 +10,17 @@ export function useAuth() {
 
   useEffect(() => {
     // Get initial session
-    void supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      setLoading(false);
-    });
+    void supabase.auth
+      .getSession()
+      .then(({ data: { session: s } }) => {
+        setSession(s);
+        setUser(s?.user ?? null);
+        setLoading(false);
+      })
+      .catch((err: unknown) => {
+        Sentry.captureException(err);
+        setLoading(false);
+      });
 
     // Listen for auth state changes (login, logout, token refresh)
     const {

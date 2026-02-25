@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import * as Sentry from '@sentry/react';
 import { useSupabase } from '../context/SupabaseProvider';
 import { useToast } from '../components/ui/Toast';
 import type { TagArea } from '../types';
@@ -49,7 +50,13 @@ export function useTagAreas() {
       );
       toast.success('Area created');
     },
-    onError: (err) => toast.error(err instanceof Error ? err.message : 'Failed to create area'),
+    onError: (err) => {
+      // Don't send expected client-side duplicate validation errors to Sentry
+      if (!(err instanceof Error && err.message.includes('already exists'))) {
+        Sentry.captureException(err);
+      }
+      toast.error(err instanceof Error ? err.message : 'Failed to create area');
+    },
   });
 
   const updateArea = useMutation({
@@ -71,7 +78,8 @@ export function useTagAreas() {
       );
       return { prev };
     },
-    onError: (_err, _vars, context) => {
+    onError: (err, _vars, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
       toast.error('Update failed');
     },
@@ -89,7 +97,8 @@ export function useTagAreas() {
       queryClient.setQueryData<TagArea[]>(QUERY_KEY, (old) => old?.filter((a) => a.id !== id));
       return { prev };
     },
-    onError: (_err, _id, context) => {
+    onError: (err, _id, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
       toast.error('Failed to delete area');
     },
@@ -121,7 +130,8 @@ export function useTagAreas() {
       });
       return { prev };
     },
-    onError: (_err, _vars, context) => {
+    onError: (err, _vars, context) => {
+      Sentry.captureException(err);
       if (context?.prev) queryClient.setQueryData(QUERY_KEY, context.prev);
       toast.error('Reorder failed');
     },
