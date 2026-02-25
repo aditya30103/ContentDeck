@@ -46,6 +46,15 @@ In-app feedback capture was shipped (v3.1, #20). These enhancements were explici
 - **Frequency deduplication** — "Same as #N" button per feedback item; increment repeat counter; sort FeedbackList by frequency × recency in addition to date
 - **Feedback analytics** — weekly counts by type/severity surfaced in the Stats modal; trend sparkline
 
+### 2.0.5 Sentry Error Tracking — SHIPPED v3.2 (#21)
+
+Unplanned but executed in the same session as GitHub Issues sync. Zero-config after DSN is set:
+
+- ~~`@sentry/react` init in `main.tsx` (no-op when `VITE_SENTRY_DSN` absent)~~ ✅
+- ~~`captureException` in `ErrorBoundary.componentDidCatch`~~ ✅
+- ~~Source maps via `@sentry/vite-plugin` + `build.sourcemap: true`~~ ✅
+- ~~`VITE_SENTRY_DSN` plumbed through Vercel + GitHub CI secrets~~ ✅
+
 ---
 
 ## 2.1 AI Summarization
