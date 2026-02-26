@@ -11,43 +11,26 @@
 | GitHub Issues sync — `create-github-issue` edge function, badge in FeedbackList | v3.2 | #23 |
 | Sentry error tracking — `@sentry/react` init, ErrorBoundary, source maps, CI secret | v3.2 | #23 |
 | Full Sentry coverage — all 14 mutations, unhandledrejection, fire-and-forget chains | v3.2 | #26 |
+| Obsidian Wikilinks — `[[tag]]` format in YAML frontmatter for backlink graph | v3.3 | #28 |
+| Extended Themes — Sepia + Navy themes, 4-button picker in Settings | v3.3 | #29 |
+| Race Condition & Metadata Tests — areas preserved, invoke ordering, console.warn in DEV | v3.3 | #30 |
+| arXiv source type — API metadata (title/authors/abstract), content.text, SQL migration | v3.3 | #31 |
+| YouTube transcript extraction — caption scraping in `extract-content` edge function | v3.3 | #32 |
 
 ---
 
-## Pre-Phase 2 Backlog (Next Up)
+## Pre-Phase 2 Backlog (Deferred)
 
-These ship before the AI features. Bounded, high-ROI, keep the codebase clean going into the more complex AI work.
-
-### 2.0.1 Source Type Expansion
+### 2.0.1 Source Type Expansion — GitHub repositories (deferred)
 
 **GitHub repositories** — detect `github.com/*/*` URLs:
 - Fetch repo metadata via GitHub public API (no key needed): name, description, stars, language, topics
 - DB trigger: add `github.com` to `detect_source_type()` regex
 - Display: star count + language badge in card metadata
 
-**arXiv papers** — detect `arxiv.org/abs/` and `arxiv.org/pdf/` URLs:
-- Fetch title, authors, abstract via arXiv API (free, no key)
-- Reader mode: show abstract + link to PDF
-- DB trigger: add `arxiv.org` to `detect_source_type()` regex
+> arXiv papers shipped in v3.3 (#31). GitHub repos deferred — lower ROI before Phase 2 AI work.
 
-### 2.0.2 Obsidian Wikilinks
-
-- Currently exports `tags: ["tag1", "tag2"]` as plain strings in YAML frontmatter
-- Desired: `[[tag1]]` wikilink format so Obsidian backlink graph picks up tag connections
-- Options: always use `[[tag]]` in YAML, or add a toggle in Settings
-- File: `src/lib/obsidian.ts`
-
-### 2.0.3 Race Condition & Metadata Test Coverage
-
-Current tests mock `fetchMetadata` entirely — real failure modes and races are invisible.
-
-- Test: `triggerExtraction` → `invalidateQueries` does not fire before DB writes complete
-- Test: areas are preserved in cache after `autoFetchMetadataAndTag` completes (no stale-spread clobber)
-- Test: `enrichAndTag` startup batch `await`s DB writes before calling `invalidateQueries`
-- Test: silent `catch {}` blocks surface `console.warn` in development
-- Files: `src/hooks/__tests__/useBookmarks.test.ts`, new `src/lib/__tests__/metadata.test.ts`
-
-### 2.0.4 Feedback System Enhancements
+### 2.0.4 Feedback System Enhancements (deferred)
 
 Remaining items from the feedback system (in-app capture shipped v3.1, GitHub sync shipped v3.2):
 
@@ -121,7 +104,7 @@ CREATE INDEX bookmarks_embedding_idx ON bookmarks USING ivfflat (embedding vecto
 
 ## Backlog (P3 — after Phase 2 core)
 
-| Item | Description |
-|---|---|
-| YouTube transcript extraction | Fetch via youtube-transcript or similar; surface in Reader mode |
-| Warm/Sepia theme (main app) | Reader mode already has sepia; extend to the dashboard shell |
+| Item | Status | Description |
+|---|---|---|
+| YouTube transcript extraction | ✅ Shipped v3.3 (#32) | Caption scraping via `ytInitialPlayerResponse`, JSON3 format, stored in `content.text` |
+| Warm/Sepia theme + Navy theme | ✅ Shipped v3.3 (#29) | CSS variable overrides, 4-button picker in Settings (Light/Dark/Sepia/Navy) |
