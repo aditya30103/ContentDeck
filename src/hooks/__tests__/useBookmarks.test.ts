@@ -496,25 +496,47 @@ describe('triggerExtraction — invoke and invalidate', () => {
       ),
     );
   });
+});
 
-  it('skips functions.invoke for youtube source type', async () => {
-    vi.clearAllMocks();
-    mockSupabaseClient._resetBuilders();
+describe('useBookmarks — triggerExtraction (youtube transcript)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
+  function makeYouTubeRawBookmark(overrides: Record<string, unknown> = {}) {
+    return {
+      id: 'bm-yt',
+      url: 'https://youtube.com/watch?v=abc',
+      title: 'Test Video',
+      image: null,
+      excerpt: null,
+      source_type: 'youtube',
+      status: 'unread',
+      is_favorited: false,
+      notes: [],
+      tags: [],
+      metadata: {},
+      content: {},
+      content_status: 'pending',
+      content_fetched_at: null,
+      synced: false,
+      created_at: '2024-01-01T00:00:00Z',
+      status_changed_at: '2024-01-01T00:00:00Z',
+      started_reading_at: null,
+      finished_at: null,
+      bookmark_tags: [],
+      ...overrides,
+    };
+  }
+
+  it('calls functions.invoke for youtube (no longer in SKIP_EXTRACTION_SOURCES)', async () => {
     const builder = mockSupabaseClient._getBuilder('bookmarks');
     builder._resolve = { data: [], error: null };
 
     const { result } = renderHook(() => useBookmarks(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    builder._resolve = {
-      data: makeRawBookmark({
-        id: 'bm-yt',
-        url: 'https://youtube.com/watch?v=abc',
-        source_type: 'youtube',
-      }),
-      error: null,
-    };
+    builder._resolve = { data: makeYouTubeRawBookmark(), error: null };
 
     act(() => {
       result.current.addBookmark.mutate({ url: 'https://youtube.com/watch?v=abc' });
@@ -522,9 +544,12 @@ describe('triggerExtraction — invoke and invalidate', () => {
 
     await waitFor(() => expect(result.current.addBookmark.isSuccess).toBe(true));
 
-    // Wait a tick for any async fire-and-forget
-    await new Promise((r) => setTimeout(r, 50));
-    expect(mockSupabaseClient.functions.invoke).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(mockSupabaseClient.functions.invoke).toHaveBeenCalledWith(
+        'extract-content',
+        expect.objectContaining({ body: { bookmark_id: 'bm-yt' } }),
+      ),
+    );
   });
 });
 

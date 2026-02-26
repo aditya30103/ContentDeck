@@ -493,7 +493,7 @@ export function useBookmarks() {
   }
 
   const isDemo = localStorage.getItem('contentdeck_demo') === 'true';
-  const SKIP_EXTRACTION_SOURCES = ['youtube', 'twitter', 'book', 'arxiv'];
+  const SKIP_EXTRACTION_SOURCES = ['twitter', 'book', 'arxiv'];
 
   async function triggerExtraction(bookmark: Bookmark) {
     if (isDemo) return;
