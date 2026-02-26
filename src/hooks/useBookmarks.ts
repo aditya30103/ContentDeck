@@ -438,8 +438,9 @@ export function useBookmarks() {
           };
         }
       }
-    } catch {
+    } catch (err) {
       // Silent fail for metadata — still attempt tagging with whatever we have
+      if (import.meta.env.DEV) console.warn('[autoFetchMetadata] failed', err);
     }
     if (enriched.tags.length === 0 && localStorage.getItem('openrouter_key')) {
       void autoSuggestTags(enriched);
@@ -485,8 +486,9 @@ export function useBookmarks() {
         body: { bookmark_id: bookmark.id },
       });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEY });
-    } catch {
+    } catch (err) {
       // Silent fail — extraction is non-critical
+      if (import.meta.env.DEV) console.warn('[triggerExtraction] failed', err);
     }
   }
 
@@ -528,8 +530,9 @@ export function useBookmarks() {
         );
         toast.info(`AI suggested tags: ${tags.join(', ')}`);
       }
-    } catch {
+    } catch (err) {
       // Silent fail for AI tagging — non-critical
+      if (import.meta.env.DEV) console.warn('[autoSuggestTags] failed', err);
     }
   }
 
