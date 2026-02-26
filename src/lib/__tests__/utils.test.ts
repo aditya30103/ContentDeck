@@ -46,6 +46,14 @@ describe('detectSourceType', () => {
     expect(detectSourceType('https://example.substack.com/p/title')).toBe('substack');
   });
 
+  it('detects arxiv.org/abs/', () => {
+    expect(detectSourceType('https://arxiv.org/abs/2301.00001')).toBe('arxiv');
+  });
+
+  it('detects arxiv.org/pdf/', () => {
+    expect(detectSourceType('https://arxiv.org/pdf/1706.03762v5')).toBe('arxiv');
+  });
+
   it('returns blog for generic URLs', () => {
     expect(detectSourceType('https://example.com/article')).toBe('blog');
   });

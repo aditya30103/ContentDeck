@@ -1,4 +1,11 @@
-export type SourceType = 'youtube' | 'twitter' | 'linkedin' | 'substack' | 'blog' | 'book';
+export type SourceType =
+  | 'youtube'
+  | 'twitter'
+  | 'linkedin'
+  | 'substack'
+  | 'blog'
+  | 'book'
+  | 'arxiv';
 export type Status = 'unread' | 'reading' | 'done';
 export type NoteType = 'insight' | 'question' | 'highlight' | 'note';
 export type ContentStatus = 'pending' | 'extracting' | 'success' | 'failed' | 'skipped';
@@ -17,6 +24,10 @@ export interface BookmarkMetadata {
   word_count?: number;
   reading_time?: number;
   author?: string;
+  authors?: string[];
+  abstract?: string;
+  arxiv_id?: string;
+  published?: string;
 }
 
 export interface BookmarkContent {
@@ -27,7 +38,7 @@ export interface BookmarkContent {
   lead_image?: string;
   excerpt?: string;
   extracted_at?: string;
-  method?: 'readability' | 'failed';
+  method?: 'readability' | 'arxiv_api' | 'youtube_captions' | 'failed';
   error?: string;
 }
 
@@ -97,6 +108,7 @@ export const SOURCE_LABELS: Record<SourceType, string> = {
   substack: 'Substack',
   blog: 'Blog',
   book: 'Book',
+  arxiv: 'arXiv',
 };
 
 export const SOURCE_LIST: SourceType[] = [
@@ -106,6 +118,7 @@ export const SOURCE_LIST: SourceType[] = [
   'substack',
   'blog',
   'book',
+  'arxiv',
 ];
 export const STATUS_LIST: Status[] = ['unread', 'reading', 'done'];
 

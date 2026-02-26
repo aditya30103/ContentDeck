@@ -1,4 +1,5 @@
 import type { SourceType, Status } from '../../types';
+import { SOURCE_LABELS } from '../../types';
 
 const sourceStyles: Record<SourceType, string> = {
   youtube: 'bg-[#ff000018] text-source-youtube',
@@ -7,6 +8,7 @@ const sourceStyles: Record<SourceType, string> = {
   substack: 'bg-[#ff681818] text-source-substack',
   blog: 'bg-[#6366f118] text-source-blog',
   book: 'bg-[#4ecdc418] text-source-book',
+  arxiv: 'bg-[#b31b1b18] text-source-arxiv',
 };
 
 const statusStyles: Record<Status, string> = {
@@ -24,10 +26,10 @@ const statusLabels: Record<Status, string> = {
 export function SourceBadge({ source }: { source: SourceType }) {
   return (
     <span
-      aria-label={`Source: ${source}`}
+      aria-label={`Source: ${SOURCE_LABELS[source]}`}
       className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${sourceStyles[source]}`}
     >
-      {source}
+      {SOURCE_LABELS[source]}
     </span>
   );
 }

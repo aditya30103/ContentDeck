@@ -36,6 +36,11 @@ export function generateMarkdown(bookmark: Bookmark): string {
     lines.push(`reading_time: ${bookmark.metadata.reading_time} min`);
   if (bookmark.metadata?.channel) lines.push(`channel: "${yamlEscape(bookmark.metadata.channel)}"`);
   if (bookmark.metadata?.author) lines.push(`author: "${yamlEscape(bookmark.metadata.author)}"`);
+  if (bookmark.metadata?.authors && bookmark.metadata.authors.length > 0)
+    lines.push(
+      `authors: [${bookmark.metadata.authors.map((a) => `"${yamlEscape(a)}"`).join(', ')}]`,
+    );
+  if (bookmark.metadata?.arxiv_id) lines.push(`arxiv_id: ${bookmark.metadata.arxiv_id}`);
 
   lines.push('---');
   lines.push('');
@@ -113,6 +118,7 @@ function getFolder(bookmark: Bookmark): string {
     substack: 'Articles',
     blog: 'Articles',
     book: 'Books',
+    arxiv: 'Papers',
   };
   return folders[bookmark.source_type] || 'Articles';
 }
