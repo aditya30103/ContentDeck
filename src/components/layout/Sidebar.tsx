@@ -186,12 +186,12 @@ export default function Sidebar({
             <Moon size={18} />
           )}
           {theme === 'dark'
-            ? 'Light Mode'
+            ? 'Sepia Theme'
             : theme === 'sepia'
-              ? 'Dark Mode'
+              ? 'Navy Theme'
               : theme === 'navy'
-                ? 'Light Mode'
-                : 'Dark Mode'}
+                ? 'Light Theme'
+                : 'Dark Theme'}
         </button>
         <button
           onClick={onStats}
