@@ -7,6 +7,7 @@ export function detectSourceType(url: string): SourceType {
   if (/twitter\.com|x\.com|t\.co/.test(u)) return 'twitter';
   if (/linkedin\.com|lnkd\.in/.test(u)) return 'linkedin';
   if (/substack\.com/.test(u)) return 'substack';
+  if (/arxiv\.org\/(abs|pdf)\//.test(u)) return 'arxiv';
   return 'blog';
 }
 

@@ -436,10 +436,28 @@ export function useBookmarks() {
               .getQueryData<Bookmark[]>(QUERY_KEY)
               ?.find((b) => b.id === bookmark.id) ?? bookmark),
           };
+          // For arXiv, also populate content.text with the abstract for future RAG use
+          if (bookmark.source_type === 'arxiv' && result.metadata?.abstract) {
+            const text = result.metadata.abstract;
+            void db
+              .from('bookmarks')
+              .update({
+                content: {
+                  text,
+                  method: 'arxiv_api',
+                  word_count: text.split(/\s+/).filter(Boolean).length,
+                  extracted_at: new Date().toISOString(),
+                },
+                content_status: 'success',
+                content_fetched_at: new Date().toISOString(),
+              })
+              .eq('id', bookmark.id);
+          }
         }
       }
-    } catch {
+    } catch (err) {
       // Silent fail for metadata — still attempt tagging with whatever we have
+      if (import.meta.env.DEV) console.warn('[autoFetchMetadata] failed', err);
     }
     if (enriched.tags.length === 0 && localStorage.getItem('openrouter_key')) {
       void autoSuggestTags(enriched);
@@ -475,7 +493,7 @@ export function useBookmarks() {
   }
 
   const isDemo = localStorage.getItem('contentdeck_demo') === 'true';
-  const SKIP_EXTRACTION_SOURCES = ['youtube', 'twitter', 'book'];
+  const SKIP_EXTRACTION_SOURCES = ['youtube', 'twitter', 'book', 'arxiv'];
 
   async function triggerExtraction(bookmark: Bookmark) {
     if (isDemo) return;

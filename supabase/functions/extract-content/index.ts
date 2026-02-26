@@ -18,7 +18,7 @@ function jsonResponse(body: Record<string, unknown>, status: number) {
 const TEXT_CAP = 100 * 1024; // 100KB max text per bookmark
 const FETCH_TIMEOUT = 10_000; // 10s
 
-const SKIP_SOURCES = ['youtube', 'twitter'];
+const SKIP_SOURCES = ['youtube', 'twitter', 'arxiv'];
 
 Deno.serve(async (req) => {
   // CORS preflight

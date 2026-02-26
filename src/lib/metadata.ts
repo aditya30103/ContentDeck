@@ -165,6 +165,50 @@ async function fetchMicrolinkMetadata(url: string): Promise<MetadataResult> {
   }
 }
 
+/** Extract arXiv paper ID from URL (abs or pdf paths) */
+function extractArxivId(url: string): string | null {
+  const m = url.match(/arxiv\.org\/(?:abs|pdf)\/([\d.]+(?:v\d+)?)/i);
+  return m?.[1] ?? null;
+}
+
+/** Fetch metadata for an arXiv paper via the export API (CORS-safe, no key needed) */
+async function fetchArxivMetadata(url: string): Promise<MetadataResult> {
+  const id = extractArxivId(url);
+  if (!id) return {};
+  try {
+    const apiUrl = `https://export.arxiv.org/api/query?id_list=${id}`;
+    const resp = await fetch(apiUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+    if (!resp.ok) return {};
+    const xml = await resp.text();
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'application/xml');
+    const entry = doc.querySelector('entry');
+    if (!entry) return {};
+
+    const rawTitle = entry.querySelector('title')?.textContent?.trim() ?? '';
+    const title = rawTitle.replace(/\s+/g, ' ');
+    const abstract = entry.querySelector('summary')?.textContent?.trim().replace(/\s+/g, ' ') ?? '';
+    const published = entry.querySelector('published')?.textContent?.slice(0, 10) ?? undefined;
+    const authors = Array.from(entry.querySelectorAll('author > name')).map(
+      (n) => n.textContent?.trim() ?? '',
+    );
+
+    return {
+      title: title || undefined,
+      excerpt: abstract.slice(0, 300) || undefined,
+      metadata: {
+        authors: authors.length > 0 ? authors : undefined,
+        abstract: abstract || undefined,
+        arxiv_id: id,
+        published,
+      },
+    };
+  } catch {
+    return {};
+  }
+}
+
 /** Fetch metadata for a bookmark URL based on its source type */
 export async function fetchMetadata(url: string, sourceType: string): Promise<MetadataResult> {
   switch (sourceType) {
@@ -172,6 +216,8 @@ export async function fetchMetadata(url: string, sourceType: string): Promise<Me
       return fetchYouTubeMetadata(url);
     case 'twitter':
       return fetchTwitterMetadata(url);
+    case 'arxiv':
+      return fetchArxivMetadata(url);
     default:
       return fetchMicrolinkMetadata(url);
   }

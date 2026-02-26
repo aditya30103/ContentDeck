@@ -213,6 +213,81 @@ describe('fetchMetadata — generic (Microlink)', () => {
   });
 });
 
+describe('fetchMetadata — arXiv', () => {
+  function xmlResponse(xml: string, status = 200): Response {
+    return {
+      ok: status >= 200 && status < 300,
+      status,
+      text: () => Promise.resolve(xml),
+    } as Response;
+  }
+
+  function makeArxivXml(
+    overrides: {
+      title?: string;
+      summary?: string;
+      published?: string;
+      authors?: string[];
+    } = {},
+  ): string {
+    const title = overrides.title ?? 'Attention Is All You Need';
+    const summary = overrides.summary ?? 'We propose the Transformer architecture.';
+    const published = overrides.published ?? '2017-06-12T00:00:00Z';
+    const authors = overrides.authors ?? ['Ashish Vaswani', 'Noam Shazeer'];
+    const authorXml = authors.map((a) => `<author><name>${a}</name></author>`).join('\n');
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <entry>
+    <id>http://arxiv.org/abs/1706.03762v5</id>
+    <title>${title}</title>
+    <summary>${summary}</summary>
+    <published>${published}</published>
+    ${authorXml}
+  </entry>
+</feed>`;
+  }
+
+  it('returns title, authors, abstract, arxiv_id from API', async () => {
+    mockFetch.mockResolvedValueOnce(xmlResponse(makeArxivXml()));
+
+    const result = await fetchMetadata('https://arxiv.org/abs/1706.03762', 'arxiv');
+
+    expect(result.title).toBe('Attention Is All You Need');
+    expect(result.excerpt).toContain('Transformer');
+    expect(result.metadata?.authors).toEqual(['Ashish Vaswani', 'Noam Shazeer']);
+    expect(result.metadata?.abstract).toContain('Transformer');
+    expect(result.metadata?.arxiv_id).toBe('1706.03762');
+    expect(result.metadata?.published).toBe('2017-06-12');
+  });
+
+  it('returns empty when API returns no entry element', async () => {
+    mockFetch.mockResolvedValueOnce(
+      xmlResponse(`<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"></feed>`),
+    );
+
+    const result = await fetchMetadata('https://arxiv.org/abs/9999.99999', 'arxiv');
+
+    expect(result).toEqual({});
+  });
+
+  it('returns empty when fetch throws (network error)', async () => {
+    mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+    const result = await fetchMetadata('https://arxiv.org/abs/1234.56789', 'arxiv');
+
+    expect(result).toEqual({});
+  });
+
+  it('routes arxiv URLs to arXiv handler', async () => {
+    mockFetch.mockResolvedValueOnce(xmlResponse(makeArxivXml()));
+    await fetchMetadata('https://arxiv.org/abs/1706.03762', 'arxiv');
+
+    const calledUrl = mockFetch.mock.calls[0]?.[0] as string;
+    expect(calledUrl).toContain('export.arxiv.org/api/query');
+    expect(calledUrl).toContain('1706.03762');
+  });
+});
+
 describe('fetchMetadata — routing', () => {
   beforeEach(() => {
     // Ensure no YouTube API key leaks from other describe blocks

@@ -33,7 +33,7 @@ describe('AddBookmarkModal', () => {
     const user = userEvent.setup();
     render(<AddBookmarkModal {...defaultProps} />);
     await user.type(screen.getByLabelText('URL'), 'https://youtube.com/watch?v=abc');
-    expect(screen.getByText('youtube')).toBeInTheDocument();
+    expect(screen.getByText('YouTube')).toBeInTheDocument();
   });
 
   it('submit button is disabled when URL is empty', () => {
@@ -64,7 +64,7 @@ describe('AddBookmarkModal', () => {
   it('pre-fills URL from initialUrl prop', () => {
     render(<AddBookmarkModal {...defaultProps} initialUrl="https://twitter.com/user/status/1" />);
     expect(screen.getByLabelText('URL')).toHaveValue('https://twitter.com/user/status/1');
-    expect(screen.getByText('twitter')).toBeInTheDocument();
+    expect(screen.getByText('Twitter')).toBeInTheDocument();
   });
 });
 

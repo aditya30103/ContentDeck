@@ -57,7 +57,7 @@ describe('BookmarkCard', () => {
     render(<BookmarkCard bookmark={makeBookmark()} {...defaultCallbacks} />);
     expect(screen.getByText('Test Article')).toBeInTheDocument();
     expect(screen.getByText('example.com')).toBeInTheDocument();
-    expect(screen.getByText('blog')).toBeInTheDocument();
+    expect(screen.getByText('Blog')).toBeInTheDocument();
   });
 
   it('renders status badge and cycles on click', async () => {
