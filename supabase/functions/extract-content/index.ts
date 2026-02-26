@@ -18,7 +18,68 @@ function jsonResponse(body: Record<string, unknown>, status: number) {
 const TEXT_CAP = 100 * 1024; // 100KB max text per bookmark
 const FETCH_TIMEOUT = 10_000; // 10s
 
-const SKIP_SOURCES = ['youtube', 'twitter', 'arxiv'];
+// Sources with no webpage text to extract via Readability
+// (YouTube now handled separately via caption extraction below)
+const SKIP_SOURCES = ['twitter', 'arxiv'];
+
+// ---- YouTube transcript helpers ----
+
+function extractYouTubeId(url: string): string | null {
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+  );
+  return match?.[1] ?? null;
+}
+
+async function fetchYouTubeTranscript(videoId: string): Promise<string | null> {
+  try {
+    // Fetch YouTube watch page to get caption track URLs
+    const pageRes = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT),
+    });
+    const html = await pageRes.text();
+
+    // Extract caption tracks JSON from ytInitialPlayerResponse
+    const match = html.match(/"captionTracks":(\[.*?\])/);
+    if (!match) return null;
+
+    const tracks = JSON.parse(match[1]) as Array<{ baseUrl: string; languageCode: string }>;
+    if (tracks.length === 0) return null;
+
+    // Prefer English, fall back to first available
+    const track =
+      tracks.find((t) => t.languageCode === 'en') ??
+      tracks.find((t) => t.languageCode?.startsWith('en')) ??
+      tracks[0];
+    if (!track?.baseUrl) return null;
+
+    // Fetch transcript in JSON3 format
+    const captionRes = await fetch(`${track.baseUrl}&fmt=json3`, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT),
+    });
+    const data = (await captionRes.json()) as {
+      events?: Array<{ segs?: Array<{ utf8?: string }> }>;
+    };
+
+    const text = (data.events ?? [])
+      .filter((e) => e.segs)
+      .map((e) => e.segs!.map((s) => s.utf8 ?? '').join(''))
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // Return null if transcript is too short to be useful
+    if (text.length < 100) return null;
+    // Cap at 100KB
+    return text.length > TEXT_CAP ? text.slice(0, TEXT_CAP) : text;
+  } catch {
+    return null;
+  }
+}
 
 Deno.serve(async (req) => {
   // CORS preflight
@@ -76,7 +137,10 @@ Deno.serve(async (req) => {
     .single();
 
   if (fetchError || !bookmark) {
-    console.error('extract-content: bookmark not found', { bookmarkId, error: fetchError?.message });
+    console.error('extract-content: bookmark not found', {
+      bookmarkId,
+      error: fetchError?.message,
+    });
     return jsonResponse({ error: 'Bookmark not found' }, 404);
   }
 
@@ -86,7 +150,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Forbidden' }, 403);
   }
 
-  // Skip YouTube/Twitter — no article text to extract
+  // Skip sources with no extractable text (Twitter)
   if (SKIP_SOURCES.includes(bookmark.source_type)) {
     await adminClient
       .from('bookmarks')
@@ -94,6 +158,51 @@ Deno.serve(async (req) => {
       .eq('id', bookmarkId);
     return jsonResponse({ status: 'skipped', reason: 'Source type not extractable' }, 200);
   }
+
+  // ---- YouTube transcript extraction ----
+  if (bookmark.source_type === 'youtube') {
+    const videoId = extractYouTubeId(bookmark.url);
+    if (!videoId) {
+      await adminClient
+        .from('bookmarks')
+        .update({ content_status: 'skipped' })
+        .eq('id', bookmarkId);
+      return jsonResponse({ status: 'skipped', reason: 'Could not extract video ID' }, 200);
+    }
+
+    await adminClient
+      .from('bookmarks')
+      .update({ content_status: 'extracting' })
+      .eq('id', bookmarkId);
+
+    const transcript = await fetchYouTubeTranscript(videoId);
+    if (!transcript) {
+      await adminClient
+        .from('bookmarks')
+        .update({ content_status: 'skipped' })
+        .eq('id', bookmarkId);
+      return jsonResponse({ status: 'skipped', reason: 'No captions available' }, 200);
+    }
+
+    const wordCount = transcript.split(/\s+/).filter(Boolean).length;
+    await adminClient
+      .from('bookmarks')
+      .update({
+        content: {
+          text: transcript,
+          method: 'youtube_captions',
+          word_count: wordCount,
+          extracted_at: new Date().toISOString(),
+        },
+        content_status: 'success',
+        content_fetched_at: new Date().toISOString(),
+      })
+      .eq('id', bookmarkId);
+
+    return jsonResponse({ status: 'success', word_count: wordCount }, 200);
+  }
+
+  // ---- Readability extraction (all other sources) ----
 
   // Set status to extracting
   await adminClient
@@ -179,7 +288,11 @@ Deno.serve(async (req) => {
     );
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    console.error('extract-content: extraction failed', { bookmarkId, url: bookmark.url, error: errorMessage });
+    console.error('extract-content: extraction failed', {
+      bookmarkId,
+      url: bookmark.url,
+      error: errorMessage,
+    });
 
     await adminClient
       .from('bookmarks')
