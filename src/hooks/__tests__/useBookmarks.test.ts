@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -376,5 +376,188 @@ describe('useBookmarks — cycleStatus', () => {
     await waitFor(() =>
       expect(result.current.bookmarks.find((b) => b.id === 'bm-1')?.status).toBe('reading'),
     );
+  });
+});
+
+// ---- Helper: wrapper that exposes queryClient ----
+
+function createWrapperWithClient() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false, gcTime: 0 },
+      mutations: { retry: false },
+    },
+  });
+  const Wrapper = ({ children }: { children: React.ReactNode }) =>
+    createElement(QueryClientProvider, { client: queryClient }, children);
+  return { Wrapper, queryClient };
+}
+
+function makeRawBookmark(overrides: Record<string, unknown> = {}) {
+  return {
+    id: 'bm-1',
+    url: 'https://example.com',
+    title: null,
+    image: null,
+    excerpt: null,
+    source_type: 'blog',
+    status: 'unread',
+    is_favorited: false,
+    notes: [],
+    tags: [],
+    metadata: {},
+    content: {},
+    content_status: 'pending',
+    content_fetched_at: null,
+    synced: false,
+    created_at: '2024-01-01T00:00:00Z',
+    status_changed_at: '2024-01-01T00:00:00Z',
+    started_reading_at: null,
+    finished_at: null,
+    bookmark_tags: [],
+    ...overrides,
+  };
+}
+
+describe('autoFetchMetadataAndTag — areas preserved', () => {
+  it('preserves existing bookmark areas after metadata cache merge', async () => {
+    const { fetchMetadata } = await import('../../lib/metadata');
+    vi.mocked(fetchMetadata).mockResolvedValueOnce({ title: 'Fetched Title' });
+
+    const builder = mockSupabaseClient._getBuilder('bookmarks');
+    // Initial query: empty
+    builder._resolve = { data: [], error: null };
+
+    const { Wrapper } = createWrapperWithClient();
+    const { result } = renderHook(() => useBookmarks(), { wrapper: Wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    // Insert returns bookmark with an area in bookmark_tags
+    const area = {
+      id: 'area-1',
+      name: 'Tech',
+      description: null,
+      color: null,
+      emoji: null,
+      sort_order: 0,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+    builder._resolve = {
+      data: makeRawBookmark({
+        id: 'bm-new',
+        url: 'https://blog.com',
+        bookmark_tags: [{ tag_area_id: 'area-1', tag_areas: area }],
+      }),
+      error: null,
+    };
+
+    act(() => {
+      result.current.addBookmark.mutate({ url: 'https://blog.com' });
+    });
+
+    await waitFor(() => expect(result.current.addBookmark.isSuccess).toBe(true));
+
+    // After autoFetchMetadataAndTag runs, title should be set AND areas preserved
+    await waitFor(() => {
+      const bm = result.current.bookmarks.find((b) => b.id === 'bm-new');
+      return bm?.title === 'Fetched Title';
+    });
+
+    const bm = result.current.bookmarks.find((b) => b.id === 'bm-new');
+    expect(bm?.areas).toEqual([expect.objectContaining({ id: 'area-1', name: 'Tech' })]);
+  });
+});
+
+describe('triggerExtraction — invoke and invalidate', () => {
+  it('calls functions.invoke for non-skipped source types', async () => {
+    const builder = mockSupabaseClient._getBuilder('bookmarks');
+    builder._resolve = { data: [], error: null };
+
+    const { result } = renderHook(() => useBookmarks(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    builder._resolve = {
+      data: makeRawBookmark({ id: 'bm-blog', url: 'https://blog.com', source_type: 'blog' }),
+      error: null,
+    };
+
+    act(() => {
+      result.current.addBookmark.mutate({ url: 'https://blog.com' });
+    });
+
+    await waitFor(() => expect(result.current.addBookmark.isSuccess).toBe(true));
+
+    // Extraction runs after autoFetchMetadataAndTag — give it a tick
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    await waitFor(() =>
+      expect(mockSupabaseClient.functions.invoke).toHaveBeenCalledWith(
+        'extract-content',
+        expect.objectContaining({ body: { bookmark_id: 'bm-blog' } }),
+      ),
+    );
+  });
+
+  it('skips functions.invoke for youtube source type', async () => {
+    vi.clearAllMocks();
+    mockSupabaseClient._resetBuilders();
+
+    const builder = mockSupabaseClient._getBuilder('bookmarks');
+    builder._resolve = { data: [], error: null };
+
+    const { result } = renderHook(() => useBookmarks(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    builder._resolve = {
+      data: makeRawBookmark({
+        id: 'bm-yt',
+        url: 'https://youtube.com/watch?v=abc',
+        source_type: 'youtube',
+      }),
+      error: null,
+    };
+
+    act(() => {
+      result.current.addBookmark.mutate({ url: 'https://youtube.com/watch?v=abc' });
+    });
+
+    await waitFor(() => expect(result.current.addBookmark.isSuccess).toBe(true));
+
+    // Wait a tick for any async fire-and-forget
+    await new Promise((r) => setTimeout(r, 50));
+    expect(mockSupabaseClient.functions.invoke).not.toHaveBeenCalled();
+  });
+});
+
+describe('autoFetchMetadataAndTag — dev console.warn on failure', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('logs a warning in dev mode when fetchMetadata throws', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { fetchMetadata } = await import('../../lib/metadata');
+    vi.mocked(fetchMetadata).mockRejectedValueOnce(new Error('Network error'));
+
+    const builder = mockSupabaseClient._getBuilder('bookmarks');
+    builder._resolve = { data: [], error: null };
+
+    const { result } = renderHook(() => useBookmarks(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    builder._resolve = {
+      data: makeRawBookmark({ id: 'bm-warn', url: 'https://blog.com' }),
+      error: null,
+    };
+
+    act(() => {
+      result.current.addBookmark.mutate({ url: 'https://blog.com' });
+    });
+
+    await waitFor(() => expect(result.current.addBookmark.isSuccess).toBe(true));
+
+    // Wait for fire-and-forget to complete
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(warnSpy).toHaveBeenCalledWith('[autoFetchMetadata] failed', expect.any(Error));
   });
 });
