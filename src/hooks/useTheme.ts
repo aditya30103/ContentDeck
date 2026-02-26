@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 
-type Theme = 'light' | 'dark' | 'system';
+type Theme = 'light' | 'dark' | 'system' | 'sepia' | 'navy';
 
 const STORAGE_KEY = 'theme';
 
@@ -11,6 +11,8 @@ function getSystemTheme(): 'light' | 'dark' {
 function applyTheme(theme: Theme) {
   const resolved = theme === 'system' ? getSystemTheme() : theme;
   document.documentElement.classList.toggle('dark', resolved === 'dark');
+  document.documentElement.classList.toggle('sepia', resolved === 'sepia');
+  document.documentElement.classList.toggle('navy', resolved === 'navy');
 }
 
 export function useTheme() {
@@ -25,8 +27,10 @@ export function useTheme() {
   }, []);
 
   const toggleTheme = useCallback(() => {
-    const resolved = theme === 'system' ? getSystemTheme() : theme;
-    setTheme(resolved === 'dark' ? 'light' : 'dark');
+    const cycle: Theme[] = ['light', 'dark', 'sepia', 'navy'];
+    const current = theme === 'system' ? getSystemTheme() : theme;
+    const idx = cycle.indexOf(current as Theme);
+    setTheme(cycle[(idx + 1) % cycle.length]!);
   }, [theme, setTheme]);
 
   // Apply on mount and listen for system changes
@@ -44,6 +48,7 @@ export function useTheme() {
     theme,
     setTheme,
     toggleTheme,
-    isDark: theme === 'dark' || (theme === 'system' && getSystemTheme() === 'dark'),
+    isDark:
+      theme === 'dark' || theme === 'navy' || (theme === 'system' && getSystemTheme() === 'dark'),
   };
 }

@@ -6,6 +6,7 @@ import {
   Plus,
   Sun,
   Moon,
+  Anchor,
   Settings,
   BarChart3,
   LogOut,
@@ -51,7 +52,7 @@ export default function Sidebar({
     showFavorites,
     setFavorites,
   } = useUI();
-  const { toggleTheme, isDark } = useTheme();
+  const { toggleTheme, theme } = useTheme();
 
   const totalCount = counts.unread + counts.reading + counts.done;
 
@@ -175,8 +176,22 @@ export default function Sidebar({
           onClick={toggleTheme}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors min-h-[44px]"
         >
-          {isDark ? <Sun size={18} /> : <Moon size={18} />}
-          {isDark ? 'Light Mode' : 'Dark Mode'}
+          {theme === 'dark' ? (
+            <Sun size={18} />
+          ) : theme === 'sepia' ? (
+            <Moon size={18} />
+          ) : theme === 'navy' ? (
+            <Anchor size={18} />
+          ) : (
+            <Moon size={18} />
+          )}
+          {theme === 'dark'
+            ? 'Light Mode'
+            : theme === 'sepia'
+              ? 'Dark Mode'
+              : theme === 'navy'
+                ? 'Light Mode'
+                : 'Dark Mode'}
         </button>
         <button
           onClick={onStats}

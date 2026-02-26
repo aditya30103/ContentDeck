@@ -1,4 +1,4 @@
-import { Search, Sun, Moon, Plus, Settings, MessageSquare } from 'lucide-react';
+import { Search, Sun, Moon, BookOpen, Plus, Settings, MessageSquare } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 
 interface MobileHeaderProps {
@@ -15,7 +15,7 @@ export default function MobileHeader({
   onSettings,
   onFeedback,
 }: MobileHeaderProps) {
-  const { toggleTheme, isDark } = useTheme();
+  const { toggleTheme, theme } = useTheme();
 
   return (
     <header
@@ -48,10 +48,14 @@ export default function MobileHeader({
         <button
           onClick={toggleTheme}
           className="p-2.5 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center"
-          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label="Cycle theme"
         >
-          {isDark ? (
+          {theme === 'dark' ? (
             <Sun size={20} className="text-surface-400" />
+          ) : theme === 'sepia' ? (
+            <Moon size={20} className="text-surface-600" />
+          ) : theme === 'navy' ? (
+            <BookOpen size={20} className="text-surface-600" />
           ) : (
             <Moon size={20} className="text-surface-600" />
           )}

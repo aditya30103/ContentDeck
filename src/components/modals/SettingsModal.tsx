@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ExternalLink, Smartphone, FlaskConical } from 'lucide-react';
+import { ExternalLink, Smartphone, FlaskConical, Sun, Moon, BookOpen, Anchor } from 'lucide-react';
+import { useTheme } from '../../hooks/useTheme';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import TokenManager from '../settings/TokenManager';
@@ -21,6 +22,7 @@ export default function SettingsModal({
   isDemo,
 }: SettingsModalProps) {
   const [activeTab, setActiveTab] = useState<'general' | 'feedback'>('general');
+  const { theme, setTheme } = useTheme();
   const [aiKey, setAiKey] = useState(() => localStorage.getItem('openrouter_key') ?? '');
   const [ytKey, setYtKey] = useState(() => localStorage.getItem('youtube_api_key') ?? '');
   const [obsidianVault, setObsidianVault] = useState(
@@ -106,6 +108,36 @@ export default function SettingsModal({
               </div>
             </section>
           )}
+
+          {/* Theme */}
+          <section>
+            <h3 className="text-sm font-semibold text-surface-900 dark:text-surface-100 mb-2">
+              Theme
+            </h3>
+            <div className="grid grid-cols-4 gap-2">
+              {(
+                [
+                  { key: 'light', label: 'Light', icon: Sun },
+                  { key: 'dark', label: 'Dark', icon: Moon },
+                  { key: 'sepia', label: 'Sepia', icon: BookOpen },
+                  { key: 'navy', label: 'Navy', icon: Anchor },
+                ] as const
+              ).map(({ key, label, icon: Icon }) => (
+                <button
+                  key={key}
+                  onClick={() => setTheme(key)}
+                  className={`flex flex-col items-center gap-1 py-2 px-1 rounded-lg border text-xs font-medium transition-colors min-h-[56px] ${
+                    theme === key
+                      ? 'border-primary-500 bg-primary-600/10 text-primary-700 dark:text-primary-300'
+                      : 'border-surface-200 dark:border-surface-700 text-surface-500 dark:text-surface-400 hover:border-surface-300 dark:hover:border-surface-600'
+                  }`}
+                >
+                  <Icon size={16} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </section>
 
           {/* Save from Your Phone */}
           <section>
