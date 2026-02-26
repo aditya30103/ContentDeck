@@ -47,6 +47,44 @@
   --color-success: #22c55e;
 }
 
+/* Warm sepia theme */
+:root.sepia {
+  --color-surface-50: #fdf9f0;
+  --color-surface-100: #f9f3e3;
+  --color-surface-200: #f0e6cc;
+  --color-surface-300: #e4d5b0;
+  --color-surface-400: #c8b888;
+  --color-surface-500: #a89060;
+  --color-surface-600: #7a6540;
+  --color-surface-700: #5c4828;
+  --color-surface-800: #3e2e15;
+  --color-surface-900: #261a08;
+  --color-surface-950: #150e04;
+  --color-primary-400: #d4a340;
+  --color-primary-500: #c0891e;
+  --color-primary-600: #a8720c;
+  --color-primary-700: #8c5c00;
+}
+
+/* Light blue / navy theme */
+:root.navy {
+  --color-surface-50: #f0f4ff;
+  --color-surface-100: #e0eaff;
+  --color-surface-200: #c7d8f8;
+  --color-surface-300: #a0bef0;
+  --color-surface-400: #6e9de0;
+  --color-surface-500: #4a7dc8;
+  --color-surface-600: #3060a8;
+  --color-surface-700: #1e4580;
+  --color-surface-800: #12305e;
+  --color-surface-900: #0a1f3d;
+  --color-surface-950: #050f22;
+  --color-primary-400: #60b8ff;
+  --color-primary-500: #3ea0f0;
+  --color-primary-600: #1a85d8;
+  --color-primary-700: #0068b8;
+}
+
 /* Base styles */
 html {
   scroll-behavior: smooth;
