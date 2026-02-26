@@ -26,7 +26,7 @@ export function generateMarkdown(bookmark: Bookmark): string {
   lines.push(`status: ${bookmark.status}`);
   if (bookmark.is_favorited) lines.push('favorited: true');
   if (bookmark.tags.length > 0) {
-    lines.push(`tags: [${bookmark.tags.map((t) => `"${yamlEscape(t)}"`).join(', ')}]`);
+    lines.push(`tags: [${bookmark.tags.map((t) => `"[[${yamlEscape(t)}]]"`).join(', ')}]`);
   }
   lines.push(`created: ${formatDate(bookmark.created_at)}`);
   if (bookmark.started_reading_at)

@@ -92,3 +92,26 @@ describe('generateMarkdown — book without URL', () => {
     expect(md).toContain('# Untitled Book');
   });
 });
+
+describe('generateMarkdown — wikilink tags', () => {
+  it('renders single tag as Obsidian wikilink', () => {
+    const md = generateMarkdown(makeBookmark({ tags: ['javascript'] }));
+    expect(md).toContain('tags: ["[[javascript]]"]');
+  });
+
+  it('renders multiple tags as wikilinks', () => {
+    const md = generateMarkdown(makeBookmark({ tags: ['react', 'typescript'] }));
+    expect(md).toContain('tags: ["[[react]]", "[[typescript]]"]');
+  });
+
+  it('escapes special chars inside wikilinks', () => {
+    const md = generateMarkdown(makeBookmark({ tags: ['c++', 'node"js'] }));
+    expect(md).toContain('"[[c++]]"');
+    expect(md).toContain('"[[node\\"js]]"');
+  });
+
+  it('omits tags line when tags array is empty', () => {
+    const md = generateMarkdown(makeBookmark({ tags: [] }));
+    expect(md).not.toContain('tags:');
+  });
+});
