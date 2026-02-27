@@ -81,21 +81,27 @@ Optimistic updates that don't match the DB write cause UI glitches and phantom d
 
 ---
 
-## Category 4: Demo Mode Parity
+## Category 4: Scoring Engine Integrity (Phase 2+)
 
-Demo mode uses `mock-supabase.ts` which must match the real Supabase client's behavior.
+The scoring engine is the core of the Trusted Curator paradigm. It must be interpretable, deterministic, and correctly derived from existing data.
 
-**Read `src/lib/mock-supabase.ts` and verify:**
+> **Note:** Demo mode is maintained only for `/library`. New home screen has no demo mode. Run the legacy demo mode checks below only when auditing the library view.
 
-- [ ] **All methods used in hooks exist on mock**: `.from().select()`, `.from().insert()`, `.from().update()`, `.from().delete()`, `.from().upsert()`, `.eq()`, `.in()`, `.single()`, `.order()`, `.textSearch()` (if added)
-- [ ] **Chainable builder is thenable**: `.then()` works so TanStack Query can await it
-- [ ] **Mock returns match real shape**: `{ data, error }` with correct types
-- [ ] **`functions.invoke()` is stubbed**: demo mode doesn't call real edge functions
-- [ ] **Auth mock**: `supabase.auth.getSession()`, `onAuthStateChange()` behave correctly in demo
+**If the scoring engine exists (`src/lib/scoring.ts` or similar), verify:**
 
-**Compare with actual hook usage:**
-- Read each hook (`useBookmarks`, `useTagAreas`, `useStats`, `useTokens`) and list every Supabase method chain used
-- Verify mock covers all of them
+- [ ] **All score factors are named**: no anonymous weight multiplications — every factor has a named variable
+- [ ] **Reason generation is deterministic**: `dominantFactor(scores)` returns the same string for the same input, always
+- [ ] **Diversity cap enforced**: same tag area cannot win primary slot in two consecutive scoring calls
+- [ ] **Long-form suppressed correctly**: items with reading_time > 60 min are filtered from primary slot on weekday evenings (time-of-day context)
+- [ ] **Mood override changes output**: each of the 4 mood modes produces a different top item from a known fixture set
+- [ ] **Score inputs are all from existing DB fields**: no fields not present on the `Bookmark` type
+- [ ] **Test coverage**: every score factor has a unit test with known inputs → expected outputs
+
+**Legacy demo mode checks (library view only):**
+- [ ] `mock-supabase.ts` covers all Supabase method chains used in hooks
+- [ ] Chainable builder is thenable
+- [ ] `functions.invoke()` is stubbed
+- [ ] Auth mock behaves correctly
 
 ---
 
@@ -202,7 +208,7 @@ Desktop and mobile are rendered by separate component trees. Features added to t
 | Build & Static Analysis | PASS/FAIL | count |
 | Async Flow Integrity | PASS/WARN/FAIL | count |
 | Cache Consistency | PASS/WARN/FAIL | count |
-| Demo Mode Parity | PASS/WARN/FAIL | count |
+| Scoring Engine Integrity | PASS/WARN/FAIL/N/A | count |
 | Security | PASS/FAIL | count |
 | React & UI Patterns | PASS/WARN/FAIL | count |
 | PWA & Deployment | PASS/WARN/FAIL | count |

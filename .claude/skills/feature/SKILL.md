@@ -30,20 +30,27 @@ Complete workflow for developing features professionally: branch → plan → im
    - `refactor/<issue>-<name>` for refactoring
    - `chore/<issue>-<name>` for tooling, deps, config
 
-3. **Explore codebase** to understand affected areas:
-   - Read `docs/INDEX.md` and `docs/plan/phase-1.md` for current roadmap state
+3. **Philosophy check** — before reading a single source file, open `docs/plan/philosophy.md` and run the Philosophy-First Feature Review:
+   - Which of the 5 principles does this feature serve? (If none, stop and discuss.)
+   - Does it help intentional-you or anxiety-you?
+   - Does it close or strengthen the content loop?
+   - Does it add user-visible complexity proportionate to its benefit?
+   - Is it free?
+
+4. **Explore codebase** to understand affected areas:
+   - Read `docs/INDEX.md` and the active phase plan for current roadmap state
    - Read relevant source files
    - Identify all files that need changes
    - Check for existing patterns to follow
 
-4. **Write implementation plan:**
+5. **Write implementation plan:**
    - Files to create/modify
    - Dependencies or migrations needed
    - Risks or edge cases
    - Testing approach (unit tests for lib/, component tests for UI)
    - Which docs/log/ entry will record this feature
 
-5. **Get user approval** before writing any code.
+6. **Get user approval** before writing any code.
 
 ## Phase 2 — IMPLEMENT
 
@@ -78,7 +85,7 @@ All five must pass with zero errors before proceeding to Phase 4.
 1. **Update documentation** — mandatory, not optional:
    - `docs/log/<version>-<feature>.md` — **always create/update this log** when a feature ships. Record: what was built, key decisions, files changed, gotchas.
    - `docs/INDEX.md` — add to shipped features table, update "Next up"
-   - `docs/plan/phase-1.md` — mark completed items
+   - `docs/plan/phase-2.md` (or active phase) — mark completed items
    - `CLAUDE.md` — if architecture, patterns, or rules changed
    - `README.md` — if user-facing features changed
    - `docs/reference/audit.md` — if bugs were found/fixed

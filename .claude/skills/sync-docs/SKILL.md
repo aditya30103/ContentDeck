@@ -319,7 +319,7 @@ These are the historical causes of drift in this project. Check these first duri
 
 1. **Skills not updated when npm scripts change** — skills use `npx tool` instead of `npm run script`
 2. **Logs not created when features ship** — session ends, log step skipped
-3. **Plan items not marked done** — feature ships, phase-1.md checkboxes left open
+3. **Plan items not marked done** — feature ships, phase-2.md checkboxes left open
 4. **MEMORY.md not updated at session end** — stale "next priority" or "current status"
 5. **INDEX.md shipped table not updated** — feature ships, table row not added
 6. **Co-author model drift** — model name changes, not updated in all skill files
@@ -327,3 +327,6 @@ These are the historical causes of drift in this project. Check these first duri
 8. **GitHub Issues not closed on merge** — `Closes #N` missing from PR body
 9. **CLAUDE.md architecture not updated** — new `src/` file added, not listed in architecture
 10. **Branch naming convention evolves** — docs/skills not updated to match new convention
+11. **philosophy.md not consulted** — feature built without philosophy-first review; may contradict a core principle
+12. **Scoring engine undocumented** — `src/lib/scoring.ts` changes not reflected in phase-2.md scoring formula docs
+13. **Route architecture drift** — new routes added without updating the `/` → home, `/library` → library convention in vision.md and phase-2.md

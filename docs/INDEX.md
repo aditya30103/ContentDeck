@@ -2,10 +2,10 @@
 
 > Start here. This file orients each session.
 
-**Version:** v3.2 | **Status:** Phase 1 complete · Pre-Phase 2 backlog in progress
-**Next up:** 2.0.1 Source types (GitHub, arXiv) · 2.0.2 Obsidian wikilinks · 2.0.3 Race condition tests → then Phase 2 AI features
+**Version:** v3.3 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) starting
+**Next up:** Obsidian Plugin (2.0) → Values Onboarding (2.1) → Scoring Engine (2.2) → New Home Screen (2.3) → Post-Read Reflection (2.4)
 **Feedback:** In-app button in Sidebar/MobileHeader → Settings → Feedback tab to review
-**Active plan:** [Phase 2 — Intelligence](plan/phase-2.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
+**Active plan:** [Phase 2 — Trusted Curator](plan/phase-2.md) | **Philosophy:** [Product Philosophy](plan/philosophy.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
 
 ---
 
@@ -13,8 +13,9 @@
 
 | If you're... | Read these |
 |---|---|
-| Starting a new feature | [plan/phase-2.md](plan/phase-2.md) + [guides/workflow.md](guides/workflow.md) |
-| Planning Phase 2 AI features | [plan/phase-2.md](plan/phase-2.md) |
+| Starting a new feature | [plan/philosophy.md](plan/philosophy.md) + [plan/phase-2.md](plan/phase-2.md) + [guides/workflow.md](guides/workflow.md) |
+| Questioning whether a feature belongs | [plan/philosophy.md](plan/philosophy.md) — Philosophy-First Feature Review |
+| Planning Phase 2 Trusted Curator features | [plan/phase-2.md](plan/phase-2.md) |
 | Understanding the vision | [plan/vision.md](plan/vision.md) |
 | Debugging something that used to work | [log/](log/) — find the relevant implementation log |
 | Setting up Supabase Auth | [guides/supabase-auth-setup.md](guides/supabase-auth-setup.md) |
@@ -30,11 +31,12 @@
 docs/
 ├── INDEX.md                        ← You are here
 ├── plan/                           # Future work — gets shorter as features ship
-│   ├── vision.md                   # Vision, architecture evolution, principles
+│   ├── philosophy.md               # Product philosophy — THE WHY. Read before any feature.
+│   ├── vision.md                   # Vision, architecture evolution, transition strategy
 │   ├── phase-1.md                  # Phase 1: Foundation — COMPLETE ✅
-│   ├── phase-2.md                  # Phase 2: Intelligence (v3.5)
-│   ├── phase-3.md                  # Phase 3: Platform (v4.0)
-│   ├── phase-4.md                  # Phase 4: Social & Scale (v5.0)
+│   ├── phase-2.md                  # Phase 2: Trusted Curator (v3.5) — ACTIVE
+│   ├── phase-3.md                  # Phase 3: Platform (v4.5) — Browser Extension, CLI
+│   ├── phase-4.md                  # Phase 4: Social & Scale — FROZEN (contradicts philosophy)
 │   ├── phase-5.md                  # Phase 5: Ecosystem (v6.0)
 │   └── infrastructure.md          # DevOps, budget, quality gates, priority matrix
 ├── log/                            # Implementation records — append-only
