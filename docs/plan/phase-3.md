@@ -11,13 +11,6 @@
 - Auth: uses Supabase session token from the main app
 - Published on Chrome Web Store + Firefox Add-ons (both free)
 
-## 3.2 Offline-First PWA
-- **IndexedDB** (via Dexie.js) for local bookmark storage
-- Full CRUD works offline — syncs when back online
-- Conflict resolution: last-write-wins with timestamp comparison
-- Background sync API: queue mutations → replay on reconnect
-- Service worker: precache app shell + critical assets on install
-
 ## 3.3 Public API
 - RESTful API via Supabase Edge Functions
 - Endpoints: `/api/bookmarks`, `/api/areas`, `/api/search`
@@ -33,24 +26,3 @@
 - `npx contentdeck export --format=obsidian --area=engineering`
 - Auth via `contentdeck login` (opens browser for OAuth)
 - Published on npm (free)
-
-## 3.5 Telegram Bot
-- `/save <url>` — save a bookmark
-- `/list` — show recent unread
-- `/random` — get a random unread bookmark to read
-- Forward any message with a URL → auto-save
-- Hosted on Supabase Edge Functions (webhook mode, no server needed)
-- Telegram Bot API is free, unlimited
-
-## 3.6 Email-to-Save
-- Dedicated email address (via Cloudflare Email Workers, free)
-- Forward newsletters → auto-saved as bookmarks
-- Subject line → title, body URLs → extracted and saved
-- Great for Substack newsletters that don't have clean URLs
-
-## 3.7 RSS Feed Monitoring
-- Add RSS feeds in Settings → new items auto-saved as unread bookmarks
-- pg_cron job checks feeds every 30 minutes
-- Supabase Edge Function parses RSS XML
-- Use cases: follow blogs, YouTube channels, Substack writers
-- Max 20 feeds per user (free tier budget)
