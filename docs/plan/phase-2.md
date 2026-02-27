@@ -52,16 +52,48 @@ Each step is independently shippable. Don't wait for all five before shipping an
 
 The loop: ContentDeck captures → Obsidian holds the knowledge. Without this, "done" items go nowhere permanent. The Review card becomes hollow — you'd be revisiting content with no notes rooted in your vault.
 
-**Scope:**
-- ContentDeck → Obsidian: auto-export when status changes to "done" (Markdown file + YAML frontmatter with tags, areas, URL, date, your notes)
-- Obsidian → ContentDeck: save links from your vault directly into ContentDeck (plugin UI in Obsidian sidebar)
+> **Updated Feb 2026:** Obsidian shipped major integration capabilities — iOS Share Sheet (v1.12.2), Keychain for secure token storage, Siri/Shortcuts support (v1.11), and a full CLI. These change the plugin scope significantly: the Obsidian → ContentDeck direction no longer needs plugin code.
+
+### What the plugin builds (ContentDeck → Obsidian only)
+
+- Auto-export when a bookmark is marked "done": creates a Markdown file in the vault with YAML frontmatter (title, URL, tags, areas, date, source type, your notes/reflection)
+- Export format: identical to current manual Obsidian export — no format change, no migration
+- Plugin settings: vault path, export folder, ContentDeck API token (stored via **Obsidian Keychain** — not plain text)
 - Uses Obsidian Plugin API (TypeScript — same language as ContentDeck)
 - Free to develop; free to publish on Obsidian Community Plugins
 
-**Key design decisions:**
-- Export format: same Markdown/YAML as current manual export, no format change
-- Bidirectional: not just export — Obsidian can push URLs back to ContentDeck via the existing `save-bookmark` edge function (token auth already works)
-- Conflict handling: ContentDeck is the source of truth for metadata; Obsidian is the source of truth for long-form notes
+### What the plugin does NOT need to build (Obsidian → ContentDeck)
+
+Obsidian v1.11 shipped a native **"Bookmark Link" Shortcuts action** on iOS. Combined with ContentDeck's existing `save-bookmark` edge function (token auth already works), the reverse direction is a **Shortcuts automation**, not plugin code:
+
+```
+iOS Shortcut: "Save to ContentDeck"
+  1. Receive URL from Share Sheet or Obsidian Shortcuts action
+  2. GET https://<project>.supabase.co/functions/v1/save-bookmark?token=<token>&url=[URL]
+```
+
+This is a setup guide (one page in `docs/guides/`), not a plugin feature. Scope cut cleanly.
+
+### Auth — Obsidian Keychain
+
+Obsidian v1.11 introduced Keychain: secure OS-level storage for plugin secrets. Use it:
+
+```typescript
+// Store token on first setup
+await this.app.keychain.setKey('contentdeck-token', token);
+
+// Retrieve on export
+const token = await this.app.keychain.getKey('contentdeck-token');
+```
+
+No ContentDeck API token ever touches the plain-text plugin `data.json`. Better security, native UX.
+
+### Key design decisions
+
+- ContentDeck is the source of truth for metadata; Obsidian is the source of truth for long-form notes
+- Export is one-way and append-only — the plugin never reads back from Obsidian or modifies existing files
+- Conflict model: if a file already exists at the export path, append a timestamp suffix rather than overwrite
+- `obsidian-headless` npm package (for serverless vault writes) is **out of scope** — requires paid Obsidian Sync subscription, violates free-tier constraint
 
 **Infrastructure note:** Enable pgvector on Supabase now (free, 30 seconds). Store the vector column on `bookmarks` even before embeddings are generated. Painful to add later, trivially cheap to add now.
 
