@@ -436,24 +436,25 @@ export function useBookmarks() {
               .getQueryData<Bookmark[]>(QUERY_KEY)
               ?.find((b) => b.id === bookmark.id) ?? bookmark),
           };
-          // For arXiv, also populate content.text with the abstract for future RAG use
-          if (bookmark.source_type === 'arxiv' && result.metadata?.abstract) {
-            const text = result.metadata.abstract;
-            void db
-              .from('bookmarks')
-              .update({
-                content: {
-                  text,
-                  method: 'arxiv_api',
-                  word_count: text.split(/\s+/).filter(Boolean).length,
-                  extracted_at: new Date().toISOString(),
-                },
-                content_status: 'success',
-                content_fetched_at: new Date().toISOString(),
-              })
-              .eq('id', bookmark.id);
-          }
         }
+      }
+      // For arXiv, populate content.text with the abstract regardless of whether
+      // other metadata fields needed updating — abstract should always be stored.
+      if (bookmark.source_type === 'arxiv' && result.metadata?.abstract) {
+        const text = result.metadata.abstract;
+        void db
+          .from('bookmarks')
+          .update({
+            content: {
+              text,
+              method: 'arxiv_api',
+              word_count: text.split(/\s+/).filter(Boolean).length,
+              extracted_at: new Date().toISOString(),
+            },
+            content_status: 'success',
+            content_fetched_at: new Date().toISOString(),
+          })
+          .eq('id', bookmark.id);
       }
     } catch (err) {
       // Silent fail for metadata — still attempt tagging with whatever we have

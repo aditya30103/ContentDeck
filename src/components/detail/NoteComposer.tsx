@@ -71,7 +71,7 @@ export default function NoteComposer({ onAddNote, isPending }: NoteComposerProps
         onKeyDown={handleKeyDown}
         placeholder="Type your thought..."
         rows={2}
-        className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-sm text-surface-900 dark:text-surface-100 placeholder:text-surface-400 resize-none min-h-[60px]"
+        className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-base text-surface-900 dark:text-surface-100 placeholder:text-surface-400 resize-none min-h-[60px]"
       />
 
       {/* Submit */}

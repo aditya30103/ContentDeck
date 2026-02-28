@@ -1,10 +1,20 @@
-import { Search, Sun, Moon, BookOpen, Plus, Settings, MessageSquare } from 'lucide-react';
+import {
+  Search,
+  Sun,
+  Moon,
+  BookOpen,
+  Plus,
+  Settings,
+  MessageSquare,
+  BarChart3,
+} from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 
 interface MobileHeaderProps {
   onAdd: () => void;
   onToggleSearch: () => void;
   onSettings: () => void;
+  onStats: () => void;
   onFeedback: () => void;
   showSearch: boolean;
 }
@@ -13,6 +23,7 @@ export default function MobileHeader({
   onAdd,
   onToggleSearch,
   onSettings,
+  onStats,
   onFeedback,
 }: MobileHeaderProps) {
   const { toggleTheme, theme } = useTheme();
@@ -37,6 +48,13 @@ export default function MobileHeader({
           aria-label="Settings"
         >
           <Settings size={20} className="text-surface-600 dark:text-surface-400" />
+        </button>
+        <button
+          onClick={onStats}
+          className="p-2.5 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center"
+          aria-label="View statistics"
+        >
+          <BarChart3 size={20} className="text-surface-600 dark:text-surface-400" />
         </button>
         <button
           onClick={onFeedback}

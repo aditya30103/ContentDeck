@@ -286,6 +286,30 @@ describe('fetchMetadata — arXiv', () => {
     expect(calledUrl).toContain('export.arxiv.org/api/query');
     expect(calledUrl).toContain('1706.03762');
   });
+
+  it('parses title and authors from Atom XML with default namespace (getElementsByTagName)', async () => {
+    // Verifies that the namespace-safe getElementsByTagName approach works on
+    // XML where querySelector('entry') would return null in browsers due to
+    // the default Atom namespace (xmlns="http://www.w3.org/2005/Atom").
+    const namespacedXml = `<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <entry>
+    <id>http://arxiv.org/abs/2301.00001v1</id>
+    <title>Namespace Test Paper</title>
+    <summary>An abstract about namespace handling.</summary>
+    <published>2023-01-01T00:00:00Z</published>
+    <author><name>Alice Example</name></author>
+  </entry>
+</feed>`;
+    mockFetch.mockResolvedValueOnce(xmlResponse(namespacedXml));
+
+    const result = await fetchMetadata('https://arxiv.org/abs/2301.00001', 'arxiv');
+
+    expect(result.title).toBe('Namespace Test Paper');
+    expect(result.metadata?.authors).toEqual(['Alice Example']);
+    expect(result.metadata?.abstract).toBe('An abstract about namespace handling.');
+    expect(result.metadata?.published).toBe('2023-01-01');
+  });
 });
 
 describe('fetchMetadata — routing', () => {
