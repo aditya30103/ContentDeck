@@ -27,7 +27,7 @@ A list of free API integrations, plugins, and extensions that could enhance Cont
 |-------------|--------------|-----------|
 | **Readwise API** | Sync highlights from Kindle/articles | Requires Readwise subscription |
 | **Notion API** | Export bookmarks to Notion database | Free |
-| **Obsidian (local)** | Export as markdown files | Free |
+| **Obsidian (local)** | Export as markdown files via URI scheme, batch File System export, auto-export on mark-done | Free | ✅ Shipped — Phase A (export) + Phase B ([Community Plugin](https://github.com/aditya30103/obsidian-contentdeck)) |
 | **IFTTT/Zapier webhooks** | Trigger actions on bookmark add | Limited free |
 | **RSS feed generation** | Expose your bookmarks as RSS | Self-implement, free |
 | **Archive.today / Wayback Machine** | Auto-archive bookmarked pages | Free |

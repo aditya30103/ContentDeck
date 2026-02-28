@@ -247,7 +247,10 @@ export default function SettingsModal({
                   htmlFor="settings-vault"
                   className="block text-xs text-surface-500 dark:text-surface-400 mb-1"
                 >
-                  Vault Name <span className="text-surface-400">(exact name shown in Obsidian, e.g. MyVault)</span>
+                  Vault Name{' '}
+                  <span className="text-surface-400">
+                    (exact name shown in Obsidian, e.g. MyVault)
+                  </span>
                 </label>
                 <input
                   id="settings-vault"
@@ -264,15 +267,16 @@ export default function SettingsModal({
                   htmlFor="settings-vault-folder"
                   className="block text-xs text-surface-500 dark:text-surface-400 mb-1"
                 >
-                  Vault Folder <span className="text-surface-400">(subfolder inside vault, e.g. ContentDeck)</span>
+                  Vault Folder{' '}
+                  <span className="text-surface-400">
+                    (subfolder inside vault, e.g. ContentDeck)
+                  </span>
                 </label>
                 <input
                   id="settings-vault-folder"
                   type="text"
                   value={obsidianVaultFolder}
-                  onChange={(e) =>
-                    setObsidianVaultFolder(e.target.value || 'ContentDeck')
-                  }
+                  onChange={(e) => setObsidianVaultFolder(e.target.value || 'ContentDeck')}
                   placeholder="ContentDeck"
                   className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-base min-h-[44px]"
                 />
@@ -331,7 +335,7 @@ export default function SettingsModal({
           {/* Info */}
           <section className="pt-2 border-t border-surface-200 dark:border-surface-800">
             <div className="flex items-center justify-between text-xs text-surface-400 dark:text-surface-500">
-              <span>ContentDeck v3.0</span>
+              <span>ContentDeck v3.4</span>
               <a
                 href="https://github.com/aditya30103/ContentDeck"
                 target="_blank"

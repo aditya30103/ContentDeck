@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ContentDeck — a personal content bookmarking PWA dashboard for the Capture → Consume → Reflect → Export workflow. Bridges web browsing and Obsidian knowledge management.
 
-**Status: v3.2 — React + Vite + Tailwind + TypeScript. Supabase Auth, demo mode, PWA share target, Sentry error tracking, GitHub Issues sync.**
+**Status: v3.4 — React + Vite + Tailwind + TypeScript. Supabase Auth, demo mode, PWA share target, Sentry error tracking, GitHub Issues sync, Obsidian export + Community Plugin (Phase A+B complete).**
 
 See `docs/reference/audit.md` for the full audit trail (39/47 v1 issues resolved, 14 v2.0 bugs fixed, 8 v2.2 shipping fixes).
 
@@ -21,7 +21,7 @@ All project docs live in `docs/`. Start each session by reading `docs/INDEX.md`.
 | `docs/guides/` | Development workflow and setup guides |
 | `docs/reference/` | Audit trail, integrations, lookup tables |
 
-**Current phase:** Phase 2 (Intelligence) — see `docs/plan/phase-2.md` (Phase 1 complete)
+**Current phase:** Phase 2 (Trusted Curator) — see `docs/plan/phase-2.md`. Obsidian Plugin (2.0) complete. Next: Values Onboarding (2.1) → Scoring Engine (2.2) → New Home Screen (2.3) → Post-Read Reflection (2.4)
 
 ## Tech Stack
 
@@ -68,7 +68,8 @@ supabase/
 └── functions/
     ├── save-bookmark/        # Token-authenticated bookmark save (bookmarklet + iOS Shortcut)
     ├── extract-content/      # Article extraction via Readability (reader mode + full-text search)
-    └── create-github-issue/  # Feedback → GitHub Issue sync (GITHUB_PAT secret)
+    ├── create-github-issue/  # Feedback → GitHub Issue sync (GITHUB_PAT secret)
+    └── sync-done/            # Obsidian plugin sync — GET done+unsynced bookmarks, POST mark synced (token auth)
 ```
 
 ### Key patterns

@@ -33,7 +33,7 @@ These were planned but are not worth the effort relative to Phase 2's paradigm s
 The sequence matters. Each item unblocks the next.
 
 ```
-1. Obsidian Plugin      ← closes the Reflect → Export loop. Makes "done" mean something.
+1. Obsidian Plugin      ← closes the Reflect → Export loop. Makes "done" mean something. ✅ DONE
 2. Values Onboarding    ← states the user's constitution. Unlocks the scoring engine.
 3. Scoring Engine       ← pure logic, fully testable. Unlocks the home screen.
 4. New Home Screen      ← UI consuming the scoring engine. The paradigm inversion.
@@ -48,7 +48,7 @@ Each step is independently shippable. Don't wait for all five before shipping an
 
 ## 2.0 Obsidian Plugin
 
-**Status:** Not started | **Priority:** PREREQUISITE
+**Status:** ✅ COMPLETE (Phase A — PR #36, Phase B — PR #37) | **Priority:** PREREQUISITE
 
 The loop: ContentDeck captures → Obsidian holds the knowledge. Without this, "done" items go nowhere permanent. The Review card becomes hollow — you'd be revisiting content with no notes rooted in your vault.
 

@@ -2,8 +2,8 @@
 
 > Start here. This file orients each session.
 
-**Version:** v3.3 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) starting
-**Next up:** Obsidian Plugin (2.0) → Values Onboarding (2.1) → Scoring Engine (2.2) → New Home Screen (2.3) → Post-Read Reflection (2.4)
+**Version:** v3.4 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) in progress — Obsidian Plugin (2.0) ✅
+**Next up:** Values Onboarding (2.1) → Scoring Engine (2.2) → New Home Screen (2.3) → Post-Read Reflection (2.4)
 **Feedback:** In-app button in Sidebar/MobileHeader → Settings → Feedback tab to review
 **Active plan:** [Phase 2 — Trusted Curator](plan/phase-2.md) | **Philosophy:** [Product Philosophy](plan/philosophy.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
 
@@ -55,7 +55,9 @@ docs/
 │   ├── v3.1-feedback-capture.md   # In-app feedback capture system (#20)
 │   ├── v3.1-pwa-autoupdate-feedback-status-fix.md # Session 3: PWA auto-update + feedback status save
 │   ├── v3.2-sentry-github-sync.md  # Sentry + GitHub Issues sync (#21 #22) + full Sentry coverage (#25)
-│   └── v3.2-bookmarklet-dedup.md   # Bookmarklet deduplication fix (#27)
+│   ├── v3.2-bookmarklet-dedup.md   # Bookmarklet deduplication fix (#27)
+│   ├── v3.4-obsidian-export-phase-a.md  # Obsidian export Phase A: areas wikilinks, auto-export, batch, reflection
+│   └── v3.4-obsidian-plugin-phase-b.md  # Obsidian Community Plugin (Phase B): sync-done edge function + BRAT plugin
 ├── guides/                         # How-to references
 │   ├── workflow.md                 # Development practices, session workflow
 │   └── supabase-auth-setup.md      # Supabase Auth provider configuration
@@ -70,6 +72,8 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
+| v3.4 | Obsidian Plugin Phase B — `sync-done` edge function + Community Plugin (BRAT-installable, ribbon icon, auto-marks synced) (#37) | [log/v3.4-obsidian-plugin-phase-b.md](log/v3.4-obsidian-plugin-phase-b.md) |
+| v3.4 | Obsidian Export Phase A — areas wikilinks, content_deck_id, reflection section, arXiv abstract, auto-export on mark-done, batch export (#36) | [log/v3.4-obsidian-export-phase-a.md](log/v3.4-obsidian-export-phase-a.md) |
 | v3.2 | Bookmarklet deduplication — prevent duplicate saves on double-click (#27) | [log/v3.2-bookmarklet-dedup.md](log/v3.2-bookmarklet-dedup.md) |
 | v3.2 | Full Sentry coverage (all 14 mutations, unhandledrejection, fire-and-forget chains) | [log/v3.2-sentry-github-sync.md](log/v3.2-sentry-github-sync.md) |
 | v3.2 | Sentry error tracking (init, ErrorBoundary, source maps) + GitHub Issues sync (edge function, FeedbackList badge) | [log/v3.2-sentry-github-sync.md](log/v3.2-sentry-github-sync.md) |
