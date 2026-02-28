@@ -183,14 +183,19 @@ async function fetchArxivMetadata(url: string): Promise<MetadataResult> {
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(xml, 'application/xml');
-    const entry = doc.querySelector('entry');
+    // getElementsByTagName is used instead of querySelector because Atom XML has a default
+    // namespace (xmlns="http://www.w3.org/2005/Atom") which makes querySelector unreliable
+    // in browsers — it returns null for namespace-qualified elements.
+    const entry = doc.getElementsByTagName('entry')[0];
     if (!entry) return {};
 
-    const rawTitle = entry.querySelector('title')?.textContent?.trim() ?? '';
+    const rawTitle = entry.getElementsByTagName('title')[0]?.textContent?.trim() ?? '';
     const title = rawTitle.replace(/\s+/g, ' ');
-    const abstract = entry.querySelector('summary')?.textContent?.trim().replace(/\s+/g, ' ') ?? '';
-    const published = entry.querySelector('published')?.textContent?.slice(0, 10) ?? undefined;
-    const authors = Array.from(entry.querySelectorAll('author > name')).map(
+    const abstract =
+      entry.getElementsByTagName('summary')[0]?.textContent?.trim().replace(/\s+/g, ' ') ?? '';
+    const published =
+      entry.getElementsByTagName('published')[0]?.textContent?.slice(0, 10) ?? undefined;
+    const authors = Array.from(entry.getElementsByTagName('name')).map(
       (n) => n.textContent?.trim() ?? '',
     );
 

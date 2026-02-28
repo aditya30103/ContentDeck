@@ -53,7 +53,7 @@ const SearchBar = forwardRef<SearchBarHandle, { autoFocus?: boolean }>(function 
         onChange={(e) => setLocalValue(e.target.value)}
         placeholder="Search bookmarks..."
         aria-label="Search bookmarks"
-        className="w-full pl-9 pr-8 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-sm text-surface-900 dark:text-surface-100 placeholder:text-surface-400 min-h-[40px]"
+        className="w-full pl-9 pr-8 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-base text-surface-900 dark:text-surface-100 placeholder:text-surface-400 min-h-[40px]"
       />
       {localValue && (
         <button

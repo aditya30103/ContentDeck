@@ -141,7 +141,7 @@ export default function FeedbackModal({ open, onClose, activeBookmark }: Feedbac
                 id="feedback-severity"
                 value={severity}
                 onChange={(e) => setSeverity(e.target.value as FeedbackSeverity)}
-                className="w-full px-3 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 text-sm min-h-[44px]"
+                className="w-full px-3 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 text-base min-h-[44px]"
               >
                 <option value="blocking">Blocking — can't use the app</option>
                 <option value="major">Major — significant impact</option>
@@ -169,7 +169,7 @@ export default function FeedbackModal({ open, onClose, activeBookmark }: Feedbac
               placeholder={
                 feedbackType === 'bug' ? 'Describe the bug briefly' : 'What would you like?'
               }
-              className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-sm min-h-[44px]"
+              className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-base min-h-[44px]"
             />
           </div>
 
@@ -187,7 +187,7 @@ export default function FeedbackModal({ open, onClose, activeBookmark }: Feedbac
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Steps to reproduce, expected vs actual behaviour, etc."
-              className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-sm resize-none"
+              className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-base resize-none"
             />
           </div>
 

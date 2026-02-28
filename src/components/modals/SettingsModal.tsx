@@ -189,7 +189,7 @@ export default function SettingsModal({
                   value={aiKey}
                   onChange={(e) => setAiKey(e.target.value)}
                   placeholder="sk-or-..."
-                  className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-sm min-h-[44px]"
+                  className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-base min-h-[44px]"
                 />
               </div>
               <div>
@@ -206,7 +206,7 @@ export default function SettingsModal({
                   value={ytKey}
                   onChange={(e) => setYtKey(e.target.value)}
                   placeholder="AIza..."
-                  className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-sm min-h-[44px]"
+                  className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-base min-h-[44px]"
                 />
               </div>
             </div>
@@ -230,7 +230,7 @@ export default function SettingsModal({
                 value={obsidianVault}
                 onChange={(e) => setObsidianVault(e.target.value)}
                 placeholder="ContentDeck"
-                className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-sm min-h-[44px]"
+                className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-base min-h-[44px]"
               />
             </div>
           </section>
