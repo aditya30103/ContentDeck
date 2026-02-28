@@ -24,7 +24,11 @@ export function generateMarkdown(bookmark: Bookmark): string {
   if (bookmark.title) lines.push(`title: "${yamlEscape(bookmark.title)}"`);
   lines.push(`source: ${SOURCE_LABELS[bookmark.source_type]}`);
   lines.push(`status: ${bookmark.status}`);
+  lines.push(`content_deck_id: "${bookmark.id}"`);
   if (bookmark.is_favorited) lines.push('favorited: true');
+  if (bookmark.areas.length > 0) {
+    lines.push(`areas: [${bookmark.areas.map((a) => `"[[${yamlEscape(a.name)}]]"`).join(', ')}]`);
+  }
   if (bookmark.tags.length > 0) {
     lines.push(`tags: [${bookmark.tags.map((t) => `"[[${yamlEscape(t)}]]"`).join(', ')}]`);
   }
@@ -55,23 +59,45 @@ export function generateMarkdown(bookmark: Bookmark): string {
     lines.push('');
   }
 
-  // Excerpt
-  if (bookmark.excerpt) {
-    lines.push('## Summary');
+  // Summary / Abstract
+  const isArxiv = bookmark.source_type === 'arxiv';
+  const summaryText = isArxiv
+    ? (bookmark.metadata?.abstract ?? bookmark.excerpt)
+    : bookmark.excerpt;
+  if (summaryText) {
+    lines.push(`## ${isArxiv ? 'Abstract' : 'Summary'}`);
     lines.push('');
-    lines.push(bookmark.excerpt);
+    lines.push(summaryText);
     lines.push('');
   }
 
-  // Notes
-  if (bookmark.notes.length > 0) {
+  // Notes (non-reflection)
+  const regularNotes = bookmark.notes.filter((n) => n.type !== 'reflection');
+  const reflections = bookmark.notes.filter((n) => n.type === 'reflection');
+
+  if (regularNotes.length > 0) {
     lines.push('## Notes');
     lines.push('');
-    for (const note of bookmark.notes) {
-      const emoji = { insight: '💡', question: '❓', highlight: '🖍️', note: '📝' }[note.type];
+    for (const note of regularNotes) {
+      const emoji =
+        { insight: '💡', question: '❓', highlight: '🖍️', note: '📝' }[
+          note.type as 'insight' | 'question' | 'highlight' | 'note'
+        ] ?? '📝';
       const label = note.type.charAt(0).toUpperCase() + note.type.slice(1);
       lines.push(`### ${emoji} ${label}`);
       lines.push('');
+      lines.push(note.content);
+      lines.push('');
+      lines.push(`*${formatDate(note.created_at)}*`);
+      lines.push('');
+    }
+  }
+
+  // Reflection notes
+  if (reflections.length > 0) {
+    lines.push('## Reflection');
+    lines.push('');
+    for (const note of reflections) {
       lines.push(note.content);
       lines.push('');
       lines.push(`*${formatDate(note.created_at)}*`);
@@ -135,7 +161,7 @@ export function exportToObsidianUri(bookmark: Bookmark, vaultName: string): bool
   const content = encodeURIComponent(generateMarkdown(bookmark));
   const uri = `obsidian://new?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(filePath)}&content=${content}`;
 
-  window.location.href = uri;
+  window.open(uri);
   return true;
 }
 

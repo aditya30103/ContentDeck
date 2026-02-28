@@ -34,6 +34,12 @@ const NOTE_CONFIG: Record<NoteType, { emoji: string; label: string; color: strin
     color: 'text-indigo-600 dark:text-indigo-400',
     bg: 'bg-indigo-500/10 border-indigo-500/20',
   },
+  reflection: {
+    emoji: '🪞',
+    label: 'Reflection',
+    color: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-purple-500/10 border-purple-500/20',
+  },
 };
 
 export default function NoteCard({ type, content, createdAt, onDelete }: NoteCardProps) {

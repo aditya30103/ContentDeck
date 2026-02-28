@@ -4,6 +4,7 @@ import { useSupabase } from '../context/SupabaseProvider';
 import { useToast } from '../components/ui/Toast';
 import { fetchMetadata } from '../lib/metadata';
 import { suggestTags } from '../lib/ai';
+import { exportToObsidianUri } from '../lib/obsidian';
 import { detectSourceType, isBookWithoutUrl } from '../lib/utils';
 import type { Bookmark, TagArea, Status, NoteType, Note, BookmarkMetadata } from '../types';
 
@@ -155,6 +156,22 @@ export function useBookmarks() {
         old?.map((b) => (b.id === id ? { ...b, status: newStatus } : b)),
       );
       return { prev };
+    },
+    onSuccess: (_data, { id, newStatus }) => {
+      if (
+        newStatus === 'done' &&
+        localStorage.getItem('obsidian_vault') &&
+        localStorage.getItem('obsidian_auto_export') === 'true'
+      ) {
+        const vaultName = localStorage.getItem('obsidian_vault')!;
+        const updatedBookmark = queryClient
+          .getQueryData<Bookmark[]>(QUERY_KEY)
+          ?.find((b) => b.id === id);
+        if (updatedBookmark) {
+          exportToObsidianUri(updatedBookmark, vaultName);
+          markSynced.mutate(id);
+        }
+      }
     },
     onError: (err, _vars, context) => {
       Sentry.captureException(err);

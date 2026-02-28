@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ExternalLink, Smartphone, FlaskConical, Sun, Moon, BookOpen, Anchor } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
+import { useBookmarks } from '../../hooks/useBookmarks';
+import { batchExport } from '../../lib/obsidian';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import TokenManager from '../settings/TokenManager';
@@ -28,6 +30,16 @@ export default function SettingsModal({
   const [obsidianVault, setObsidianVault] = useState(
     () => localStorage.getItem('obsidian_vault') ?? '',
   );
+  const [autoExport, setAutoExport] = useState(
+    () => localStorage.getItem('obsidian_auto_export') === 'true',
+  );
+  const [exportProgress, setExportProgress] = useState<{ current: number; total: number } | null>(
+    null,
+  );
+
+  const { bookmarks, markSynced } = useBookmarks();
+  const doneUnsynced = bookmarks.filter((b) => b.status === 'done' && !b.synced);
+  const hasDirectoryPicker = 'showDirectoryPicker' in window;
 
   // Save keys to localStorage on change
   useEffect(() => {
@@ -44,6 +56,11 @@ export default function SettingsModal({
     if (obsidianVault) localStorage.setItem('obsidian_vault', obsidianVault);
     else localStorage.removeItem('obsidian_vault');
   }, [obsidianVault]);
+
+  useEffect(() => {
+    if (autoExport) localStorage.setItem('obsidian_auto_export', 'true');
+    else localStorage.removeItem('obsidian_auto_export');
+  }, [autoExport]);
 
   return (
     <Modal open={open} onClose={onClose} title="Settings" size="md">
@@ -217,21 +234,71 @@ export default function SettingsModal({
             <h3 className="text-sm font-semibold text-surface-900 dark:text-surface-100 mb-2">
               Obsidian Export
             </h3>
-            <div>
-              <label
-                htmlFor="settings-vault"
-                className="block text-xs text-surface-500 dark:text-surface-400 mb-1"
-              >
-                Vault Folder Name <span className="text-surface-400">(e.g. ContentDeck)</span>
-              </label>
-              <input
-                id="settings-vault"
-                type="text"
-                value={obsidianVault}
-                onChange={(e) => setObsidianVault(e.target.value)}
-                placeholder="ContentDeck"
-                className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-base min-h-[44px]"
-              />
+            <div className="space-y-3">
+              <div>
+                <label
+                  htmlFor="settings-vault"
+                  className="block text-xs text-surface-500 dark:text-surface-400 mb-1"
+                >
+                  Vault Folder Name <span className="text-surface-400">(e.g. ContentDeck)</span>
+                </label>
+                <input
+                  id="settings-vault"
+                  type="text"
+                  value={obsidianVault}
+                  onChange={(e) => setObsidianVault(e.target.value)}
+                  placeholder="ContentDeck"
+                  className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-base min-h-[44px]"
+                />
+              </div>
+
+              {obsidianVault && (
+                <>
+                  <label className="flex items-center gap-3 cursor-pointer min-h-[44px]">
+                    <input
+                      type="checkbox"
+                      checked={autoExport}
+                      onChange={(e) => setAutoExport(e.target.checked)}
+                      className="w-4 h-4 rounded accent-primary-600"
+                    />
+                    <span className="text-xs text-surface-700 dark:text-surface-300">
+                      Auto-export to Obsidian when marking done
+                    </span>
+                  </label>
+
+                  <div className="space-y-1.5">
+                    {doneUnsynced.length > 0 && (
+                      <p className="text-xs text-surface-500 dark:text-surface-400">
+                        {doneUnsynced.length} item{doneUnsynced.length !== 1 ? 's' : ''} done, not
+                        yet synced
+                      </p>
+                    )}
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      disabled={doneUnsynced.length === 0 || exportProgress !== null}
+                      onClick={async () => {
+                        setExportProgress({ current: 0, total: doneUnsynced.length });
+                        const result = await batchExport(
+                          doneUnsynced,
+                          obsidianVault,
+                          (current, total) => setExportProgress({ current, total }),
+                        );
+                        setExportProgress(null);
+                        if (result.exported > 0) {
+                          for (const b of doneUnsynced) markSynced.mutate(b.id);
+                        }
+                      }}
+                    >
+                      {exportProgress
+                        ? `Exporting ${exportProgress.current}/${exportProgress.total}...`
+                        : hasDirectoryPicker
+                          ? 'Export All Done'
+                          : 'Copy All Done as Markdown'}
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           </section>
 
