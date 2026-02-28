@@ -240,7 +240,7 @@ export default function SettingsModal({
                   htmlFor="settings-vault"
                   className="block text-xs text-surface-500 dark:text-surface-400 mb-1"
                 >
-                  Vault Folder Name <span className="text-surface-400">(e.g. ContentDeck)</span>
+                  Vault Name <span className="text-surface-400">(exact name shown in Obsidian, e.g. MyVault)</span>
                 </label>
                 <input
                   id="settings-vault"
