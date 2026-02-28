@@ -7,7 +7,7 @@ export type SourceType =
   | 'book'
   | 'arxiv';
 export type Status = 'unread' | 'reading' | 'done';
-export type NoteType = 'insight' | 'question' | 'highlight' | 'note';
+export type NoteType = 'insight' | 'question' | 'highlight' | 'note' | 'reflection';
 export type ContentStatus = 'pending' | 'extracting' | 'success' | 'failed' | 'skipped';
 export type SortOption = 'newest' | 'oldest' | 'title';
 export type ViewMode = 'list' | 'areas';
