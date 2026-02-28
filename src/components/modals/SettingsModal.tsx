@@ -30,6 +30,9 @@ export default function SettingsModal({
   const [obsidianVault, setObsidianVault] = useState(
     () => localStorage.getItem('obsidian_vault') ?? '',
   );
+  const [obsidianVaultFolder, setObsidianVaultFolder] = useState(
+    () => localStorage.getItem('obsidian_vault_folder') ?? 'ContentDeck',
+  );
   const [autoExport, setAutoExport] = useState(
     () => localStorage.getItem('obsidian_auto_export') === 'true',
   );
@@ -56,6 +59,10 @@ export default function SettingsModal({
     if (obsidianVault) localStorage.setItem('obsidian_vault', obsidianVault);
     else localStorage.removeItem('obsidian_vault');
   }, [obsidianVault]);
+
+  useEffect(() => {
+    localStorage.setItem('obsidian_vault_folder', obsidianVaultFolder || 'ContentDeck');
+  }, [obsidianVaultFolder]);
 
   useEffect(() => {
     if (autoExport) localStorage.setItem('obsidian_auto_export', 'true');
@@ -252,6 +259,25 @@ export default function SettingsModal({
                 />
               </div>
 
+              <div>
+                <label
+                  htmlFor="settings-vault-folder"
+                  className="block text-xs text-surface-500 dark:text-surface-400 mb-1"
+                >
+                  Vault Folder <span className="text-surface-400">(subfolder inside vault, e.g. ContentDeck)</span>
+                </label>
+                <input
+                  id="settings-vault-folder"
+                  type="text"
+                  value={obsidianVaultFolder}
+                  onChange={(e) =>
+                    setObsidianVaultFolder(e.target.value || 'ContentDeck')
+                  }
+                  placeholder="ContentDeck"
+                  className="w-full px-3 py-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 text-base min-h-[44px]"
+                />
+              </div>
+
               {obsidianVault && (
                 <>
                   <label className="flex items-center gap-3 cursor-pointer min-h-[44px]">
@@ -281,7 +307,7 @@ export default function SettingsModal({
                         setExportProgress({ current: 0, total: doneUnsynced.length });
                         const result = await batchExport(
                           doneUnsynced,
-                          obsidianVault,
+                          obsidianVaultFolder,
                           (current, total) => setExportProgress({ current, total }),
                         );
                         setExportProgress(null);

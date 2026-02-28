@@ -164,11 +164,12 @@ export function useBookmarks() {
         localStorage.getItem('obsidian_auto_export') === 'true'
       ) {
         const vaultName = localStorage.getItem('obsidian_vault')!;
+        const vaultFolder = localStorage.getItem('obsidian_vault_folder') ?? 'ContentDeck';
         const updatedBookmark = queryClient
           .getQueryData<Bookmark[]>(QUERY_KEY)
           ?.find((b) => b.id === id);
         if (updatedBookmark) {
-          exportToObsidianUri(updatedBookmark, vaultName);
+          exportToObsidianUri(updatedBookmark, vaultName, vaultFolder);
           markSynced.mutate(id);
         }
       }

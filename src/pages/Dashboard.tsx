@@ -291,12 +291,12 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
 
   async function handleExport(bookmark: Bookmark) {
     const vaultName = localStorage.getItem('obsidian_vault') ?? '';
+    const vaultFolder = localStorage.getItem('obsidian_vault_folder') ?? 'ContentDeck';
     if (vaultName) {
-      // One-click: open Obsidian directly via URI scheme → Inbox/{Source}/title.md
-      const success = exportToObsidianUri(bookmark, vaultName);
+      const success = exportToObsidianUri(bookmark, vaultName, vaultFolder);
       if (success) {
         markSynced.mutate(bookmark.id);
-        toast.success(`Exporting to Inbox/${bookmark.source_type}...`);
+        toast.success('Opening in Obsidian…');
       }
     } else {
       // No vault configured — copy markdown to clipboard

@@ -150,14 +150,14 @@ function getFolder(bookmark: Bookmark): string {
 }
 
 /** Export a single bookmark via Obsidian URI scheme (one-click) */
-export function exportToObsidianUri(bookmark: Bookmark, vaultName: string): boolean {
+export function exportToObsidianUri(
+  bookmark: Bookmark,
+  vaultName: string,
+  vaultFolder: string,
+): boolean {
   if (!vaultName) return false;
 
-  const sourceLabel = SOURCE_LABELS[bookmark.source_type] || 'Blog';
-  const safeTitle = (bookmark.title || getDomain(bookmark.url))
-    .slice(0, 100)
-    .replace(/[\\/:*?"<>|]/g, '-');
-  const filePath = `Inbox/${sourceLabel}/${safeTitle}`;
+  const filePath = `${vaultFolder}/${getFolder(bookmark)}/${safeFilename(bookmark)}`;
   const content = encodeURIComponent(generateMarkdown(bookmark));
   const uri = `obsidian://new?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(filePath)}&content=${content}`;
 
