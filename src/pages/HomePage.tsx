@@ -10,7 +10,7 @@ import { isBookWithoutUrl } from '../lib/utils';
 import { SourceBadge } from '../components/ui/Badge';
 import SettingsModal from '../components/modals/SettingsModal';
 import ValuesOnboardingModal from '../components/modals/ValuesOnboardingModal';
-import type { MoodMode } from '../types/scoring';
+import type { MoodMode, UserValues } from '../types/scoring';
 import type { Bookmark } from '../types';
 
 // ---------------------------------------------------------------------------
@@ -41,8 +41,8 @@ function getContextLabel(h: number, mood: MoodMode): string {
 
 function getFirstName(email: string | null): string {
   if (!email) return '';
-  const local = email.split('@')[0];
-  const part = (local ?? '').split(/[._-]/)[0] ?? '';
+  const local = email.split('@')[0] ?? '';
+  const part = local.split(/[._-]/)[0] ?? '';
   return part.charAt(0).toUpperCase() + part.slice(1);
 }
 
@@ -375,7 +375,7 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
     [cycleStatus],
   );
 
-  function handleCompleteOnboarding(v: Parameters<typeof setValues>[0]) {
+  function handleCompleteOnboarding(v: UserValues) {
     setValues(v);
     setShowOnboarding(false);
   }
@@ -385,7 +385,7 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
   return (
     <div
       className="min-h-screen bg-surface-50 dark:bg-surface-950"
-      style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0px)' }}
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
     >
       <div
         className="max-w-lg mx-auto px-4 py-6"
