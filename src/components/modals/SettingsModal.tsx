@@ -360,7 +360,7 @@ export default function SettingsModal({
           {/* Info */}
           <section className="pt-2 border-t border-surface-200 dark:border-surface-800">
             <div className="flex items-center justify-between text-xs text-surface-400 dark:text-surface-500">
-              <span>ContentDeck v3.4</span>
+              <span>ContentDeck v3.5</span>
               <a
                 href="https://github.com/aditya30103/ContentDeck"
                 target="_blank"

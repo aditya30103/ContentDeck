@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/aditya30103/ContentDeck/actions/workflows/ci.yml/badge.svg)](https://github.com/aditya30103/ContentDeck/actions/workflows/ci.yml)
 
-A personal content bookmarking PWA — save articles, videos, tweets, books, and more from any device, read with distraction-free reader mode, reflect with structured notes, and export to Obsidian.
+A personal content bookmarking PWA built around the **Trusted Curator** paradigm — save from anywhere, get a single confident recommendation for what to read next, reflect with structured notes, and export to Obsidian.
 
-**Live:** [contentdeck.vercel.app](https://contentdeck.vercel.app) | **Version:** v3.2
+**Live:** [contentdeck.vercel.app](https://contentdeck.vercel.app) | **Version:** v3.5
 
 ## Try It
 
@@ -18,6 +18,14 @@ Visit [contentdeck.vercel.app](https://contentdeck.vercel.app) and click **Try D
 - **Auto metadata fetching** — titles, thumbnails, reading time via YouTube Data API, Twitter oEmbed, Microlink
 - **Book capture without URL** — add books by title + author, no URL required
 - **Save from anywhere** — PWA share target, iOS Shortcut, PC bookmarklet, or dashboard
+
+### Curate
+- **Trusted Curator home screen** — one confident recommendation for what to read next, not a list to scroll
+- **Scoring engine** — pure client-side 7-factor algorithm: staleness, source diversity, effort fit, completion rate, freshness, favorites, and recency penalty
+- **Mood selector** — five modes (Smart, Deep, Light, Quick, Shuffle) shift weight vectors to match your session energy
+- **Reason strings** — every recommendation comes with a plain-English explanation of why it was chosen
+- **Values onboarding** — set priority areas and preferred session length; the engine weights picks accordingly
+- **Secondary picks** — "Continue" (in-progress bookmarks) and "Quick Win" (shortest unread) surface alongside the primary pick
 
 ### Organize
 - **Status tracking** — cycle bookmarks through `unread → reading → done`
@@ -161,11 +169,11 @@ The shortcut uses GET with query parameters — this is more reliable than POST 
 ```
 src/
   components/     React components (layout, feed, detail, modals, areas, settings, auth, ui)
-  hooks/          TanStack Query hooks (useBookmarks, useTagAreas, useStats, useAuth, useTokens, useFeedback)
+  hooks/          TanStack Query hooks (useBookmarks, useTagAreas, useStats, useAuth, useTokens, useFeedback, useScoring, useUserValues)
   context/        SupabaseProvider, UIProvider
-  lib/            supabase, metadata, ai, obsidian, tokens, utils, mock-supabase, demo-data
-  types/          TypeScript interfaces
-  pages/          Dashboard (orchestrator)
+  lib/            supabase, metadata, ai, obsidian, tokens, utils, scoring, mock-supabase, demo-data
+  types/          TypeScript interfaces (Bookmark, TagArea, UserToken, Note, scoring)
+  pages/          HomePage (curator home screen), Dashboard (library orchestrator)
   App.tsx         Root: auth check, demo mode detection, share target
   main.tsx        Entry point + Sentry init
 
@@ -211,20 +219,20 @@ vercel.json       SPA rewrites, immutable cache headers for hashed assets
 ## The Workflow
 
 ```
-CAPTURE            ORGANIZE           REFLECT             EXPORT
-  |                   |                  |                   |
-  v                   v                  v                   v
-Save URL     ->   Tag + status   ->   Read + notes   ->   One-click to
-(shortcut,        (AI auto-tags)      (reader mode,       Obsidian
-bookmarklet,                           insights,
-share target)                          questions)
+CAPTURE         CURATE            REFLECT            EXPORT
+  |               |                  |                  |
+  v               v                  v                  v
+Save URL  ->  System picks  ->  Read + notes  ->  One-click to
+(shortcut,    what to read       (reader mode,     Obsidian
+bookmarklet,  next (scoring      insights,
+share target) engine + mood)     questions)
 ```
 
-ContentDeck is your **capture and reflection layer**. Obsidian is your **knowledge layer**. Ideas flow from consumption to permanent notes.
+ContentDeck is your **capture, curation, and reflection layer**. Obsidian is your **knowledge layer**. Ideas flow from consumption to permanent notes.
 
 ## Quality
 
-- **165 Vitest tests** — unit tests for lib functions, component tests for hooks and UI
+- **229 Vitest tests** — unit tests for lib functions (incl. 27 scoring engine tests), component tests for hooks and UI
 - **GitHub Actions CI** — format check, lint, typecheck, tests, and build on every PR
 - **Sentry error tracking** — automatic capture of runtime errors and unhandled rejections in production
 - **ESLint** with TypeScript strict mode + `jsx-a11y` accessibility rules
