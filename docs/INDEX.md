@@ -2,8 +2,8 @@
 
 > Start here. This file orients each session.
 
-**Version:** v3.4 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) in progress — Obsidian Plugin (2.0) ✅
-**Next up:** Values Onboarding (2.1) → Scoring Engine (2.2) → New Home Screen (2.3) → Post-Read Reflection (2.4)
+**Version:** v3.5 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) in progress — Obsidian Plugin ✅ · Values Onboarding ✅ · Scoring Engine ✅ · Home Screen ✅
+**Next up:** Post-Read Reflection (2.4) → Spaced Review (2.5)
 **Feedback:** In-app button in Sidebar/MobileHeader → Settings → Feedback tab to review
 **Active plan:** [Phase 2 — Trusted Curator](plan/phase-2.md) | **Philosophy:** [Product Philosophy](plan/philosophy.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
 
@@ -57,7 +57,8 @@ docs/
 │   ├── v3.2-sentry-github-sync.md  # Sentry + GitHub Issues sync (#21 #22) + full Sentry coverage (#25)
 │   ├── v3.2-bookmarklet-dedup.md   # Bookmarklet deduplication fix (#27)
 │   ├── v3.4-obsidian-export-phase-a.md  # Obsidian export Phase A: areas wikilinks, auto-export, batch, reflection
-│   └── v3.4-obsidian-plugin-phase-b.md  # Obsidian Community Plugin (Phase B): sync-done edge function + BRAT plugin
+│   ├── v3.4-obsidian-plugin-phase-b.md  # Obsidian Community Plugin (Phase B): sync-done edge function + BRAT plugin
+│   └── v3.5-trusted-curator.md          # Phase 2.1+2.2+2.3 — Values Onboarding, Scoring Engine, Home Screen
 ├── guides/                         # How-to references
 │   ├── workflow.md                 # Development practices, session workflow
 │   └── supabase-auth-setup.md      # Supabase Auth provider configuration
@@ -72,6 +73,7 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
+| v3.5 | Trusted Curator: Values Onboarding (2.1) + Scoring Engine (2.2) + New Home Screen (2.3) | [log/v3.5-trusted-curator.md](log/v3.5-trusted-curator.md) |
 | v3.4 | Obsidian Plugin Phase B — `sync-done` edge function + Community Plugin (BRAT-installable, ribbon icon, auto-marks synced) (#37) | [log/v3.4-obsidian-plugin-phase-b.md](log/v3.4-obsidian-plugin-phase-b.md) |
 | v3.4 | Obsidian Export Phase A — areas wikilinks, content_deck_id, reflection section, arXiv abstract, auto-export on mark-done, batch export (#36) | [log/v3.4-obsidian-export-phase-a.md](log/v3.4-obsidian-export-phase-a.md) |
 | v3.2 | Bookmarklet deduplication — prevent duplicate saves on double-click (#27) | [log/v3.2-bookmarklet-dedup.md](log/v3.2-bookmarklet-dedup.md) |

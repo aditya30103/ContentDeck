@@ -1,0 +1,240 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
+import { HomePage } from '../../pages/HomePage';
+import type { Bookmark } from '../../types';
+
+// ---------------------------------------------------------------------------
+// Module mocks (hoisted by Vitest)
+// ---------------------------------------------------------------------------
+
+vi.mock('../../hooks/useScoring', () => ({ useScoring: vi.fn() }));
+vi.mock('../../hooks/useBookmarks', () => ({ useBookmarks: vi.fn() }));
+vi.mock('../../hooks/useTagAreas', () => ({ useTagAreas: vi.fn() }));
+vi.mock('../../hooks/useUserValues', () => ({ useUserValues: vi.fn() }));
+vi.mock('../../lib/scoring', () => ({ getReadingMinutes: vi.fn(() => 12) }));
+vi.mock('../../components/modals/SettingsModal', () => ({
+  default: ({ open }: { open: boolean }) => (open ? <div data-testid="settings-modal" /> : null),
+}));
+vi.mock('../../components/modals/ValuesOnboardingModal', () => ({
+  default: ({ open }: { open: boolean }) => (open ? <div data-testid="onboarding-modal" /> : null),
+}));
+vi.mock('../../components/ui/Badge', () => ({
+  SourceBadge: () => <span data-testid="source-badge" />,
+}));
+
+import { useScoring } from '../../hooks/useScoring';
+import { useBookmarks } from '../../hooks/useBookmarks';
+import { useTagAreas } from '../../hooks/useTagAreas';
+import { useUserValues } from '../../hooks/useUserValues';
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function makeBookmark(overrides: Partial<Bookmark> = {}): Bookmark {
+  return {
+    id: 'b1',
+    url: 'https://example.com/article',
+    title: 'Test Article Title',
+    image: null,
+    excerpt: null,
+    source_type: 'blog',
+    status: 'unread',
+    is_favorited: false,
+    notes: [],
+    tags: [],
+    areas: [],
+    metadata: {},
+    content: {},
+    content_status: 'pending',
+    content_fetched_at: null,
+    synced: false,
+    created_at: new Date().toISOString(),
+    status_changed_at: new Date().toISOString(),
+    started_reading_at: null,
+    finished_at: null,
+    ...overrides,
+  };
+}
+
+const defaultProps = {
+  userEmail: 'test@example.com',
+  onSignOut: vi.fn(),
+  isDemo: false,
+};
+
+function renderHome(props: Partial<typeof defaultProps> = {}) {
+  return render(
+    <MemoryRouter>
+      <HomePage {...defaultProps} {...props} />
+    </MemoryRouter>,
+  );
+}
+
+const mockCycleStatusMutate = vi.fn();
+
+function setupDefaultMocks() {
+  vi.mocked(useTagAreas).mockReturnValue({ areas: [] } as unknown as ReturnType<
+    typeof useTagAreas
+  >);
+  vi.mocked(useUserValues).mockReturnValue({
+    values: null,
+    setValues: vi.fn(),
+    clearValues: vi.fn(),
+  });
+  vi.mocked(useBookmarks).mockReturnValue({
+    bookmarks: [],
+    isLoading: false,
+    cycleStatus: { mutate: mockCycleStatusMutate } as unknown as ReturnType<
+      typeof useBookmarks
+    >['cycleStatus'],
+  } as unknown as ReturnType<typeof useBookmarks>);
+  vi.mocked(useScoring).mockReturnValue({
+    topPick: null,
+    continueItem: null,
+    quickWin: null,
+    ctx: {} as ReturnType<typeof useScoring>['ctx'],
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+describe('HomePage', () => {
+  beforeEach(() => {
+    setupDefaultMocks();
+    // Set contentdeck_values so onboarding doesn't show by default
+    localStorage.setItem('contentdeck_values', JSON.stringify({ version: 1 }));
+  });
+
+  it('1. renders greeting text without crashing', () => {
+    renderHome();
+    // Greeting text contains "Good" (morning/afternoon/evening)
+    expect(screen.getByText(/Good (morning|afternoon|evening)/i)).toBeInTheDocument();
+  });
+
+  it('2. shows empty state message when topPick is null', () => {
+    renderHome();
+    expect(screen.getByText(/Your queue is clear/i)).toBeInTheDocument();
+    expect(screen.getByText(/Add something to read/i)).toBeInTheDocument();
+  });
+
+  it('3. shows primary pick card title when topPick has a bookmark', () => {
+    const bookmark = makeBookmark({ title: 'The Art of Thinking Clearly' });
+    vi.mocked(useScoring).mockReturnValue({
+      topPick: { bookmark, reason: 'Waited 10 days.' },
+      continueItem: null,
+      quickWin: null,
+      ctx: {} as ReturnType<typeof useScoring>['ctx'],
+    });
+    renderHome();
+    expect(screen.getByText('The Art of Thinking Clearly')).toBeInTheDocument();
+  });
+
+  it('4. shows reason text from topPick.reason', () => {
+    const bookmark = makeBookmark();
+    vi.mocked(useScoring).mockReturnValue({
+      topPick: { bookmark, reason: 'This has been waiting 21 days.' },
+      continueItem: null,
+      quickWin: null,
+      ctx: {} as ReturnType<typeof useScoring>['ctx'],
+    });
+    renderHome();
+    expect(screen.getByText(/This has been waiting 21 days/i)).toBeInTheDocument();
+  });
+
+  it('5. hides secondary card row when both continueItem and quickWin are null', () => {
+    const bookmark = makeBookmark();
+    vi.mocked(useScoring).mockReturnValue({
+      topPick: { bookmark, reason: 'A reason.' },
+      continueItem: null,
+      quickWin: null,
+      ctx: {} as ReturnType<typeof useScoring>['ctx'],
+    });
+    renderHome();
+    expect(screen.queryByText('Continue')).not.toBeInTheDocument();
+    expect(screen.queryByText('Quick Win')).not.toBeInTheDocument();
+  });
+
+  it('6. shows Continue card when continueItem is non-null', () => {
+    const continueBookmark = makeBookmark({
+      id: 'b2',
+      title: 'Continue Article',
+      status: 'reading',
+    });
+    vi.mocked(useScoring).mockReturnValue({
+      topPick: null,
+      continueItem: continueBookmark,
+      quickWin: null,
+      ctx: {} as ReturnType<typeof useScoring>['ctx'],
+    });
+    renderHome();
+    expect(screen.getByText('Continue')).toBeInTheDocument();
+    expect(screen.getByText('Continue Article')).toBeInTheDocument();
+  });
+
+  it('7. shows Quick Win card when quickWin is non-null', () => {
+    const quickBookmark = makeBookmark({ id: 'b3', title: 'Quick Win Article' });
+    vi.mocked(useScoring).mockReturnValue({
+      topPick: null,
+      continueItem: null,
+      quickWin: quickBookmark,
+      ctx: {} as ReturnType<typeof useScoring>['ctx'],
+    });
+    renderHome();
+    expect(screen.getByText('Quick Win')).toBeInTheDocument();
+    expect(screen.getByText('Quick Win Article')).toBeInTheDocument();
+  });
+
+  it('8. clicking a mood pill activates it and deactivates others', async () => {
+    const user = userEvent.setup();
+    renderHome();
+    const deepBtn = screen.getByRole('button', { name: /deep/i });
+    const smartBtn = screen.getByRole('button', { name: /smart/i });
+    expect(smartBtn).toHaveClass('bg-primary-600');
+    await user.click(deepBtn);
+    expect(deepBtn).toHaveClass('bg-primary-600');
+    expect(smartBtn).not.toHaveClass('bg-primary-600');
+  });
+
+  it('9. clicking settings gear opens settings modal', async () => {
+    const user = userEvent.setup();
+    renderHome();
+    expect(screen.queryByTestId('settings-modal')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /open settings/i }));
+    expect(screen.getByTestId('settings-modal')).toBeInTheDocument();
+  });
+
+  it('10. shows onboarding modal when contentdeck_values is null', () => {
+    localStorage.removeItem('contentdeck_values');
+    renderHome();
+    expect(screen.getByTestId('onboarding-modal')).toBeInTheDocument();
+  });
+
+  it('11. does not show onboarding modal when values exist in localStorage', () => {
+    localStorage.setItem('contentdeck_values', JSON.stringify({ version: 1 }));
+    renderHome();
+    expect(screen.queryByTestId('onboarding-modal')).not.toBeInTheDocument();
+  });
+
+  it('12. Start reading calls cycleStatus.mutate with { id, newStatus: reading }', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal('open', vi.fn());
+    const bookmark = makeBookmark({ id: 'pick-1', status: 'unread' });
+    vi.mocked(useScoring).mockReturnValue({
+      topPick: { bookmark, reason: 'A good pick.' },
+      continueItem: null,
+      quickWin: null,
+      ctx: {} as ReturnType<typeof useScoring>['ctx'],
+    });
+    renderHome();
+    await user.click(screen.getByRole('button', { name: /start reading/i }));
+    expect(mockCycleStatusMutate).toHaveBeenCalledWith({
+      id: 'pick-1',
+      newStatus: 'reading',
+    });
+  });
+});

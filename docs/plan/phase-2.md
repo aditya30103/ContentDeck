@@ -101,7 +101,7 @@ No ContentDeck API token ever touches the plain-text plugin `data.json`. Better 
 
 ## 2.1 Values Onboarding
 
-**Status:** Not started | **Priority:** HIGH (unblocks scoring engine)
+**Status:** ✅ COMPLETE (v3.5, 2026-03-01) | **Priority:** HIGH (unblocks scoring engine)
 
 One-time setup. Three questions, asked once when the user first arrives at the new home screen. Never shown again unless manually reset.
 
@@ -120,7 +120,7 @@ One-time setup. Three questions, asked once when the user first arrives at the n
 
 ## 2.2 Scoring Engine
 
-**Status:** Not started | **Priority:** HIGH
+**Status:** ✅ COMPLETE (v3.5, 2026-03-01) | **Priority:** HIGH
 
 Pure client-side function. Zero infrastructure cost. Runs over the TanStack Query bookmark cache on every home screen render.
 
@@ -182,7 +182,7 @@ The scoring engine is pure logic. Write tests for it before the UI exists:
 
 ## 2.3 New Home Screen
 
-**Status:** Not started | **Priority:** HIGH
+**Status:** ✅ COMPLETE (v3.5, 2026-03-01) | **Priority:** HIGH
 
 Replaces `/` as the default route. The library moves to `/library`. The transition is additive — nothing is removed.
 
