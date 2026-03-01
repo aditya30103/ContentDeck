@@ -186,3 +186,4 @@ Run in this order before every commit — all must pass:
 | `/ui` | Systematic UI work — component states, mobile parity, accessibility |
 | `/perf-check` | Bundle size, deployment config, TTFB investigation |
 | `/supabase-migrate` | Generate SQL migration files following schema conventions |
+| `/obsidian-plugin` | Obsidian plugin lifecycle — debug, add features, release, keep in sync with ContentDeck |
