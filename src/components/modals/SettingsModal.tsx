@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ExternalLink, Smartphone, FlaskConical, Sun, Moon, BookOpen, Anchor } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useBookmarks } from '../../hooks/useBookmarks';
+import { clearUserValues } from '../../hooks/useUserValues';
 import { batchExport } from '../../lib/obsidian';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -331,6 +332,30 @@ export default function SettingsModal({
               )}
             </div>
           </section>
+
+          {/* Reading values */}
+          {localStorage.getItem('contentdeck_values') && (
+            <section>
+              <h3 className="text-sm font-semibold text-surface-900 dark:text-surface-100 mb-2">
+                Personalization
+              </h3>
+              <div className="flex items-center justify-between min-h-[44px]">
+                <span className="text-sm text-surface-700 dark:text-surface-300">
+                  Reading values configured
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    clearUserValues();
+                    window.dispatchEvent(new Event('storage'));
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
+            </section>
+          )}
 
           {/* Info */}
           <section className="pt-2 border-t border-surface-200 dark:border-surface-800">

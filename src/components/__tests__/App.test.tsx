@@ -1,11 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
 // Mock heavy child components as simple stubs
 vi.mock('../../pages/Dashboard', () => ({
   default: (props: { isDemo?: boolean }) => (
     <div data-testid="dashboard" data-demo={props.isDemo} />
   ),
+}));
+
+vi.mock('../../pages/HomePage', () => ({
+  HomePage: () => <div data-testid="home-page" />,
 }));
 
 vi.mock('../auth/AuthScreen', () => ({
@@ -102,7 +107,11 @@ describe('App', () => {
 
   it('renders Dashboard when user is logged in', () => {
     mockUseAuth.mockReturnValue(authState({ user: { id: 'u1', email: 'test@test.com' } as never }));
-    render(<App />);
+    render(
+      <MemoryRouter initialEntries={['/library']}>
+        <App />
+      </MemoryRouter>,
+    );
     expect(screen.getByTestId('dashboard')).toBeInTheDocument();
     expect(screen.getByTestId('update-banner')).toBeInTheDocument();
   });
@@ -110,7 +119,11 @@ describe('App', () => {
   it('renders Dashboard with DemoBanner in demo mode', () => {
     localStorage.setItem('contentdeck_demo', 'true');
     mockUseAuth.mockReturnValue(authState());
-    render(<App />);
+    render(
+      <MemoryRouter initialEntries={['/library']}>
+        <App />
+      </MemoryRouter>,
+    );
     expect(screen.getByTestId('dashboard')).toBeInTheDocument();
     expect(screen.getByTestId('demo-banner')).toBeInTheDocument();
   });
@@ -118,14 +131,22 @@ describe('App', () => {
   it('skips loading spinner in demo mode even if auth is loading', () => {
     localStorage.setItem('contentdeck_demo', 'true');
     mockUseAuth.mockReturnValue(authState({ loading: true }));
-    render(<App />);
+    render(
+      <MemoryRouter initialEntries={['/library']}>
+        <App />
+      </MemoryRouter>,
+    );
     expect(screen.getByTestId('dashboard')).toBeInTheDocument();
   });
 
   it('extracts shared URL from ?url= query param', () => {
     window.location.search = '?url=https%3A%2F%2Fexample.com';
     mockUseAuth.mockReturnValue(authState({ user: { id: 'u1', email: 'test@test.com' } as never }));
-    render(<App />);
+    render(
+      <MemoryRouter initialEntries={['/library']}>
+        <App />
+      </MemoryRouter>,
+    );
     const dashboard = screen.getByTestId('dashboard');
     expect(dashboard).toBeInTheDocument();
   });

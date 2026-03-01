@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { useTheme } from './hooks/useTheme';
 import { SupabaseProvider } from './context/SupabaseProvider';
@@ -9,6 +10,7 @@ import UpdateBanner from './components/ui/UpdateBanner';
 import DemoBanner from './components/ui/DemoBanner';
 import AuthScreen from './components/auth/AuthScreen';
 import Dashboard from './pages/Dashboard';
+import { HomePage } from './pages/HomePage';
 import { createMockSupabaseClient } from './lib/mock-supabase';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from '@vercel/analytics/react';
@@ -84,12 +86,30 @@ export default function App() {
               Skip to main content
             </a>
             {isDemo ? <DemoBanner onSignIn={handleExitDemo} /> : <UpdateBanner />}
-            <Dashboard
-              userEmail={userEmail}
-              onSignOut={isDemo ? handleExitDemo : handleSignOut}
-              isDemo={isDemo}
-              sharedUrl={sharedUrl}
-            />
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <HomePage
+                    userEmail={userEmail}
+                    onSignOut={isDemo ? handleExitDemo : handleSignOut}
+                    isDemo={isDemo}
+                  />
+                }
+              />
+              <Route
+                path="/library"
+                element={
+                  <Dashboard
+                    userEmail={userEmail}
+                    onSignOut={isDemo ? handleExitDemo : handleSignOut}
+                    isDemo={isDemo}
+                    sharedUrl={sharedUrl}
+                  />
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
           </ToastProvider>
         </UIProvider>
       </SupabaseProvider>

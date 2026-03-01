@@ -124,6 +124,16 @@ export const STATUS_LIST: Status[] = ['unread', 'reading', 'done'];
 
 // ---- Feedback ----
 
+export type {
+  SessionLength,
+  MoodMode,
+  UserValues,
+  WeightVector,
+  ScoreContext,
+  ScoreResult,
+  DominantFactor,
+} from './scoring';
+
 export type FeedbackType = 'bug' | 'suggestion' | 'other';
 export type FeedbackSeverity = 'blocking' | 'major' | 'minor' | 'polish';
 export type FeedbackStatus = 'open' | 'investigating' | 'resolved' | 'wont_fix';
