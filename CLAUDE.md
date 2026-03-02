@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ContentDeck — a personal content bookmarking PWA dashboard for the Capture → Consume → Reflect → Export workflow. Bridges web browsing and Obsidian knowledge management.
 
-**Status: v3.5 — React + Vite + Tailwind + TypeScript. Supabase Auth, demo mode, PWA share target, Sentry error tracking, GitHub Issues sync, Obsidian export + Community Plugin (Phase A+B complete). Trusted Curator home screen (Values Onboarding + Scoring Engine + Home Screen) complete.**
+**Status: v3.5 — React + Vite + Tailwind + TypeScript. Supabase Auth, demo mode, PWA share target, Sentry error tracking, GitHub Issues sync, Obsidian export + Community Plugin (Phase A+B complete). Trusted Curator home screen (Values Onboarding + Scoring Engine + Home Screen + Reflection Prompt) complete.**
 
 See `docs/reference/audit.md` for the full audit trail (39/47 v1 issues resolved, 14 v2.0 bugs fixed, 8 v2.2 shipping fixes).
 
@@ -21,7 +21,7 @@ All project docs live in `docs/`. Start each session by reading `docs/INDEX.md`.
 | `docs/guides/` | Development workflow and setup guides |
 | `docs/reference/` | Audit trail, integrations, lookup tables |
 
-**Current phase:** Phase 2 (Trusted Curator) — see `docs/plan/phase-2.md`. 2.0 Obsidian Plugin ✅ · 2.1 Values Onboarding ✅ · 2.2 Scoring Engine ✅ · 2.3 Home Screen ✅. Next: Post-Read Reflection (2.4) → Spaced Review (2.5)
+**Current phase:** Phase 2 (Trusted Curator) — see `docs/plan/phase-2.md`. 2.0 Obsidian Plugin ✅ · 2.1 Values Onboarding ✅ · 2.2 Scoring Engine ✅ · 2.3 Home Screen ✅ · 2.4 Reflection Prompt ✅. Next: Spaced Review (2.5)
 
 ## Tech Stack
 

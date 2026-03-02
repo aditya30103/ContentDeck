@@ -236,7 +236,7 @@ The home screen requires real data to be meaningful. Demo mode remains at `/libr
 
 ## 2.4 Post-Read Reflection Prompt
 
-**Status:** Not started | **Priority:** HIGH
+**Status:** ✅ COMPLETE (v3.5, 2026-03-02) | **Priority:** HIGH
 
 When the user marks a bookmark as "done", a prompt appears before the status update completes.
 

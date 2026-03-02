@@ -20,6 +20,9 @@ vi.mock('../../components/modals/SettingsModal', () => ({
 vi.mock('../../components/modals/ValuesOnboardingModal', () => ({
   default: ({ open }: { open: boolean }) => (open ? <div data-testid="onboarding-modal" /> : null),
 }));
+vi.mock('../../components/modals/ReflectionModal', () => ({
+  default: ({ open }: { open: boolean }) => (open ? <div data-testid="reflection-modal" /> : null),
+}));
 vi.mock('../../components/ui/Badge', () => ({
   SourceBadge: () => <span data-testid="source-badge" />,
 }));
@@ -87,9 +90,14 @@ function setupDefaultMocks() {
   vi.mocked(useBookmarks).mockReturnValue({
     bookmarks: [],
     isLoading: false,
-    cycleStatus: { mutate: mockCycleStatusMutate } as unknown as ReturnType<
-      typeof useBookmarks
-    >['cycleStatus'],
+    cycleStatus: {
+      mutate: mockCycleStatusMutate,
+      mutateAsync: vi.fn().mockResolvedValue(undefined),
+    } as unknown as ReturnType<typeof useBookmarks>['cycleStatus'],
+    addNote: {
+      mutate: vi.fn(),
+      mutateAsync: vi.fn().mockResolvedValue(undefined),
+    } as unknown as ReturnType<typeof useBookmarks>['addNote'],
   } as unknown as ReturnType<typeof useBookmarks>);
   vi.mocked(useScoring).mockReturnValue({
     topPick: null,
@@ -236,5 +244,100 @@ describe('HomePage', () => {
       id: 'pick-1',
       newStatus: 'reading',
     });
+  });
+
+  it('13. Just Added strip shown when bookmarks has an unread item with different id than topPick', () => {
+    const topBookmark = makeBookmark({ id: 'top-1', title: 'Top Pick' });
+    const newestBookmark = makeBookmark({
+      id: 'new-1',
+      title: 'Freshly Saved Article',
+      status: 'unread',
+      created_at: new Date(Date.now() + 1000).toISOString(),
+    });
+    vi.mocked(useScoring).mockReturnValue({
+      topPick: { bookmark: topBookmark, reason: 'A reason.' },
+      continueItem: null,
+      quickWin: null,
+      ctx: {} as ReturnType<typeof useScoring>['ctx'],
+    });
+    vi.mocked(useBookmarks).mockReturnValue({
+      bookmarks: [newestBookmark, topBookmark],
+      isLoading: false,
+      cycleStatus: {
+        mutate: mockCycleStatusMutate,
+        mutateAsync: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ReturnType<typeof useBookmarks>['cycleStatus'],
+      addNote: {
+        mutate: vi.fn(),
+        mutateAsync: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ReturnType<typeof useBookmarks>['addNote'],
+    } as unknown as ReturnType<typeof useBookmarks>);
+    renderHome();
+    expect(screen.getByText('🆕 Just added')).toBeInTheDocument();
+    expect(screen.getByText('Freshly Saved Article')).toBeInTheDocument();
+  });
+
+  it('14. Just Added strip hidden when bookmarks array is empty', () => {
+    renderHome();
+    expect(screen.queryByText('🆕 Just added')).not.toBeInTheDocument();
+  });
+
+  it('15. Just Added strip hidden when most recent unread matches topPick id', () => {
+    const bookmark = makeBookmark({ id: 'same-1', title: 'Same Bookmark' });
+    vi.mocked(useScoring).mockReturnValue({
+      topPick: { bookmark, reason: 'Top reason.' },
+      continueItem: null,
+      quickWin: null,
+      ctx: {} as ReturnType<typeof useScoring>['ctx'],
+    });
+    vi.mocked(useBookmarks).mockReturnValue({
+      bookmarks: [bookmark],
+      isLoading: false,
+      cycleStatus: {
+        mutate: mockCycleStatusMutate,
+        mutateAsync: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ReturnType<typeof useBookmarks>['cycleStatus'],
+      addNote: {
+        mutate: vi.fn(),
+        mutateAsync: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ReturnType<typeof useBookmarks>['addNote'],
+    } as unknown as ReturnType<typeof useBookmarks>);
+    renderHome();
+    expect(screen.queryByText('🆕 Just added')).not.toBeInTheDocument();
+  });
+
+  it('16. Continue card renders Mark done button when continueItem is non-null', () => {
+    const continueBookmark = makeBookmark({
+      id: 'c-1',
+      title: 'In Progress Article',
+      status: 'reading',
+    });
+    vi.mocked(useScoring).mockReturnValue({
+      topPick: null,
+      continueItem: continueBookmark,
+      quickWin: null,
+      ctx: {} as ReturnType<typeof useScoring>['ctx'],
+    });
+    renderHome();
+    expect(screen.getByRole('button', { name: /mark done/i })).toBeInTheDocument();
+  });
+
+  it('17. clicking Mark done opens reflection modal', async () => {
+    const user = userEvent.setup();
+    const continueBookmark = makeBookmark({
+      id: 'c-2',
+      title: 'Article To Finish',
+      status: 'reading',
+    });
+    vi.mocked(useScoring).mockReturnValue({
+      topPick: null,
+      continueItem: continueBookmark,
+      quickWin: null,
+      ctx: {} as ReturnType<typeof useScoring>['ctx'],
+    });
+    renderHome();
+    expect(screen.queryByTestId('reflection-modal')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /mark done/i }));
+    expect(screen.getByTestId('reflection-modal')).toBeInTheDocument();
   });
 });
