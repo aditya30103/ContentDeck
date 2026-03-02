@@ -309,6 +309,7 @@ function JustAddedStrip({ bookmark, onOpen }: JustAddedStripProps) {
     <div
       role="button"
       tabIndex={0}
+      aria-label={`Just added: ${bookmark.title ?? bookmark.url}`}
       onClick={() => onOpen(bookmark)}
       onKeyDown={handleKeyDown}
       className="rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/50 dark:bg-emerald-950/20 p-3 mb-4 flex items-center gap-3 cursor-pointer hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors focus-visible:ring-2 min-h-[44px]"
@@ -426,13 +427,13 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
     return () => clearInterval(id);
   }, []);
 
-  // Most recently saved unread bookmark that wasn't already surfaced as the primary pick
+  // Most recently saved unread bookmark that wasn't already surfaced as the primary pick.
+  // ISO 8601 strings are lexicographically sortable — no Date parsing needed.
   const justAdded = useMemo(() => {
     const newest =
-      [...bookmarks]
+      bookmarks
         .filter((b) => b.status === 'unread')
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0] ??
-      null;
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))[0] ?? null;
     if (!newest || newest.id === topPick?.bookmark.id) return null;
     return newest;
   }, [bookmarks, topPick]);
@@ -449,17 +450,18 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
     [cycleStatus],
   );
 
-  const handleMarkDone = useCallback((bookmark: Bookmark) => {
+  function handleMarkDone(bookmark: Bookmark) {
     setPendingDoneBookmark(bookmark);
-  }, []);
+  }
 
   const handleReflectionSave = useCallback(
     async (text: string) => {
       if (!pendingDoneBookmark) return;
       const { id } = pendingDoneBookmark;
+      const trimmedText = text.trim();
       await Promise.all([
-        text.trim()
-          ? addNote.mutateAsync({ bookmarkId: id, type: 'reflection', content: text.trim() })
+        trimmedText
+          ? addNote.mutateAsync({ bookmarkId: id, type: 'reflection', content: trimmedText })
           : Promise.resolve(),
         cycleStatus.mutateAsync({ id, newStatus: 'done' }),
       ]);

@@ -43,7 +43,9 @@ function getSpeechRecognitionCtor(): SpeechRecognitionCtor | null {
   return SR ?? null;
 }
 
-const speechSupported = typeof window !== 'undefined' && getSpeechRecognitionCtor() !== null;
+// Evaluated once at module load; cached for reuse in handleMicClick
+const speechSR = typeof window !== 'undefined' ? getSpeechRecognitionCtor() : null;
+const speechSupported = speechSR !== null;
 
 // ---------------------------------------------------------------------------
 // Component
@@ -61,13 +63,14 @@ export default function ReflectionModal({ open, bookmark, onSave, onSkip }: Refl
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
-  // Reset state when modal opens or closes
+  // Reset state when modal opens; abort recognition and clean up when it closes
   useEffect(() => {
     if (open) {
       setText('');
       setIsListening(false);
     } else {
-      recognitionRef.current?.abort();
+      // Refs are always current in effects — safe to check without deps
+      if (recognitionRef.current) recognitionRef.current.abort();
       recognitionRef.current = null;
       setIsListening(false);
     }
@@ -76,11 +79,12 @@ export default function ReflectionModal({ open, bookmark, onSave, onSkip }: Refl
   function handleMicClick() {
     if (isListening) {
       recognitionRef.current?.stop();
+      recognitionRef.current = null;
       return;
     }
 
-    const SR = getSpeechRecognitionCtor();
-    if (!SR) return;
+    if (!speechSR) return;
+    const SR = speechSR;
 
     const recognition = new SR();
     recognition.continuous = false;
@@ -99,7 +103,7 @@ export default function ReflectionModal({ open, bookmark, onSave, onSkip }: Refl
 
   function handleSave() {
     onSave(text);
-    setText('');
+    // text resets via useEffect when open → false (parent clears pendingDoneBookmark)
   }
 
   function handleSkip() {
