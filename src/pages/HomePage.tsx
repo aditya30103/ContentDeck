@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Settings, ArrowRight, ExternalLink, PlayCircle, Zap } from 'lucide-react';
 import { useTagAreas } from '../hooks/useTagAreas';
@@ -10,6 +10,7 @@ import { isBookWithoutUrl } from '../lib/utils';
 import { SourceBadge } from '../components/ui/Badge';
 import SettingsModal from '../components/modals/SettingsModal';
 import ValuesOnboardingModal from '../components/modals/ValuesOnboardingModal';
+import ReflectionModal from '../components/modals/ReflectionModal';
 import type { MoodMode, UserValues } from '../types/scoring';
 import type { Bookmark } from '../types';
 
@@ -219,9 +220,10 @@ interface SecondaryCardProps {
   type: 'continue' | 'quick-win';
   bookmark: Bookmark | null;
   onOpen: (b: Bookmark) => void;
+  onMarkDone?: (b: Bookmark) => void;
 }
 
-function SecondaryCard({ type, bookmark, onOpen }: SecondaryCardProps) {
+function SecondaryCard({ type, bookmark, onOpen, onMarkDone }: SecondaryCardProps) {
   if (!bookmark) return <div />;
 
   // Capture narrowed non-null reference so closures below retain the narrowed type
@@ -240,6 +242,7 @@ function SecondaryCard({ type, bookmark, onOpen }: SecondaryCardProps) {
     <div
       role="button"
       tabIndex={0}
+      aria-label={`${isContinue ? 'Continue reading' : 'Quick win'}: ${b.title ?? b.url}`}
       onClick={() => onOpen(b)}
       onKeyDown={handleKeyDown}
       className="rounded-xl border border-surface-200 dark:border-surface-800 bg-white dark:bg-surface-900 p-4 cursor-pointer hover:border-surface-300 dark:hover:border-surface-700 transition-colors focus-visible:ring-2 min-h-[44px]"
@@ -266,6 +269,66 @@ function SecondaryCard({ type, bookmark, onOpen }: SecondaryCardProps) {
           <span className="text-xs text-surface-400">{minutes} min</span>
         )}
       </div>
+      {/* Mark done — continue card only */}
+      {isContinue && onMarkDone && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onMarkDone(b);
+          }}
+          className="mt-2 text-xs text-surface-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors min-h-[32px] text-left focus-visible:ring-2 rounded"
+        >
+          Mark done ✓
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// JustAddedStrip
+// ---------------------------------------------------------------------------
+
+interface JustAddedStripProps {
+  bookmark: Bookmark;
+  onOpen: (b: Bookmark) => void;
+}
+
+function JustAddedStrip({ bookmark, onOpen }: JustAddedStripProps) {
+  const minutes = getReadingMinutes(bookmark);
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onOpen(bookmark);
+    }
+  }
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={`Just added: ${bookmark.title ?? bookmark.url}`}
+      onClick={() => onOpen(bookmark)}
+      onKeyDown={handleKeyDown}
+      className="rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/50 dark:bg-emerald-950/20 p-3 mb-4 flex items-center gap-3 cursor-pointer hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors focus-visible:ring-2 min-h-[44px]"
+    >
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 mb-0.5">
+          🆕 Just added
+        </p>
+        <p className="text-sm font-medium text-surface-900 dark:text-surface-100 line-clamp-1">
+          {bookmark.title ?? bookmark.url}
+        </p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <SourceBadge source={bookmark.source_type} />
+          {minutes != null && minutes > 0 && (
+            <span className="text-xs text-surface-400">{minutes} min</span>
+          )}
+        </div>
+      </div>
+      <ArrowRight size={16} className="flex-shrink-0 text-surface-400" />
     </div>
   );
 }
@@ -351,17 +414,29 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
   const [showOnboarding, setShowOnboarding] = useState(
     () => localStorage.getItem('contentdeck_values') === null && !isDemo,
   );
+  const [pendingDoneBookmark, setPendingDoneBookmark] = useState<Bookmark | null>(null);
 
   const { areas } = useTagAreas();
   const { setValues } = useUserValues();
   const { topPick, continueItem, quickWin } = useScoring(mood);
-  const { isLoading, cycleStatus } = useBookmarks();
+  const { isLoading, bookmarks, cycleStatus, addNote } = useBookmarks();
 
   // Update clock every 60 seconds
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
   }, []);
+
+  // Most recently saved unread bookmark that wasn't already surfaced as the primary pick.
+  // ISO 8601 strings are lexicographically sortable — no Date parsing needed.
+  const justAdded = useMemo(() => {
+    const newest =
+      bookmarks
+        .filter((b) => b.status === 'unread')
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))[0] ?? null;
+    if (!newest || newest.id === topPick?.bookmark.id) return null;
+    return newest;
+  }, [bookmarks, topPick]);
 
   const handleStartReading = useCallback(
     (bookmark: Bookmark) => {
@@ -374,6 +449,32 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
     },
     [cycleStatus],
   );
+
+  function handleMarkDone(bookmark: Bookmark) {
+    setPendingDoneBookmark(bookmark);
+  }
+
+  const handleReflectionSave = useCallback(
+    async (text: string) => {
+      if (!pendingDoneBookmark) return;
+      const { id } = pendingDoneBookmark;
+      const trimmedText = text.trim();
+      await Promise.all([
+        trimmedText
+          ? addNote.mutateAsync({ bookmarkId: id, type: 'reflection', content: trimmedText })
+          : Promise.resolve(),
+        cycleStatus.mutateAsync({ id, newStatus: 'done' }),
+      ]);
+      setPendingDoneBookmark(null);
+    },
+    [pendingDoneBookmark, addNote, cycleStatus],
+  );
+
+  const handleReflectionSkip = useCallback(() => {
+    if (!pendingDoneBookmark) return;
+    cycleStatus.mutate({ id: pendingDoneBookmark.id, newStatus: 'done' });
+    setPendingDoneBookmark(null);
+  }, [pendingDoneBookmark, cycleStatus]);
 
   function handleCompleteOnboarding(v: UserValues) {
     setValues(v);
@@ -409,10 +510,18 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
           {/* Secondary cards — only render row if at least one slot is filled */}
           {hasSecondary && (
             <div className="grid grid-cols-2 gap-3 mb-6">
-              <SecondaryCard type="continue" bookmark={continueItem} onOpen={handleStartReading} />
+              <SecondaryCard
+                type="continue"
+                bookmark={continueItem}
+                onOpen={handleStartReading}
+                onMarkDone={handleMarkDone}
+              />
               <SecondaryCard type="quick-win" bookmark={quickWin} onOpen={handleStartReading} />
             </div>
           )}
+
+          {/* Just Added strip — most recent unread, only when not already the primary pick */}
+          {justAdded && <JustAddedStrip bookmark={justAdded} onOpen={handleStartReading} />}
 
           <MoodSelector mood={mood} onChange={setMood} />
 
@@ -433,6 +542,13 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
         areas={areas}
         onComplete={handleCompleteOnboarding}
         onSkip={() => setShowOnboarding(false)}
+      />
+
+      <ReflectionModal
+        open={pendingDoneBookmark !== null}
+        bookmark={pendingDoneBookmark}
+        onSave={handleReflectionSave}
+        onSkip={handleReflectionSkip}
       />
     </div>
   );
