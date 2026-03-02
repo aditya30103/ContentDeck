@@ -48,7 +48,7 @@ Each step is independently shippable. Don't wait for all five before shipping an
 
 ## 2.0 Obsidian Plugin
 
-**Status:** ✅ COMPLETE (Phase A — PR #36, Phase B — PR #37) | **Priority:** PREREQUISITE
+**Status:** ✅ COMPLETE (Phase A — PR #36, Phase B — PR #37) | **Priority:** PREREQUISITE → [Phase A log](../log/v3.4-obsidian-export-phase-a.md) · [Phase B log](../log/v3.4-obsidian-plugin-phase-b.md)
 
 The loop: ContentDeck captures → Obsidian holds the knowledge. Without this, "done" items go nowhere permanent. The Review card becomes hollow — you'd be revisiting content with no notes rooted in your vault.
 
@@ -101,7 +101,7 @@ No ContentDeck API token ever touches the plain-text plugin `data.json`. Better 
 
 ## 2.1 Values Onboarding
 
-**Status:** ✅ COMPLETE (v3.5, 2026-03-01) | **Priority:** HIGH (unblocks scoring engine)
+**Status:** ✅ COMPLETE (v3.5, 2026-03-01) | **Priority:** HIGH (unblocks scoring engine) → [Implementation log](../log/v3.5-trusted-curator.md)
 
 One-time setup. Three questions, asked once when the user first arrives at the new home screen. Never shown again unless manually reset.
 
@@ -120,7 +120,7 @@ One-time setup. Three questions, asked once when the user first arrives at the n
 
 ## 2.2 Scoring Engine
 
-**Status:** ✅ COMPLETE (v3.5, 2026-03-01) | **Priority:** HIGH
+**Status:** ✅ COMPLETE (v3.5, 2026-03-01) | **Priority:** HIGH → [Implementation log](../log/v3.5-trusted-curator.md)
 
 Pure client-side function. Zero infrastructure cost. Runs over the TanStack Query bookmark cache on every home screen render.
 
@@ -182,7 +182,7 @@ The scoring engine is pure logic. Write tests for it before the UI exists:
 
 ## 2.3 New Home Screen
 
-**Status:** ✅ COMPLETE (v3.5, 2026-03-01) | **Priority:** HIGH
+**Status:** ✅ COMPLETE (v3.5, 2026-03-01) | **Priority:** HIGH → [Implementation log](../log/v3.5-trusted-curator.md)
 
 Replaces `/` as the default route. The library moves to `/library`. The transition is additive — nothing is removed.
 
@@ -236,7 +236,7 @@ The home screen requires real data to be meaningful. Demo mode remains at `/libr
 
 ## 2.4 Post-Read Reflection Prompt
 
-**Status:** ✅ COMPLETE (v3.5, 2026-03-02) | **Priority:** HIGH
+**Status:** ✅ COMPLETE (v3.5, 2026-03-02) | **Priority:** HIGH → [Implementation log](../log/v3.5-phase-2.4.md)
 
 When the user marks a bookmark as "done", a prompt appears before the status update completes.
 

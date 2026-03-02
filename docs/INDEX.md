@@ -17,7 +17,7 @@
 | Questioning whether a feature belongs                    | [plan/philosophy.md](plan/philosophy.md) — Philosophy-First Feature Review                                               |
 | Planning Phase 2 Trusted Curator features                | [plan/phase-2.md](plan/phase-2.md)                                                                                       |
 | Understanding the vision                                 | [plan/vision.md](plan/vision.md)                                                                                         |
-| Debugging something that used to work or refer past work | [log/](log/) — find the relevant implementation log                                                                      |
+| Debugging something that used to work or refer past work | [log/](log/) — completed plan sections link directly to their log; log files link back to their plan section            |
 | Setting up Supabase Auth                                 | [guides/supabase-auth-setup.md](guides/supabase-auth-setup.md)                                                           |
 | Checking what's been fixed                               | [reference/audit.md](reference/audit.md)                                                                                 |
 | Looking for integration ideas                            | [reference/integrations.md](reference/integrations.md)                                                                   |

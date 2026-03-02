@@ -51,7 +51,7 @@ These are genuinely ahead of many solo developers:
 - **PWA-first distribution** — real-world deployment from v1
 - **Free-tier constraint** — forces good architecture decisions
 
-### What's now in place (as of v3.2)
+### What's now in place (as of v3.5)
 
 | Practice | Status |
 |----------|--------|
@@ -62,7 +62,7 @@ These are genuinely ahead of many solo developers:
 | Conventional commits | Adopted |
 | Quality pipeline | `format → lint → typecheck → test → build` |
 | Feature branches + PRs | All work goes through branches, PRs to main |
-| Vitest (unit + component) | 165 tests — unit + component across 12+ files |
+| Vitest (unit + component) | 240 tests — unit + component across 12+ files; scoring engine (27 unit), react-router-dom v7 |
 | GitHub Actions CI | `.github/workflows/ci.yml` — runs on PR + push to main |
 | Sentry error tracking | Active — all mutations, ErrorBoundary, unhandledrejection |
 | Vercel Analytics + Speed Insights | Active — web vitals per route |
@@ -372,7 +372,7 @@ This is the master plan. Each version adopts new practices alongside new feature
 
 ### v3.5 — Quality at Scale
 
-**Features:** AI summarization, smart content queue, spaced review
+**Features:** Trusted Curator: home screen, scoring engine, values onboarding, reflection prompt
 **Practices to adopt:**
 - [ ] Test coverage reporting
 - [ ] Pre-commit hooks (lint-staged + husky)
@@ -491,6 +491,8 @@ Big features ship behind flags. Roll out to 10% of users, verify, then 100%. If 
 - [ ] Docs updated (CLAUDE.md, README, AUDIT as needed)
 - [ ] SW cache version bumped (if src/ changed)
 - [ ] PR description has Summary + Test Plan
+- [ ] Plan doc status line updated to ✅ COMPLETE with a link to this log file (if applicable)
+- [ ] Log file includes **Plan section:** link in header (if it implements a plan section)
 
 ### Before Merging to Main
 
@@ -521,5 +523,5 @@ Big features ship behind flags. Roll out to 10% of users, verify, then 100%. If 
 
 ---
 
-*Last updated: v3.2 — Sentry + GitHub Issues sync shipped, 165 tests, full observability in production.*
-*Next milestone: Pre-Phase 2 backlog (source types, Obsidian wikilinks, race condition tests), then Phase 2 (Intelligence).*
+*Last updated: v3.5 — Trusted Curator shipped (Values Onboarding, Scoring Engine, Home Screen, Reflection Prompt), 240 tests, Obsidian Plugin complete.*
+*Next milestone: Spaced Review (2.5) — SM-2 algorithm, Review card slot.*
