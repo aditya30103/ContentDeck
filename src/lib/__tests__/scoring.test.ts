@@ -52,7 +52,7 @@ function makeBookmark(overrides: Partial<Bookmark> = {}): Bookmark {
   };
 }
 
-const NOW = new Date('2026-03-02T14:00:00Z'); // Monday afternoon
+const NOW = new Date('2026-03-02T20:00:00'); // Monday evening (local time — no Z so getHours() is timezone-invariant)
 
 function defaultCtx(bookmarks: Bookmark[] = [], values: UserValues | null = null): ScoreContext {
   return buildScoreContext(bookmarks, values, 'default', NOW);
@@ -120,7 +120,7 @@ describe('buildScoreContext', () => {
 
   it('uses default weights for default mood', () => {
     const ctx = buildScoreContext([], null, 'default', NOW);
-    // On a weekend afternoon the weights should be adjusted
+    // On a Monday evening the weights should be adjusted (evening slot applies)
     expect(ctx.weights).not.toStrictEqual(WEIGHTS['default']);
   });
 
