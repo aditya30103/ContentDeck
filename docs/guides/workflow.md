@@ -62,7 +62,7 @@ These are genuinely ahead of many solo developers:
 | Conventional commits | Adopted |
 | Quality pipeline | `format → lint → typecheck → test → build` |
 | Feature branches + PRs | All work goes through branches, PRs to main |
-| Vitest (unit + component) | 240 tests — unit + component across 12+ files; scoring engine (27 unit), react-router-dom v7 |
+| Vitest (unit + component) | 261 tests — unit + component across 12+ files; scoring engine (27 unit), spaced review (19 unit), react-router-dom v7 |
 | GitHub Actions CI | `.github/workflows/ci.yml` — runs on PR + push to main |
 | Sentry error tracking | Active — all mutations, ErrorBoundary, unhandledrejection |
 | Vercel Analytics + Speed Insights | Active — web vitals per route |
@@ -523,5 +523,4 @@ Big features ship behind flags. Roll out to 10% of users, verify, then 100%. If 
 
 ---
 
-*Last updated: v3.5 — Trusted Curator shipped (Values Onboarding, Scoring Engine, Home Screen, Reflection Prompt), 240 tests, Obsidian Plugin complete.*
-*Next milestone: Spaced Review (2.5) — SM-2 algorithm, Review card slot.*
+*Last updated: v3.6 — Phase 2 COMPLETE. Spaced Review (SM-2) shipped. 261 tests (debounce dead code removed). Maintenance mode — no new features planned.*

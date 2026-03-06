@@ -3,7 +3,7 @@
 > Start here. This file orients each session.
 
 **Version:** v3.6 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) COMPLETE ✅ — Obsidian Plugin ✅ · Values Onboarding ✅ · Scoring Engine ✅ · Home Screen ✅ · Reflection Prompt ✅ · Spaced Review ✅
-**Next up:** Phase 3 — Platform (Browser Extension, CLI) or v4.0 Intelligence Layer (pgvector embeddings)
+**Mode: Maintenance.** No new features planned. Next feature work: Phase 3 (Platform) or v4.0 (Intelligence Layer) — both deferred until signals from production use.
 **Feedback:** In-app button in Sidebar/MobileHeader → Settings → Feedback tab to review
 **Active plan:** [Phase 2 — Trusted Curator](plan/phase-2.md) | **Philosophy:** [Product Philosophy](plan/philosophy.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
 
