@@ -29,3 +29,6 @@ supabase/.temp/
 
 # Local dev files
 rename-project.bat
+
+# Obsidian workspace config
+.obsidian/
