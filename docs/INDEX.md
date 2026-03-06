@@ -3,7 +3,7 @@
 > Start here. This file orients each session.
 
 **Version:** v3.6 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) COMPLETE ✅ — Obsidian Plugin ✅ · Values Onboarding ✅ · Scoring Engine ✅ · Home Screen ✅ · Reflection Prompt ✅ · Spaced Review ✅
-**Next up:** Phase 3 — Platform (Browser Extension, CLI) or v4.0 Intelligence Layer (pgvector embeddings)
+**Mode: Maintenance.** No new features planned. Next feature work: Phase 3 (Platform) or v4.0 (Intelligence Layer) — both deferred until signals from production use.
 **Feedback:** In-app button in Sidebar/MobileHeader → Settings → Feedback tab to review
 **Active plan:** [Phase 2 — Trusted Curator](plan/phase-2.md) | **Philosophy:** [Product Philosophy](plan/philosophy.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
 
@@ -34,7 +34,7 @@ docs/
 │   ├── philosophy.md               # Product philosophy — THE WHY. Read before any feature.
 │   ├── vision.md                   # Vision, architecture evolution, transition strategy
 │   ├── phase-1.md                  # Phase 1: Foundation — COMPLETE ✅
-│   ├── phase-2.md                  # Phase 2: Trusted Curator (v3.5) — ACTIVE
+│   ├── phase-2.md                  # Phase 2: Trusted Curator (v3.6) — COMPLETE ✅
 │   ├── phase-3.md                  # Phase 3: Platform (v4.5) — Browser Extension, CLI
 │   ├── phase-4.md                  # Phase 4: Social & Scale — FROZEN (contradicts philosophy)
 │   ├── phase-5.md                  # Phase 5: Ecosystem (v6.0)

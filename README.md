@@ -2,22 +2,26 @@
 
 [![CI](https://github.com/aditya30103/ContentDeck/actions/workflows/ci.yml/badge.svg)](https://github.com/aditya30103/ContentDeck/actions/workflows/ci.yml)
 
-A personal content bookmarking PWA built around the **Trusted Curator** paradigm — save from anywhere, get a single confident recommendation for what to read next, reflect with structured notes, and export to Obsidian.
+A personal content bookmarking PWA built around the **Trusted Curator** paradigm — save from anywhere, get a single confident recommendation for what to read next, reflect with structured notes, review on a spaced schedule, and export to Obsidian.
 
-**Live:** [contentdeck.vercel.app](https://contentdeck.vercel.app) | **Version:** v3.5
+**Live:** [contentdeck.vercel.app](https://contentdeck.vercel.app) | **Version:** v3.6
+
+---
 
 ## Try It
 
 Visit [contentdeck.vercel.app](https://contentdeck.vercel.app) and click **Try Demo** — no account or setup required. Explore with sample data, then sign in with email, Google, or GitHub to save your own bookmarks.
 
+---
+
 ## Features
 
 ### Capture
-- **Multi-source bookmarking** — YouTube, Twitter/X, LinkedIn, Substack, Blogs, Books, GitHub, arXiv, PDFs
+- **Multi-source bookmarking** — YouTube, Twitter/X, LinkedIn, Substack, Blogs, Books, arXiv, GitHub, PDFs
 - **Auto source detection** — paste a URL and it's categorized automatically
 - **Auto metadata fetching** — titles, thumbnails, reading time via YouTube Data API, Twitter oEmbed, Microlink
 - **Book capture without URL** — add books by title + author, no URL required
-- **Save from anywhere** — PWA share target, iOS Shortcut, PC bookmarklet, or dashboard
+- **Save from anywhere** — PWA share target (Android/iOS), iOS Shortcut, PC bookmarklet, or dashboard
 
 ### Curate
 - **Trusted Curator home screen** — one confident recommendation for what to read next, not a list to scroll
@@ -25,7 +29,8 @@ Visit [contentdeck.vercel.app](https://contentdeck.vercel.app) and click **Try D
 - **Mood selector** — five modes (Smart, Deep, Light, Quick, Shuffle) shift weight vectors to match your session energy
 - **Reason strings** — every recommendation comes with a plain-English explanation of why it was chosen
 - **Values onboarding** — set priority areas and preferred session length; the engine weights picks accordingly
-- **Secondary picks** — "Continue" (in-progress bookmarks) and "Quick Win" (shortest unread) surface alongside the primary pick
+- **Secondary picks** — "Continue" (in-progress) and "Quick Win" (shortest unread) surface alongside the primary pick
+- **Just Added strip** — recently saved bookmarks shown inline on the home screen for immediate action
 
 ### Organize
 - **Status tracking** — cycle bookmarks through `unread → reading → done`
@@ -41,14 +46,23 @@ Visit [contentdeck.vercel.app](https://contentdeck.vercel.app) and click **Try D
 - **Reader mode** — full-screen distraction-free view with extracted article text, typography controls, sepia theme, and progress indicator
 - **Content extraction** — article text fetched server-side via Readability; word count + estimated reading time shown automatically
 - **Structured notes** — add Insights, Questions, Highlights, or general Notes
+- **Reflection prompt** — on marking done, a guided modal prompts for a closing reflection (voice-enabled via Web Speech API)
 - **Note timeline** — color-coded cards with type indicators
 - **Reading stats** — completions, streaks, avg completion time, daily activity chart
 
+### Review
+- **Spaced review** — SM-2 algorithm schedules bookmarks for periodic re-reading based on your recall rating
+- **Review modal** — rate each review (Again / Hard / Good / Easy); next review date computed automatically
+- **Due count badge** — home screen shows how many bookmarks are due for review today
+
 ### Export
-- **Obsidian integration** — one-click export with YAML frontmatter + structured notes
-- **Obsidian URI** — opens directly in your vault via `obsidian://` protocol
-- **Clipboard fallback** — copies markdown when vault name not configured
-- **Sync tracking** — marks exported bookmarks so you know what's been processed
+- **Obsidian export** — one-click export with YAML frontmatter, areas as wikilinks, structured notes, and reflection section
+- **Auto-export on mark-done** — optionally export to Obsidian automatically when a bookmark is marked done
+- **Obsidian Community Plugin** — install via BRAT; syncs done bookmarks directly into your vault with a ribbon icon and command palette action
+- **Clipboard fallback** — copies markdown when vault isn't configured or browser doesn't support File System API
+- **Sync tracking** — marks exported bookmarks so the plugin knows what's been processed
+
+---
 
 ## Save from Anywhere
 
@@ -57,33 +71,44 @@ Visit [contentdeck.vercel.app](https://contentdeck.vercel.app) and click **Try D
 | **Android** | Install PWA → share any URL → pick ContentDeck |
 | **iPhone/iPad** | Install PWA (Safari → Share → Add to Home Screen) or iOS Shortcut |
 | **PC Browser** | Bookmarklet (generate in Settings → API Tokens) |
-| **Dashboard** | Manual add with + button |
+| **Dashboard** | Manual add with the + button |
 
-The PWA Share Target works on Android Chrome and iOS Safari 16.4+. Install ContentDeck to your home screen, then share URLs from any app — ContentDeck appears in the system share sheet and opens with the URL pre-filled.
+The PWA Share Target works on Android Chrome and iOS Safari 16.4+. Install ContentDeck to your home screen, then share URLs from any app — ContentDeck appears in the system share sheet with the URL pre-filled.
+
+---
 
 ## Tech Stack
 
-- **Frontend:** React 18 + TypeScript + Vite
-- **Styling:** Tailwind CSS v4 (dark/light mode)
-- **State:** TanStack Query (server) + React Context (UI)
-- **Icons:** Lucide React
-- **Auth:** Supabase Auth (magic link + Google OAuth + GitHub OAuth)
-- **Backend:** [Supabase](https://supabase.com) (PostgreSQL + REST API + RLS + Edge Functions)
-- **AI:** [OpenRouter](https://openrouter.ai) (free models: Llama 3.3 70B, Gemma 3, Mistral, Qwen)
-- **Content extraction:** Mozilla Readability + linkedom (Deno edge function)
-- **Metadata:** YouTube oEmbed + Data API, Twitter oEmbed, [Microlink](https://microlink.io)
-- **Error tracking:** [Sentry](https://sentry.io) (browser error capture + source maps)
-- **Analytics:** Vercel Analytics + Speed Insights
-- **CI/CD:** GitHub Actions + [Vercel](https://vercel.com)
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18 + TypeScript + Vite |
+| Styling | Tailwind CSS v4 (dark / light / sepia / navy themes) |
+| State | TanStack Query (server) + React Context (UI) |
+| Routing | react-router-dom v7 (`/` home, `/library` library) |
+| Icons | Lucide React |
+| Auth | Supabase Auth — magic link + Google OAuth + GitHub OAuth |
+| Backend | Supabase (PostgreSQL + REST API + Row Level Security + Edge Functions) |
+| AI | OpenRouter — free models: Llama 3.3 70B, Gemma 3, Mistral, Qwen |
+| Content extraction | Mozilla Readability + linkedom (Deno edge function) |
+| Metadata | YouTube oEmbed + Data API v3, Twitter oEmbed, Microlink |
+| Error tracking | Sentry — browser capture + source maps |
+| Analytics | Vercel Analytics + Speed Insights |
+| CI/CD | GitHub Actions + Vercel (auto-deploy from `main`) |
+
+---
 
 ## Setup
 
 ### 1. Supabase
 
 1. Create a free project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** and run `sql/setup.sql`
-3. Run `sql/feedback.sql` to create the feedback table
-4. Enable auth providers (magic link, Google, GitHub) — see `docs/guides/supabase-auth-setup.md`
+2. Go to **SQL Editor** and run each file in `sql/` in this order:
+   - `setup.sql` — base schema (bookmarks, tag_areas, user_tokens, status_history, triggers)
+   - `feedback.sql` — feedback table
+   - `20260225_github_issue_tracking.sql` — GitHub issue columns
+   - `20260226_arxiv_source_type.sql` — arXiv source type
+   - `20260307_spaced_review.sql` — spaced review column
+3. Enable auth providers — see [`docs/guides/supabase-auth-setup.md`](docs/guides/supabase-auth-setup.md)
 
 ### 2. Environment Variables
 
@@ -92,10 +117,10 @@ Create `.env.local` in the project root:
 ```
 VITE_SUPABASE_URL=https://<your-project-ref>.supabase.co
 VITE_SUPABASE_ANON_KEY=<your-anon-key>
-VITE_SENTRY_DSN=                    # optional — paste DSN from sentry.io project settings
+VITE_SENTRY_DSN=        # optional — paste DSN from sentry.io project settings
 ```
 
-Find Supabase values in Supabase Dashboard → Settings → API.
+Find Supabase values in **Dashboard → Settings → API**.
 
 ### 3. Install & Run
 
@@ -106,7 +131,7 @@ npm run dev
 
 ### 4. Deploy
 
-Push to GitHub and connect Vercel for auto-deploy (recommended), or:
+Connect your GitHub repo to Vercel for auto-deploy (recommended), or deploy manually:
 
 ```bash
 npm run build
@@ -117,7 +142,7 @@ Add `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and optionally `VITE_SENTRY_D
 
 ### 5. Deploy Edge Functions
 
-Three edge functions power external save, content extraction, and GitHub issue sync:
+Four edge functions power external save, content extraction, GitHub issue sync, and Obsidian plugin sync:
 
 ```bash
 npx supabase login
@@ -126,6 +151,7 @@ npx supabase link --project-ref <your-project-ref>
 npx supabase functions deploy save-bookmark --no-verify-jwt
 npx supabase functions deploy extract-content --no-verify-jwt
 npx supabase functions deploy create-github-issue --no-verify-jwt
+npx supabase functions deploy sync-done --no-verify-jwt
 ```
 
 ### 6. Optional Integrations
@@ -133,79 +159,110 @@ npx supabase functions deploy create-github-issue --no-verify-jwt
 #### AI Tagging (OpenRouter)
 1. Get a free API key at [openrouter.ai](https://openrouter.ai)
 2. Settings → AI API Key → paste key
-3. New bookmarks get auto-tagged; existing untagged bookmarks are tagged on load
+3. New bookmarks are auto-tagged; existing untagged bookmarks are tagged on load
 
 #### Obsidian Export
-1. Settings → Obsidian Vault Folder → enter your folder name
-2. Click "Export" on any bookmark's detail panel
-3. Chrome/Edge: picks folder via File System API. Other browsers: copies markdown to clipboard.
+1. Settings → Obsidian → enter your vault name and folder
+2. Click **Export** on any bookmark's detail panel — opens directly in your vault via `obsidian://`
+3. Browsers without File System API support (Firefox, Safari) copy markdown to clipboard
 
-#### GitHub Issues Sync
+#### Obsidian Community Plugin
+1. Install [BRAT](https://github.com/TfTHacker/obsidian42-brat) in Obsidian
+2. BRAT → Add Beta Plugin → `aditya30103/obsidian-contentdeck`
+3. Enable the plugin → Settings → paste your ContentDeck API token and Supabase URL
+4. Use the ribbon icon or command palette to sync done bookmarks into your vault
+
+#### GitHub Issues Sync (for self-hosters)
 1. Create a GitHub Personal Access Token with `repo` scope
 2. `npx supabase secrets set GITHUB_PAT=<token> --project-ref <your-project-ref>`
-3. Redeploy `create-github-issue` — feedback submissions will now auto-create GitHub Issues
+3. Redeploy `create-github-issue` — feedback submissions will auto-create GitHub Issues
 
 ### 7. Bookmarklet & iOS Shortcut
 
-Both require an API token generated in Settings → API Tokens.
+Both require an API token generated in **Settings → API Tokens**.
 
 #### PC Bookmarklet
-1. Settings → API Tokens → Generate API Token
+1. Settings → API Tokens → Generate Token
 2. Drag **+ ContentDeck** to your bookmarks bar
-3. Click the bookmarklet on any page to save it
+3. Click the bookmarklet on any page to save it — deduplication prevents double-saves
 
 #### iOS Shortcut
-The shortcut uses GET with query parameters — this is more reliable than POST + JSON on iOS.
+1. Settings → API Tokens → Generate Token → copy the full shortcut URL shown
+2. Shortcuts app → **+** → name it "Save to ContentDeck" → enable **Show in Share Sheet** for URLs
+3. Add action: **Text** → paste the copied URL, append `&url=`, then insert **Shortcut Input** at the end
+4. Add action: **Get Contents of URL** → GET, pointed at the Text from step 3
+5. Share any URL → pick "Save to ContentDeck"
 
-1. Settings → API Tokens → Generate API Token → copy the full shortcut URL shown (it has your token pre-baked)
-2. Open **Shortcuts** app → tap **+** → name it "Save to ContentDeck"
-3. Tap the shortcut name → **Privacy** → enable **Show in Share Sheet** → select **URLs**
-4. Add action: **Text** → paste the copied URL, then append `&url=` and insert the **Shortcut Input** variable at the end
-5. Add action: **Get Contents of URL** — leave method as GET, point it at the **Text** result from step 4
-6. Share any URL from Safari or any app → pick "Save to ContentDeck"
+---
 
 ## Project Structure
 
 ```
 src/
-  components/     React components (layout, feed, detail, modals, areas, settings, auth, ui)
-  hooks/          TanStack Query hooks (useBookmarks, useTagAreas, useStats, useAuth, useTokens, useFeedback, useScoring, useUserValues)
-  context/        SupabaseProvider, UIProvider
-  lib/            supabase, metadata, ai, obsidian, tokens, utils, scoring, mock-supabase, demo-data
-  types/          TypeScript interfaces (Bookmark, TagArea, UserToken, Note, scoring)
-  pages/          HomePage (curator home screen), Dashboard (library orchestrator)
-  App.tsx         Root: auth check, demo mode detection, share target
-  main.tsx        Entry point + Sentry init
+├── components/     React components (layout, feed, detail, modals, areas, settings, auth, ui)
+├── hooks/          TanStack Query hooks — useBookmarks, useTagAreas, useStats, useAuth,
+│                   useTokens, useFeedback, useScoring, useUserValues, useSpacedReview
+├── context/        SupabaseProvider, UIProvider
+├── lib/            supabase, metadata, ai, obsidian, tokens, utils, scoring,
+│                   spaced-review, mock-supabase, demo-data
+├── types/          TypeScript interfaces — Bookmark, TagArea, UserToken, Note, scoring
+├── pages/          HomePage (curator home), Dashboard (library orchestrator)
+├── App.tsx         Root: auth check, demo mode, share target, routing
+└── main.tsx        Entry point + Sentry init
 
-supabase/
-  functions/
-    save-bookmark/        Token-authenticated bookmark save (bookmarklet + iOS Shortcut)
-    extract-content/      Article text extraction via Readability (reading mode + full-text search)
-    create-github-issue/  Creates GitHub Issue from in-app feedback submission
+supabase/functions/
+├── save-bookmark/        Token-auth bookmark save (bookmarklet + iOS Shortcut)
+├── extract-content/      Article extraction via Readability (reader mode + full-text search)
+├── create-github-issue/  Creates GitHub Issue from in-app feedback submission
+└── sync-done/            Obsidian plugin sync — GET done bookmarks, POST mark synced
 
 public/
-  sw.js           Service worker (network-first navigation, stale-while-revalidate assets, auto-update)
-  manifest.json   PWA manifest + share target
-  icon.svg        App icon
+├── sw.js           Service worker (network-first navigation, stale-while-revalidate assets)
+├── manifest.json   PWA manifest + share target definition
+└── icon.svg        App icon
 
 sql/
-  setup.sql       Database schema (bookmarks, tag_areas, user_tokens, status_history, triggers, RPC)
-  feedback.sql    Feedback table schema
-  migrations/     Incremental schema migrations
+├── setup.sql                       Base schema + triggers + RLS policies
+├── feedback.sql                    Feedback table
+├── 20260225_github_issue_tracking.sql
+├── 20260226_arxiv_source_type.sql
+└── 20260307_spaced_review.sql      last_reviewed_at column + SM-2 fields
 
-vercel.json       SPA rewrites, immutable cache headers for hashed assets
+vercel.json         SPA rewrites + immutable cache headers for hashed assets
 ```
 
-## Database Tables
+---
+
+## Database Schema
 
 | Table | Purpose |
 |-------|---------|
-| `bookmarks` | Core data: URL, title, source type, status, notes, tags, metadata (JSONB), content (JSONB) |
-| `tag_areas` | User-defined categories with name, emoji, color, sort order |
+| `bookmarks` | URL, title, source type, status, notes (JSONB), metadata (JSONB), extracted content (JSONB), spaced review fields |
+| `tag_areas` | User-defined categories — name, emoji, color, sort order |
 | `bookmark_tags` | Junction table linking bookmarks to tag areas |
 | `status_history` | Audit trail for status changes — powers streaks and reading stats |
-| `user_tokens` | API tokens (SHA-256 hashed) for bookmarklet and iOS Shortcut |
-| `feedback` | In-app feedback submissions with auto-captured context and GitHub issue link |
+| `user_tokens` | API tokens (SHA-256 hashed) for bookmarklet and iOS Shortcut auth |
+| `feedback` | In-app feedback with auto-captured context and GitHub issue link |
+
+All tables use **Row Level Security** — users can only access their own data.
+
+---
+
+## The Workflow
+
+```
+CAPTURE         CURATE              REFLECT            REVIEW           EXPORT
+  │               │                   │                  │                │
+  ▼               ▼                   ▼                  ▼                ▼
+Save URL  →  System picks  →  Read + notes  →  Spaced review  →  Export to
+(shortcut,   what to read      (reader mode,    (SM-2 recall       Obsidian
+bookmarklet, next (scoring     insights,         rating)           (auto or
+share target) engine + mood)   reflection)                         manual)
+```
+
+ContentDeck is your **capture, curation, and reflection layer**. Obsidian is your **knowledge layer**. Ideas flow from web browsing to structured permanent notes.
+
+---
 
 ## Keyboard Shortcuts
 
@@ -214,35 +271,28 @@ vercel.json       SPA rewrites, immutable cache headers for hashed assets
 | `/` | Focus search |
 | `n` | New bookmark |
 | `j` / `k` | Navigate list |
-| `Esc` | Close panel/modal |
+| `Esc` | Close panel / modal |
 
-## The Workflow
-
-```
-CAPTURE         CURATE            REFLECT            EXPORT
-  |               |                  |                  |
-  v               v                  v                  v
-Save URL  ->  System picks  ->  Read + notes  ->  One-click to
-(shortcut,    what to read       (reader mode,     Obsidian
-bookmarklet,  next (scoring      insights,
-share target) engine + mood)     questions)
-```
-
-ContentDeck is your **capture, curation, and reflection layer**. Obsidian is your **knowledge layer**. Ideas flow from consumption to permanent notes.
+---
 
 ## Quality
 
-- **229 Vitest tests** — unit tests for lib functions (incl. 27 scoring engine tests), component tests for hooks and UI
-- **GitHub Actions CI** — format check, lint, typecheck, tests, and build on every PR
-- **Sentry error tracking** — automatic capture of runtime errors and unhandled rejections in production
-- **ESLint** with TypeScript strict mode + `jsx-a11y` accessibility rules
+- **261 Vitest tests** — unit tests for lib functions (27 scoring engine, 19 spaced review, 20 metadata) + component tests for hooks and UI
+- **GitHub Actions CI** — format check, lint, typecheck, tests, and build on every PR and push to `main`
+- **Sentry error tracking** — all 14 mutations, ErrorBoundary, and global `unhandledrejection` captured in production
+- **ESLint** with TypeScript strict mode + `jsx-a11y` — accessibility issues caught at lint time
+- **Accessibility** — ARIA roles, focus management, 44px touch targets, `motion-reduce:` variants throughout
+
+---
 
 ## Known Limitations
 
-- OpenRouter free models have rate limits — AI tagging retries with exponential backoff
-- Content extraction skips YouTube and Twitter (no article text to extract)
+- OpenRouter free models have rate limits — AI tagging may silently skip on burst saves
+- Content extraction skips YouTube, Twitter, and arXiv (no generic article body to extract)
 - GitHub Issues sync is one-way — closing an issue on GitHub does not update feedback status in ContentDeck
-- SW cache version (`CACHE_NAME` in `sw.js`) requires a manual bump when SW behaviour changes
+- Demo mode stays on `/library` — the curator home screen requires real user data and values onboarding
+
+---
 
 ## Contributing
 
