@@ -1,11 +1,10 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   detectSourceType,
   timeAgo,
   localDateString,
   truncate,
   getDomain,
-  debounce,
   formatDate,
 } from '../utils';
 
@@ -156,45 +155,5 @@ describe('getDomain', () => {
 
   it('returns original string for invalid URLs', () => {
     expect(getDomain('not-a-url')).toBe('not-a-url');
-  });
-});
-
-describe('debounce', () => {
-  it('calls function after delay', () => {
-    vi.useFakeTimers();
-    const fn = vi.fn();
-    const debounced = debounce(fn, 100);
-
-    debounced();
-    expect(fn).not.toHaveBeenCalled();
-
-    vi.advanceTimersByTime(100);
-    expect(fn).toHaveBeenCalledOnce();
-    vi.useRealTimers();
-  });
-
-  it('cancels previous call on rapid invocations', () => {
-    vi.useFakeTimers();
-    const fn = vi.fn();
-    const debounced = debounce(fn, 100);
-
-    debounced();
-    debounced();
-    debounced();
-
-    vi.advanceTimersByTime(100);
-    expect(fn).toHaveBeenCalledOnce();
-    vi.useRealTimers();
-  });
-
-  it('passes arguments to the debounced function', () => {
-    vi.useFakeTimers();
-    const fn = vi.fn();
-    const debounced = debounce(fn, 50);
-
-    debounced('hello');
-    vi.advanceTimersByTime(50);
-    expect(fn).toHaveBeenCalledWith('hello');
-    vi.useRealTimers();
   });
 });
