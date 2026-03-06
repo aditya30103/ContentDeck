@@ -61,6 +61,7 @@ const defaultProps = {
   bookmark: makeBookmark(),
   onSave: vi.fn(),
   onSkip: vi.fn(),
+  onCancel: vi.fn(),
 };
 
 function renderModal(props: Partial<typeof defaultProps> = {}) {
@@ -118,13 +119,29 @@ describe('ReflectionModal', () => {
     expect(onSave).toHaveBeenCalledWith('My key insight');
   });
 
-  it('6. voice button hidden when SpeechRecognition not defined', () => {
-    // SpeechRecognition already removed in beforeEach
+  it('6. clicking Go back calls onCancel without calling onSkip or onSave', async () => {
+    const user = userEvent.setup();
+    const onCancel = vi.fn();
+    const onSkip = vi.fn();
+    const onSave = vi.fn();
+    renderModal({ onCancel, onSkip, onSave });
+    await user.click(screen.getByRole('button', { name: /go back/i }));
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(onSkip).not.toHaveBeenCalled();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('7. Go back button is present in the footer', () => {
+    renderModal();
+    expect(screen.getByRole('button', { name: /go back/i })).toBeInTheDocument();
+  });
+
+  it('8. voice button hidden when SpeechRecognition not defined', () => {
+    // SpeechRecognition already removed in beforeEach.
     // speechSupported is a module-level const evaluated at import time;
     // since the API is absent in jsdom, the voice button is not rendered.
     renderModal();
     expect(screen.queryByRole('button', { name: /voice input/i })).not.toBeInTheDocument();
-    // The "Start voice input" button is also absent
     expect(screen.queryByRole('button', { name: /start voice input/i })).not.toBeInTheDocument();
   });
 });

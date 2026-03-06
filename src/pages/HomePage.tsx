@@ -1,16 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Settings, ArrowRight, ExternalLink, PlayCircle, Zap } from 'lucide-react';
+import { Settings, ArrowRight, ExternalLink, PlayCircle, Zap, BookMarked } from 'lucide-react';
 import { useTagAreas } from '../hooks/useTagAreas';
 import { useUserValues } from '../hooks/useUserValues';
 import { useScoring } from '../hooks/useScoring';
 import { useBookmarks } from '../hooks/useBookmarks';
+import { useSpacedReview } from '../hooks/useSpacedReview';
 import { getReadingMinutes } from '../lib/scoring';
 import { isBookWithoutUrl } from '../lib/utils';
 import { SourceBadge } from '../components/ui/Badge';
 import SettingsModal from '../components/modals/SettingsModal';
 import ValuesOnboardingModal from '../components/modals/ValuesOnboardingModal';
 import ReflectionModal from '../components/modals/ReflectionModal';
+import ReviewModal from '../components/modals/ReviewModal';
+import { getReflectionNote, nextReviewState } from '../lib/spaced-review';
 import type { MoodMode, UserValues } from '../types/scoring';
 import type { Bookmark } from '../types';
 
@@ -217,18 +220,35 @@ function PrimaryPickCard({ topPick, isLoading, now, mood, onStartReading }: Prim
 // ---------------------------------------------------------------------------
 
 interface SecondaryCardProps {
-  type: 'continue' | 'quick-win';
+  type: 'continue' | 'quick-win' | 'review';
   bookmark: Bookmark | null;
   onOpen: (b: Bookmark) => void;
   onMarkDone?: (b: Bookmark) => void;
 }
 
+const CARD_CONFIG = {
+  continue: {
+    icon: <PlayCircle size={12} />,
+    label: 'Continue',
+    color: 'text-amber-500 dark:text-amber-400',
+  },
+  'quick-win': {
+    icon: <Zap size={12} />,
+    label: 'Quick Win',
+    color: 'text-primary-600 dark:text-primary-400',
+  },
+  review: {
+    icon: <BookMarked size={12} />,
+    label: 'Review',
+    color: 'text-violet-600 dark:text-violet-400',
+  },
+} as const;
+
 function SecondaryCard({ type, bookmark, onOpen, onMarkDone }: SecondaryCardProps) {
   if (!bookmark) return <div />;
 
-  // Capture narrowed non-null reference so closures below retain the narrowed type
   const b = bookmark;
-  const isContinue = type === 'continue';
+  const cfg = CARD_CONFIG[type];
   const minutes = getReadingMinutes(b);
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -238,39 +258,47 @@ function SecondaryCard({ type, bookmark, onOpen, onMarkDone }: SecondaryCardProp
     }
   }
 
+  const ariaLabel =
+    type === 'continue'
+      ? `Continue reading: ${b.title ?? b.url}`
+      : type === 'review'
+        ? `Review: ${b.title ?? b.url}`
+        : `Quick win: ${b.title ?? b.url}`;
+
   return (
     <div
       role="button"
       tabIndex={0}
-      aria-label={`${isContinue ? 'Continue reading' : 'Quick win'}: ${b.title ?? b.url}`}
+      aria-label={ariaLabel}
       onClick={() => onOpen(b)}
       onKeyDown={handleKeyDown}
       className="rounded-xl border border-surface-200 dark:border-surface-800 bg-white dark:bg-surface-900 p-4 cursor-pointer hover:border-surface-300 dark:hover:border-surface-700 transition-colors focus-visible:ring-2 min-h-[44px]"
     >
       {/* Label row */}
-      <div
-        className={`flex items-center gap-1 mb-2 text-xs font-medium ${
-          isContinue
-            ? 'text-amber-500 dark:text-amber-400'
-            : 'text-primary-600 dark:text-primary-400'
-        }`}
-      >
-        {isContinue ? <PlayCircle size={12} /> : <Zap size={12} />}
-        <span>{isContinue ? 'Continue' : 'Quick Win'}</span>
+      <div className={`flex items-center gap-1 mb-2 text-xs font-medium ${cfg.color}`}>
+        {cfg.icon}
+        <span>{cfg.label}</span>
       </div>
       {/* Title */}
       <p className="text-sm font-medium line-clamp-2 leading-snug text-surface-900 dark:text-surface-100 mb-2">
         {b.title ?? b.url}
       </p>
-      {/* Source + time */}
-      <div className="flex items-center gap-2">
-        <SourceBadge source={b.source_type} />
-        {minutes != null && minutes > 0 && (
-          <span className="text-xs text-surface-400">{minutes} min</span>
-        )}
-      </div>
+      {/* Source + time — hidden for review card (shows reflection snippet instead) */}
+      {type !== 'review' && (
+        <div className="flex items-center gap-2">
+          <SourceBadge source={b.source_type} />
+          {minutes != null && minutes > 0 && (
+            <span className="text-xs text-surface-400">{minutes} min</span>
+          )}
+        </div>
+      )}
+      {type === 'review' && (
+        <p className="text-xs text-surface-400 italic line-clamp-2">
+          {getReflectionNote(b) ?? 'Tap to review'}
+        </p>
+      )}
       {/* Mark done — continue card only */}
-      {isContinue && onMarkDone && (
+      {type === 'continue' && onMarkDone && (
         <button
           type="button"
           onClick={(e) => {
@@ -415,11 +443,13 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
     () => localStorage.getItem('contentdeck_values') === null && !isDemo,
   );
   const [pendingDoneBookmark, setPendingDoneBookmark] = useState<Bookmark | null>(null);
+  const [pendingReviewBookmark, setPendingReviewBookmark] = useState<Bookmark | null>(null);
 
   const { areas } = useTagAreas();
   const { setValues } = useUserValues();
   const { topPick, continueItem, quickWin } = useScoring(mood);
-  const { isLoading, bookmarks, cycleStatus, addNote } = useBookmarks();
+  const { isLoading, bookmarks, cycleStatus, addNote, updateBookmark } = useBookmarks();
+  const { reviewItem } = useSpacedReview();
 
   // Update clock every 60 seconds
   useEffect(() => {
@@ -454,18 +484,26 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
     setPendingDoneBookmark(bookmark);
   }
 
+  function handleReflectionCancel() {
+    setPendingDoneBookmark(null);
+  }
+
   const handleReflectionSave = useCallback(
     async (text: string) => {
       if (!pendingDoneBookmark) return;
       const { id } = pendingDoneBookmark;
       const trimmedText = text.trim();
-      await Promise.all([
-        trimmedText
-          ? addNote.mutateAsync({ bookmarkId: id, type: 'reflection', content: trimmedText })
-          : Promise.resolve(),
-        cycleStatus.mutateAsync({ id, newStatus: 'done' }),
-      ]);
-      setPendingDoneBookmark(null);
+      try {
+        await Promise.all([
+          trimmedText
+            ? addNote.mutateAsync({ bookmarkId: id, type: 'reflection', content: trimmedText })
+            : Promise.resolve(),
+          cycleStatus.mutateAsync({ id, newStatus: 'done' }),
+        ]);
+      } finally {
+        // Always close — even if one mutation failed, avoid stuck modal
+        setPendingDoneBookmark(null);
+      }
     },
     [pendingDoneBookmark, addNote, cycleStatus],
   );
@@ -476,12 +514,30 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
     setPendingDoneBookmark(null);
   }, [pendingDoneBookmark, cycleStatus]);
 
+  const handleReviewResponse = useCallback(
+    (resonates: boolean) => {
+      if (!pendingReviewBookmark) return;
+      const { interval, repetitions } = nextReviewState(pendingReviewBookmark, resonates);
+      updateBookmark.mutate({
+        id: pendingReviewBookmark.id,
+        last_reviewed_at: new Date().toISOString(),
+        metadata: {
+          ...pendingReviewBookmark.metadata,
+          review_interval: interval,
+          review_repetitions: repetitions,
+        },
+      });
+      setPendingReviewBookmark(null);
+    },
+    [pendingReviewBookmark, updateBookmark],
+  );
+
   function handleCompleteOnboarding(v: UserValues) {
     setValues(v);
     setShowOnboarding(false);
   }
 
-  const hasSecondary = continueItem !== null || quickWin !== null;
+  const hasSecondary = continueItem !== null || quickWin !== null || reviewItem !== null;
 
   return (
     <div
@@ -510,13 +566,33 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
           {/* Secondary cards — only render row if at least one slot is filled */}
           {hasSecondary && (
             <div className="grid grid-cols-2 gap-3 mb-6">
-              <SecondaryCard
-                type="continue"
-                bookmark={continueItem}
-                onOpen={handleStartReading}
-                onMarkDone={handleMarkDone}
-              />
-              <SecondaryCard type="quick-win" bookmark={quickWin} onOpen={handleStartReading} />
+              {continueItem ? (
+                <SecondaryCard
+                  type="continue"
+                  bookmark={continueItem}
+                  onOpen={handleStartReading}
+                  onMarkDone={handleMarkDone}
+                />
+              ) : reviewItem ? (
+                <SecondaryCard
+                  type="review"
+                  bookmark={reviewItem}
+                  onOpen={() => setPendingReviewBookmark(reviewItem)}
+                />
+              ) : (
+                <div />
+              )}
+              {quickWin ? (
+                <SecondaryCard type="quick-win" bookmark={quickWin} onOpen={handleStartReading} />
+              ) : reviewItem && continueItem ? (
+                <SecondaryCard
+                  type="review"
+                  bookmark={reviewItem}
+                  onOpen={() => setPendingReviewBookmark(reviewItem)}
+                />
+              ) : (
+                <div />
+              )}
             </div>
           )}
 
@@ -549,6 +625,15 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
         bookmark={pendingDoneBookmark}
         onSave={handleReflectionSave}
         onSkip={handleReflectionSkip}
+        onCancel={handleReflectionCancel}
+      />
+
+      <ReviewModal
+        open={pendingReviewBookmark !== null}
+        bookmark={pendingReviewBookmark}
+        onResonates={() => handleReviewResponse(true)}
+        onLostThread={() => handleReviewResponse(false)}
+        onClose={() => setPendingReviewBookmark(null)}
       />
     </div>
   );

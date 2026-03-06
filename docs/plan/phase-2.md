@@ -294,7 +294,7 @@ The `type: "reflection"` notes are what the Review card surfaces. A bookmark wit
 
 ## 2.5 Spaced Review (emerges from reflection accumulation)
 
-**Status:** Not started | **Priority:** MEDIUM (after reflection prompt ships)
+**Status:** ✅ COMPLETE (v3.6, 2026-03-07) | **Priority:** MEDIUM (after reflection prompt ships) → [Implementation log](../log/v3.6-phase-2.5.md)
 
 Once reflection notes exist on done items, the Review card slot becomes meaningful.
 

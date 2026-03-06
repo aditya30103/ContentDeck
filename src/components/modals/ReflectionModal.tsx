@@ -56,9 +56,16 @@ interface ReflectionModalProps {
   bookmark: Bookmark | null;
   onSave: (text: string) => void;
   onSkip: () => void;
+  onCancel: () => void;
 }
 
-export default function ReflectionModal({ open, bookmark, onSave, onSkip }: ReflectionModalProps) {
+export default function ReflectionModal({
+  open,
+  bookmark,
+  onSave,
+  onSkip,
+  onCancel,
+}: ReflectionModalProps) {
   const [text, setText] = useState('');
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
@@ -114,7 +121,7 @@ export default function ReflectionModal({ open, bookmark, onSave, onSkip }: Refl
   const displayTitle = bookmark?.title ?? bookmark?.url ?? '';
 
   return (
-    <Modal open={open} onClose={handleSkip} title="How did it go?" size="sm">
+    <Modal open={open} onClose={onCancel} title="How did it go?" size="sm">
       {/* Subtitle — truncated bookmark title */}
       <p className="text-sm text-surface-500 dark:text-surface-400 mb-4 line-clamp-1">
         {displayTitle}
@@ -147,22 +154,31 @@ export default function ReflectionModal({ open, bookmark, onSave, onSkip }: Refl
       />
 
       {/* Footer actions */}
-      <div className="flex gap-3 justify-end">
+      <div className="flex items-center justify-between gap-2">
         <button
           type="button"
-          onClick={handleSkip}
-          className="px-4 py-2 rounded-xl text-sm font-medium text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors focus-visible:ring-2 min-h-[44px]"
+          onClick={onCancel}
+          className="px-3 py-2 rounded-xl text-sm font-medium text-surface-500 dark:text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors focus-visible:ring-2 min-h-[44px]"
         >
-          Skip for now
+          ← Go back
         </button>
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={text.trim() === ''}
-          className="px-4 py-2 rounded-xl text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white transition-colors focus-visible:ring-2 min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          Save &amp; Done
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleSkip}
+            className="px-4 py-2 rounded-xl text-sm font-medium text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors focus-visible:ring-2 min-h-[44px]"
+          >
+            Skip for now
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={text.trim() === ''}
+            className="px-4 py-2 rounded-xl text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white transition-colors focus-visible:ring-2 min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Save &amp; Done
+          </button>
+        </div>
       </div>
     </Modal>
   );

@@ -13,6 +13,11 @@ vi.mock('../../hooks/useScoring', () => ({ useScoring: vi.fn() }));
 vi.mock('../../hooks/useBookmarks', () => ({ useBookmarks: vi.fn() }));
 vi.mock('../../hooks/useTagAreas', () => ({ useTagAreas: vi.fn() }));
 vi.mock('../../hooks/useUserValues', () => ({ useUserValues: vi.fn() }));
+vi.mock('../../hooks/useSpacedReview', () => ({ useSpacedReview: vi.fn() }));
+vi.mock('../../lib/spaced-review', () => ({
+  getReflectionNote: vi.fn(() => 'A reflection note'),
+  nextReviewState: vi.fn(() => ({ interval: 6, repetitions: 1, dueAt: '' })),
+}));
 vi.mock('../../lib/scoring', () => ({ getReadingMinutes: vi.fn(() => 12) }));
 vi.mock('../../components/modals/SettingsModal', () => ({
   default: ({ open }: { open: boolean }) => (open ? <div data-testid="settings-modal" /> : null),
@@ -21,7 +26,24 @@ vi.mock('../../components/modals/ValuesOnboardingModal', () => ({
   default: ({ open }: { open: boolean }) => (open ? <div data-testid="onboarding-modal" /> : null),
 }));
 vi.mock('../../components/modals/ReflectionModal', () => ({
-  default: ({ open }: { open: boolean }) => (open ? <div data-testid="reflection-modal" /> : null),
+  default: ({
+    open,
+    onCancel,
+    onSkip,
+  }: {
+    open: boolean;
+    onCancel: () => void;
+    onSkip: () => void;
+  }) =>
+    open ? (
+      <div data-testid="reflection-modal">
+        <button onClick={onCancel}>Go back</button>
+        <button onClick={onSkip}>Skip</button>
+      </div>
+    ) : null,
+}));
+vi.mock('../../components/modals/ReviewModal', () => ({
+  default: ({ open }: { open: boolean }) => (open ? <div data-testid="review-modal" /> : null),
 }));
 vi.mock('../../components/ui/Badge', () => ({
   SourceBadge: () => <span data-testid="source-badge" />,
@@ -31,6 +53,7 @@ import { useScoring } from '../../hooks/useScoring';
 import { useBookmarks } from '../../hooks/useBookmarks';
 import { useTagAreas } from '../../hooks/useTagAreas';
 import { useUserValues } from '../../hooks/useUserValues';
+import { useSpacedReview } from '../../hooks/useSpacedReview';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -98,6 +121,10 @@ function setupDefaultMocks() {
       mutate: vi.fn(),
       mutateAsync: vi.fn().mockResolvedValue(undefined),
     } as unknown as ReturnType<typeof useBookmarks>['addNote'],
+    updateBookmark: {
+      mutate: vi.fn(),
+      mutateAsync: vi.fn().mockResolvedValue(undefined),
+    } as unknown as ReturnType<typeof useBookmarks>['updateBookmark'],
   } as unknown as ReturnType<typeof useBookmarks>);
   vi.mocked(useScoring).mockReturnValue({
     topPick: null,
@@ -105,6 +132,7 @@ function setupDefaultMocks() {
     quickWin: null,
     ctx: {} as ReturnType<typeof useScoring>['ctx'],
   });
+  vi.mocked(useSpacedReview).mockReturnValue({ reviewItem: null });
 }
 
 // ---------------------------------------------------------------------------
@@ -322,7 +350,57 @@ describe('HomePage', () => {
     expect(screen.getByRole('button', { name: /mark done/i })).toBeInTheDocument();
   });
 
-  it('17. clicking Mark done opens reflection modal', async () => {
+  it('17. clicking Go back in reflection modal closes it without calling cycleStatus', async () => {
+    const user = userEvent.setup();
+    const continueBookmark = makeBookmark({
+      id: 'c-3',
+      title: 'Cancel Test',
+      status: 'reading',
+    });
+    vi.mocked(useScoring).mockReturnValue({
+      topPick: null,
+      continueItem: continueBookmark,
+      quickWin: null,
+      ctx: {} as ReturnType<typeof useScoring>['ctx'],
+    });
+    renderHome();
+    await user.click(screen.getByRole('button', { name: /mark done/i }));
+    expect(screen.getByTestId('reflection-modal')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /go back/i }));
+    expect(screen.queryByTestId('reflection-modal')).not.toBeInTheDocument();
+    expect(mockCycleStatusMutate).not.toHaveBeenCalled();
+  });
+
+  it('18. Review card shown when reviewItem is non-null', () => {
+    const reviewBookmark = makeBookmark({
+      id: 'r-1',
+      title: 'Review Article',
+      status: 'done',
+      notes: [{ type: 'reflection', content: 'My insight', created_at: '2026-01-01T00:00:00Z' }],
+      last_reviewed_at: null,
+    });
+    vi.mocked(useSpacedReview).mockReturnValue({ reviewItem: reviewBookmark });
+    renderHome();
+    expect(screen.getByText('Review')).toBeInTheDocument();
+  });
+
+  it('19. clicking Review card opens review modal', async () => {
+    const user = userEvent.setup();
+    const reviewBookmark = makeBookmark({
+      id: 'r-2',
+      title: 'Review Article',
+      status: 'done',
+      notes: [{ type: 'reflection', content: 'My insight', created_at: '2026-01-01T00:00:00Z' }],
+      last_reviewed_at: null,
+    });
+    vi.mocked(useSpacedReview).mockReturnValue({ reviewItem: reviewBookmark });
+    renderHome();
+    expect(screen.queryByTestId('review-modal')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /review:/i }));
+    expect(screen.getByTestId('review-modal')).toBeInTheDocument();
+  });
+
+  it('20. clicking Mark done opens reflection modal', async () => {
     const user = userEvent.setup();
     const continueBookmark = makeBookmark({
       id: 'c-2',

@@ -130,6 +130,13 @@ export default function MetadataHeader({
             Extract failed — retry
           </button>
         )}
+
+        {b.content_status === 'skipped' && b.source_type === 'youtube' && (
+          <span className="text-xs text-surface-400 dark:text-surface-500 flex items-center gap-1">
+            <AlertCircle size={12} />
+            No transcript available
+          </span>
+        )}
       </div>
 
       {/* Meta stats */}
