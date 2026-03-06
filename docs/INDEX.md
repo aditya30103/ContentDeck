@@ -2,8 +2,8 @@
 
 > Start here. This file orients each session.
 
-**Version:** v3.5 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) in progress — Obsidian Plugin ✅ · Values Onboarding ✅ · Scoring Engine ✅ · Home Screen ✅ · Reflection Prompt ✅
-**Next up:** Spaced Review (2.5) — Review card + SM-2 algorithm
+**Version:** v3.6 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) COMPLETE ✅ — Obsidian Plugin ✅ · Values Onboarding ✅ · Scoring Engine ✅ · Home Screen ✅ · Reflection Prompt ✅ · Spaced Review ✅
+**Next up:** Phase 3 — Platform (Browser Extension, CLI) or v4.0 Intelligence Layer (pgvector embeddings)
 **Feedback:** In-app button in Sidebar/MobileHeader → Settings → Feedback tab to review
 **Active plan:** [Phase 2 — Trusted Curator](plan/phase-2.md) | **Philosophy:** [Product Philosophy](plan/philosophy.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
 
@@ -74,6 +74,7 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
+| v3.6 | Spaced Review (2.5) + ReflectionModal cancel fix + YouTube skipped status (#42 #43 #38, 264 tests) | [log/v3.6-phase-2.5.md](log/v3.6-phase-2.5.md) |
 | v3.5 | Close the Loop: Just Added strip + Mark Done on Continue + Reflection Prompt modal (2.4, 240 tests) | [log/v3.5-phase-2.4.md](log/v3.5-phase-2.4.md) |
 | v3.5 | Trusted Curator: Values Onboarding (2.1) + Scoring Engine (2.2) + New Home Screen (2.3) | [log/v3.5-trusted-curator.md](log/v3.5-trusted-curator.md) |
 | v3.4 | Obsidian Plugin Phase B — `sync-done` edge function + Community Plugin (BRAT-installable, ribbon icon, auto-marks synced) (#37) | [log/v3.4-obsidian-plugin-phase-b.md](log/v3.4-obsidian-plugin-phase-b.md) |

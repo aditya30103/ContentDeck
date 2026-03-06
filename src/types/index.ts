@@ -28,6 +28,8 @@ export interface BookmarkMetadata {
   abstract?: string;
   arxiv_id?: string;
   published?: string;
+  review_interval?: number;
+  review_repetitions?: number;
 }
 
 export interface BookmarkContent {
@@ -63,6 +65,7 @@ export interface Bookmark {
   status_changed_at: string;
   started_reading_at: string | null;
   finished_at: string | null;
+  last_reviewed_at?: string | null;
 }
 
 export interface TagArea {
