@@ -34,7 +34,7 @@ docs/
 │   ├── philosophy.md               # Product philosophy — THE WHY. Read before any feature.
 │   ├── vision.md                   # Vision, architecture evolution, transition strategy
 │   ├── phase-1.md                  # Phase 1: Foundation — COMPLETE ✅
-│   ├── phase-2.md                  # Phase 2: Trusted Curator (v3.5) — ACTIVE
+│   ├── phase-2.md                  # Phase 2: Trusted Curator (v3.6) — COMPLETE ✅
 │   ├── phase-3.md                  # Phase 3: Platform (v4.5) — Browser Extension, CLI
 │   ├── phase-4.md                  # Phase 4: Social & Scale — FROZEN (contradicts philosophy)
 │   ├── phase-5.md                  # Phase 5: Ecosystem (v6.0)

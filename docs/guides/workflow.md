@@ -51,7 +51,7 @@ These are genuinely ahead of many solo developers:
 - **PWA-first distribution** — real-world deployment from v1
 - **Free-tier constraint** — forces good architecture decisions
 
-### What's now in place (as of v3.5)
+### What's now in place (as of v3.6)
 
 | Practice | Status |
 |----------|--------|
