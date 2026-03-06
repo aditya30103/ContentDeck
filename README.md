@@ -288,7 +288,7 @@ ContentDeck is your **capture, curation, and reflection layer**. Obsidian is you
 ## Known Limitations
 
 - OpenRouter free models have rate limits — AI tagging may silently skip on burst saves
-- Content extraction skips YouTube, Twitter, and arXiv (no generic article body to extract)
+- Content extraction skips Twitter, books, and arXiv (no article body to extract); YouTube extracts the video transcript via caption scraping — videos without captions show "No transcript available"
 - GitHub Issues sync is one-way — closing an issue on GitHub does not update feedback status in ContentDeck
 - Demo mode stays on `/library` — the curator home screen requires real user data and values onboarding
 
