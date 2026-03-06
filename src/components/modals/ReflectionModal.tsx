@@ -114,7 +114,6 @@ export default function ReflectionModal({
   }
 
   function handleSkip() {
-    setText('');
     onSkip();
   }
 

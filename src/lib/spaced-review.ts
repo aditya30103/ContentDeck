@@ -53,11 +53,14 @@ export function getReflectionNote(bookmark: Bookmark): string | null {
  * Sorted most-overdue first.
  */
 export function buildReviewQueue(bookmarks: Bookmark[], now = new Date()): Bookmark[] {
-  return bookmarks
-    .filter((b) => b.status === 'done' && getReflectionNote(b) !== null && isDue(b, now))
-    .sort((a, b) => {
-      const aDue = new Date(getReviewState(a).dueAt).getTime();
-      const bDue = new Date(getReviewState(b).dueAt).getTime();
-      return aDue - bDue;
-    });
+  // Compute dueAt once per bookmark to avoid O(2N) getReviewState calls during sort
+  type Ranked = { bookmark: Bookmark; dueMs: number };
+  const eligible: Ranked[] = [];
+  for (const b of bookmarks) {
+    if (b.status !== 'done' || getReflectionNote(b) === null) continue;
+    const dueMs = new Date(getReviewState(b).dueAt).getTime();
+    if (dueMs <= now.getTime()) eligible.push({ bookmark: b, dueMs });
+  }
+  eligible.sort((a, b) => a.dueMs - b.dueMs);
+  return eligible.map((r) => r.bookmark);
 }

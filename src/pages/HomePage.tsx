@@ -258,12 +258,7 @@ function SecondaryCard({ type, bookmark, onOpen, onMarkDone }: SecondaryCardProp
     }
   }
 
-  const ariaLabel =
-    type === 'continue'
-      ? `Continue reading: ${b.title ?? b.url}`
-      : type === 'review'
-        ? `Review: ${b.title ?? b.url}`
-        : `Quick win: ${b.title ?? b.url}`;
+  const ariaLabel = `${cfg.label}: ${b.title ?? b.url}`;
 
   return (
     <div
@@ -515,19 +510,22 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
   }, [pendingDoneBookmark, cycleStatus]);
 
   const handleReviewResponse = useCallback(
-    (resonates: boolean) => {
+    async (resonates: boolean) => {
       if (!pendingReviewBookmark) return;
       const { interval, repetitions } = nextReviewState(pendingReviewBookmark, resonates);
-      updateBookmark.mutate({
-        id: pendingReviewBookmark.id,
-        last_reviewed_at: new Date().toISOString(),
-        metadata: {
-          ...pendingReviewBookmark.metadata,
-          review_interval: interval,
-          review_repetitions: repetitions,
-        },
-      });
-      setPendingReviewBookmark(null);
+      try {
+        await updateBookmark.mutateAsync({
+          id: pendingReviewBookmark.id,
+          last_reviewed_at: new Date().toISOString(),
+          metadata: {
+            ...pendingReviewBookmark.metadata,
+            review_interval: interval,
+            review_repetitions: repetitions,
+          },
+        });
+      } finally {
+        setPendingReviewBookmark(null);
+      }
     },
     [pendingReviewBookmark, updateBookmark],
   );
@@ -538,6 +536,14 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
   }
 
   const hasSecondary = continueItem !== null || quickWin !== null || reviewItem !== null;
+
+  const reviewCard = reviewItem ? (
+    <SecondaryCard
+      type="review"
+      bookmark={reviewItem}
+      onOpen={() => setPendingReviewBookmark(reviewItem)}
+    />
+  ) : null;
 
   return (
     <div
@@ -573,23 +579,13 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
                   onOpen={handleStartReading}
                   onMarkDone={handleMarkDone}
                 />
-              ) : reviewItem ? (
-                <SecondaryCard
-                  type="review"
-                  bookmark={reviewItem}
-                  onOpen={() => setPendingReviewBookmark(reviewItem)}
-                />
               ) : (
-                <div />
+                (reviewCard ?? <div />)
               )}
               {quickWin ? (
                 <SecondaryCard type="quick-win" bookmark={quickWin} onOpen={handleStartReading} />
-              ) : reviewItem && continueItem ? (
-                <SecondaryCard
-                  type="review"
-                  bookmark={reviewItem}
-                  onOpen={() => setPendingReviewBookmark(reviewItem)}
-                />
+              ) : continueItem ? (
+                (reviewCard ?? <div />)
               ) : (
                 <div />
               )}
