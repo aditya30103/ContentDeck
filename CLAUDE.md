@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ContentDeck — a personal content bookmarking PWA dashboard for the Capture → Consume → Reflect → Export workflow. Bridges web browsing and Obsidian knowledge management.
 
-**Status: v3.5 — React + Vite + Tailwind + TypeScript. Supabase Auth, demo mode, PWA share target, Sentry error tracking, GitHub Issues sync, Obsidian export + Community Plugin (Phase A+B complete). Trusted Curator home screen (Values Onboarding + Scoring Engine + Home Screen + Reflection Prompt) complete.**
+**Status: v3.6 — Phase 2 COMPLETE (all 5 Trusted Curator features shipped). Maintenance mode. React + Vite + Tailwind + TypeScript. Supabase Auth, demo mode, PWA share target, Sentry error tracking, GitHub Issues sync, Obsidian export + Community Plugin (Phase A+B complete). Spaced Review (SM-2) complete.**
 
 See `docs/reference/audit.md` for the full audit trail (39/47 v1 issues resolved, 14 v2.0 bugs fixed, 8 v2.2 shipping fixes).
 
@@ -21,7 +21,7 @@ All project docs live in `docs/`. Start each session by reading `docs/INDEX.md`.
 | `docs/guides/` | Development workflow and setup guides |
 | `docs/reference/` | Audit trail, integrations, lookup tables |
 
-**Current phase:** Phase 2 (Trusted Curator) — see `docs/plan/phase-2.md`. 2.0 Obsidian Plugin ✅ · 2.1 Values Onboarding ✅ · 2.2 Scoring Engine ✅ · 2.3 Home Screen ✅ · 2.4 Reflection Prompt ✅. Next: Spaced Review (2.5)
+**Current phase:** Phase 2 (Trusted Curator) — see `docs/plan/phase-2.md`. 2.0 Obsidian Plugin ✅ · 2.1 Values Onboarding ✅ · 2.2 Scoring Engine ✅ · 2.3 Home Screen ✅ · 2.4 Reflection Prompt ✅ · 2.5 Spaced Review ✅ · **Phase 2 COMPLETE. Maintenance mode — no new features planned. Next: Phase 3 or v4.0 Intelligence Layer (deferred).**
 
 ## Tech Stack
 
@@ -88,11 +88,12 @@ supabase/
 - **Loading state:** Inline CSS spinner in `index.html` shown until React mounts (no blank page)
 - **Edge Functions:** All deployed with `--no-verify-jwt`; verify auth in function code. `save-bookmark` accepts `{ token, url, title? }` via query params or JSON body, validates SHA-256 token hash. `extract-content` uses JWT + ownership check, runs Readability, stores in `content` JSONB. `create-github-issue` uses JWT + ownership check, POSTs to GitHub API, writes back `github_issue_number`/`url`.
 - **Sentry:** `enabled: !!VITE_SENTRY_DSN` — completely inert when DSN absent. Edge functions use `console.error` with context (no Sentry SDK in Deno runtime).
+- **Route split (Phase 2.3):** `/` → HomePage (curator-first; requires real data; no demo mode), `/library` → Dashboard (existing library; demo mode stays here)
 
 ## Database (Supabase PostgreSQL)
 
 Schema in `sql/setup.sql` + `sql/feedback.sql` + `sql/20260225_github_issue_tracking.sql`. Key tables:
-- `bookmarks` — user_id, url, title, source_type, status (unread/reading/done), is_favorited, notes (JSONB array), metadata (JSONB), content (JSONB — extracted text/word_count/reading_time), synced
+- `bookmarks` — user_id, url, title, source_type, status (unread/reading/done), is_favorited, notes (JSONB array), metadata (JSONB), content (JSONB — extracted text/word_count/reading_time), synced, last_reviewed_at (timestamptz, nullable)
 - `tag_areas` — user_id, name, emoji, color, sort_order
 - `bookmark_tags` — junction table (scoped via bookmark's user_id)
 - `status_history` — user_id, audit trail for streak/stats calculations
