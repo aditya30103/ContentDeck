@@ -1,11 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect fill="#0a0a0f" width="512" height="512" rx="96"/>
-  <rect x="80" y="120" width="160" height="110" rx="16" fill="#6c63ff" opacity="0.9"/>
-  <rect x="272" y="120" width="160" height="110" rx="16" fill="#ff6b6b" opacity="0.9"/>
-  <rect x="80" y="262" width="160" height="110" rx="16" fill="#4ecdc4" opacity="0.9"/>
-  <rect x="272" y="262" width="160" height="110" rx="16" fill="#f5a623" opacity="0.9"/>
-  <text x="160" y="188" text-anchor="middle" font-family="system-ui,sans-serif" font-size="40" font-weight="bold" fill="white">▶</text>
-  <text x="352" y="188" text-anchor="middle" font-family="system-ui,sans-serif" font-size="36" font-weight="bold" fill="white">𝕏</text>
-  <text x="160" y="330" text-anchor="middle" font-family="system-ui,sans-serif" font-size="36" font-weight="bold" fill="white">✎</text>
-  <text x="352" y="330" text-anchor="middle" font-family="system-ui,sans-serif" font-size="36" font-weight="bold" fill="white">📚</text>
+  <!-- Background -->
+  <rect fill="#09090b" width="512" height="512" rx="96"/>
+
+  <!-- Back bookmark — deck hint, offset right 14px + down 18px -->
+  <path fill="#154f5e"
+    d="M 192 108 L 368 108 Q 388 108 388 128
+       L 388 328 L 280 382 L 172 328 L 172 128
+       Q 172 108 192 108 Z"/>
+
+  <!-- Front bookmark — vibrant teal -->
+  <path fill="#2dd4bf"
+    d="M 178 90 L 354 90 Q 374 90 374 110
+       L 374 310 L 266 364 L 158 310 L 158 110
+       Q 158 90 178 90 Z"/>
+
+  <!-- Diamond curation mark — white, centered in bookmark body -->
+  <polygon fill="#ffffff" points="266,175 298,214 266,253 234,214"/>
 </svg>
