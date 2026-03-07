@@ -1,6 +1,7 @@
 # ContentDeck
 
 [![CI](https://github.com/aditya30103/ContentDeck/actions/workflows/ci.yml/badge.svg)](https://github.com/aditya30103/ContentDeck/actions/workflows/ci.yml)
+[![React Doctor](https://img.shields.io/badge/react--doctor-92%2F100-brightgreen)](https://www.react.doctor/share?p=contentdeck&s=92&w=52&f=27)
 
 A personal content bookmarking PWA built around the **Trusted Curator** paradigm — save from anywhere, get a single confident recommendation for what to read next, reflect with structured notes, review on a spaced schedule, and export to Obsidian.
 
