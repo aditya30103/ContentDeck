@@ -65,7 +65,7 @@ export default function BookmarkCard({
         ${
           selected
             ? 'border-primary-500 bg-primary-600/5 dark:bg-primary-400/5'
-            : 'border-surface-200 dark:border-surface-800 hover:border-surface-300 dark:hover:border-surface-700 bg-white dark:bg-surface-900'
+            : 'border-surface-200 dark:border-surface-800 hover:border-surface-300 dark:hover:border-surface-700 bg-surface-50 dark:bg-surface-900'
         }
       `}
     >

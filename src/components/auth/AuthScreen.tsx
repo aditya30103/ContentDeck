@@ -80,7 +80,7 @@ export default function AuthScreen({ onDemo, onMagicLink, onGoogle, onGitHub }: 
           {FEATURES.map((f) => (
             <div
               key={f.title}
-              className="rounded-xl border border-surface-200 dark:border-surface-800 bg-white dark:bg-surface-900 p-4 text-center"
+              className="rounded-xl border border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 p-4 text-center"
             >
               <div className="mx-auto w-10 h-10 rounded-lg bg-primary-600/10 dark:bg-primary-500/10 flex items-center justify-center mb-3">
                 <f.icon size={20} className="text-primary-600 dark:text-primary-400" />
@@ -115,7 +115,7 @@ export default function AuthScreen({ onDemo, onMagicLink, onGoogle, onGitHub }: 
         </div>
 
         {/* Auth Section */}
-        <div className="rounded-xl border border-surface-200 dark:border-surface-800 bg-white dark:bg-surface-900 p-6 space-y-5">
+        <div className="rounded-xl border border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 p-6 space-y-5">
           {magicLinkSent ? (
             <div className="text-center space-y-3 py-4">
               <div className="mx-auto w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">

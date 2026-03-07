@@ -93,17 +93,17 @@ export default function DetailPanel({
           role="dialog"
           aria-modal="true"
           aria-label="Bookmark details"
-          className="absolute inset-x-0 bottom-0 top-12 bg-white dark:bg-surface-900 rounded-t-2xl shadow-xl overflow-y-auto motion-safe:animate-[slideUp_0.2s_ease-out]"
+          className="absolute inset-x-0 bottom-0 top-12 bg-surface-50 dark:bg-surface-900 rounded-t-2xl shadow-xl overflow-y-auto motion-safe:animate-[slideUp_0.2s_ease-out]"
           style={{ paddingBottom: 'calc(16px + var(--safe-bottom))' }}
         >
           {/* Mobile header */}
-          <div className="sticky top-0 flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 rounded-t-2xl z-10">
+          <div className="sticky top-0 flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900 rounded-t-2xl z-10">
             <h2 className="text-base font-semibold text-surface-900 dark:text-surface-100 truncate">
               Details
             </h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center text-surface-500 dark:text-surface-400"
               aria-label="Close"
             >
               <X size={20} />
@@ -149,15 +149,15 @@ export default function DetailPanel({
       </div>
 
       {/* Desktop: right column panel */}
-      <aside className="hidden lg:flex flex-col w-[400px] h-screen border-l border-surface-200 dark:border-surface-800 bg-white dark:bg-surface-900 overflow-y-auto">
+      <aside className="hidden lg:flex flex-col w-[400px] h-screen border-l border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 z-10">
+        <div className="sticky top-0 flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900 z-10">
           <h2 className="text-base font-semibold text-surface-900 dark:text-surface-100">
             Details
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center text-surface-500 dark:text-surface-400"
             aria-label="Close panel"
           >
             <X size={18} />

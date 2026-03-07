@@ -63,8 +63,8 @@
   --color-surface-950: #150e04;
   --color-primary-400: #d4a340;
   --color-primary-500: #c0891e;
-  --color-primary-600: #a8720c;
-  --color-primary-700: #8c5c00;
+  --color-primary-600: #bf7d18;
+  --color-primary-700: #a06410;
 }
 
 /* Light blue / navy theme */
@@ -84,6 +84,15 @@
   --color-primary-500: #3ea0f0;
   --color-primary-600: #1a85d8;
   --color-primary-700: #0068b8;
+}
+
+/* Themed scrollbars — auto-adapts via surface CSS variables */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-surface-300) transparent;
+}
+.dark * {
+  scrollbar-color: var(--color-surface-600) transparent;
 }
 
 /* Base styles */

@@ -57,7 +57,7 @@ export default function Sidebar({
   const totalCount = counts.unread + counts.reading + counts.done;
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 h-screen bg-white dark:bg-surface-900 border-r border-surface-200 dark:border-surface-800">
+    <aside className="hidden lg:flex flex-col w-64 h-screen bg-surface-50 dark:bg-surface-900 border-r border-surface-200 dark:border-surface-800">
       {/* Header */}
       <div className="p-4 border-b border-surface-200 dark:border-surface-800">
         <h1 className="text-lg font-bold text-surface-900 dark:text-surface-100">ContentDeck</h1>
@@ -157,7 +157,7 @@ export default function Sidebar({
                 className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-colors min-h-[36px]
                     ${
                       currentView === view
-                        ? 'bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-100 shadow-sm'
+                        ? 'bg-surface-50 dark:bg-surface-700 text-surface-900 dark:text-surface-100 shadow-sm'
                         : 'text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-300'
                     }`}
                 aria-label={`${label} view`}

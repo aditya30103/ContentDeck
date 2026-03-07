@@ -81,7 +81,7 @@ export default function SettingsModal({
             className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-colors min-h-[36px] capitalize
               ${
                 activeTab === tab
-                  ? 'bg-white dark:bg-surface-700 text-surface-900 dark:text-surface-100 shadow-sm'
+                  ? 'bg-surface-50 dark:bg-surface-700 text-surface-900 dark:text-surface-100 shadow-sm'
                   : 'text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-300'
               }`}
           >

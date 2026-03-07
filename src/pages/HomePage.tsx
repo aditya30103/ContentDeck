@@ -120,7 +120,7 @@ function PrimaryPickCard({ topPick, isLoading, now, mood, onStartReading }: Prim
 
   if (isLoading) {
     return (
-      <div className="relative rounded-2xl border border-surface-200 dark:border-surface-800 bg-white dark:bg-surface-900 p-5 mb-4 overflow-hidden animate-pulse">
+      <div className="relative rounded-2xl border border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 p-5 mb-4 overflow-hidden animate-pulse">
         <div className="h-3 w-32 bg-surface-200 dark:bg-surface-700 rounded mb-3" />
         <div className="h-5 bg-surface-200 dark:bg-surface-700 rounded mb-2" />
         <div className="h-5 w-3/4 bg-surface-200 dark:bg-surface-700 rounded mb-4" />
@@ -131,7 +131,7 @@ function PrimaryPickCard({ topPick, isLoading, now, mood, onStartReading }: Prim
 
   if (!topPick) {
     return (
-      <div className="rounded-2xl border border-surface-200 dark:border-surface-800 bg-white dark:bg-surface-900 p-6 mb-4 text-center">
+      <div className="rounded-2xl border border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 p-6 mb-4 text-center">
         <p className="text-surface-500 dark:text-surface-400 text-sm mb-3">
           Your queue is clear — nothing left to read.
         </p>
@@ -150,7 +150,7 @@ function PrimaryPickCard({ topPick, isLoading, now, mood, onStartReading }: Prim
   const minutes = getReadingMinutes(bookmark);
 
   return (
-    <div className="relative rounded-2xl border border-surface-200 dark:border-surface-800 bg-white dark:bg-surface-900 p-5 mb-4 overflow-hidden motion-safe:animate-[fadeSlideUp_0.25s_ease-out]">
+    <div className="relative rounded-2xl border border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 p-5 mb-4 overflow-hidden motion-safe:animate-[fadeSlideUp_0.25s_ease-out]">
       {/* Source accent bar */}
       <div
         className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
@@ -267,7 +267,7 @@ function SecondaryCard({ type, bookmark, onOpen, onMarkDone }: SecondaryCardProp
       aria-label={ariaLabel}
       onClick={() => onOpen(b)}
       onKeyDown={handleKeyDown}
-      className="rounded-xl border border-surface-200 dark:border-surface-800 bg-white dark:bg-surface-900 p-4 cursor-pointer hover:border-surface-300 dark:hover:border-surface-700 transition-colors focus-visible:ring-2 min-h-[44px]"
+      className="rounded-xl border border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 p-4 cursor-pointer hover:border-surface-300 dark:hover:border-surface-700 transition-colors focus-visible:ring-2 min-h-[44px]"
     >
       {/* Label row */}
       <div className={`flex items-center gap-1 mb-2 text-xs font-medium ${cfg.color}`}>

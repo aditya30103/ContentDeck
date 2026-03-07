@@ -10,7 +10,7 @@ function getSystemTheme(): 'light' | 'dark' {
 
 function applyTheme(theme: Theme) {
   const resolved = theme === 'system' ? getSystemTheme() : theme;
-  document.documentElement.classList.toggle('dark', resolved === 'dark');
+  document.documentElement.classList.toggle('dark', resolved === 'dark' || resolved === 'navy');
   document.documentElement.classList.toggle('sepia', resolved === 'sepia');
   document.documentElement.classList.toggle('navy', resolved === 'navy');
 }

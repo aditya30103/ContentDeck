@@ -19,7 +19,7 @@ export default function AreaCard({ area, bookmarkCount, onClick, onEdit }: AreaC
           onClick();
         }
       }}
-      className="group relative flex flex-col items-start gap-2 p-4 rounded-xl border border-surface-200 dark:border-surface-800 bg-white dark:bg-surface-900 hover:border-surface-300 dark:hover:border-surface-700 transition-colors text-left w-full min-h-[100px] cursor-pointer focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none"
+      className="group relative flex flex-col items-start gap-2 p-4 rounded-xl border border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 hover:border-surface-300 dark:hover:border-surface-700 transition-colors text-left w-full min-h-[100px] cursor-pointer focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none"
       aria-label={`${area.emoji ? area.emoji + ' ' : ''}${area.name} — ${bookmarkCount} bookmarks`}
     >
       {/* Emoji + Name */}
