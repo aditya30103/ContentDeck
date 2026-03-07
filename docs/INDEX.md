@@ -20,6 +20,7 @@
 | Debugging something that used to work or refer past work | [log/](log/) — completed plan sections link directly to their log; log files link back to their plan section            |
 | Setting up Supabase Auth                                 | [guides/supabase-auth-setup.md](guides/supabase-auth-setup.md)                                                           |
 | Checking what's been fixed                               | [reference/audit.md](reference/audit.md)                                                                                 |
+| Doing any UI work (colors, spacing, components, themes)  | [reference/design-system.md](reference/design-system.md) — read before touching any bg/text/border class                |
 | Looking for integration ideas                            | [reference/integrations.md](reference/integrations.md)                                                                   |
 | Planning infrastructure                                  | [plan/infrastructure.md](plan/infrastructure.md)                                                                         |
 
@@ -65,6 +66,7 @@ docs/
 │   └── supabase-auth-setup.md      # Supabase Auth provider configuration
 └── reference/                      # Lookup tables
     ├── audit.md                    # Bug tracking trail (v1→v2→v2.2)
+    ├── design-system.md            # Color tokens, component catalog, theme rules, spacing, a11y patterns
     └── integrations.md             # Potential integrations & extensions
 ```
 

@@ -124,8 +124,9 @@ The scoring engine is the core of the Trusted Curator paradigm. It must be inter
 - [ ] Modal focus trapping works (Tab cycles within modal, Escape closes)
 - [ ] All icon-only buttons have `aria-label`
 - [ ] Touch targets >= 44x44px on all interactive elements
-- [ ] Dark/light mode: no hardcoded colors outside Tailwind classes
+- [ ] 4-theme compliance: no `bg-white` on panels/cards/modals (should be `bg-surface-50 dark:bg-surface-900`); no `zinc-*`/`gray-*`/`slate-*` tokens; all standalone icon buttons have `text-surface-500 dark:text-surface-400`
 - [ ] Loading states: skeleton/spinner shown during async operations, no layout shift
+- [ ] Token source: source type colors live in `src/index.css` (`--color-source-*`), not in component files. There is no `tailwind.config.ts`.
 
 ---
 
@@ -161,6 +162,7 @@ Compare source code against docs — flag any mismatches:
 - [ ] **`docs/plan/phase-1.md`** — completed items marked correctly
 - [ ] **`README.md`** — features, setup steps, project structure match reality
 - [ ] **`docs/reference/audit.md`** — no stale open issues that have been fixed
+- [ ] **`docs/reference/design-system.md`** — token values match `src/index.css`; component rules match actual component code; if a new UI pattern was established this session, it is recorded here
 - [ ] **`docs/log/`** — every shipped feature has a log entry (no missing logs)
 
 ---

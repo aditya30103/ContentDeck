@@ -18,6 +18,12 @@ Systematic guide for building and auditing UI in ContentDeck. Use this when buil
 
 ---
 
+## Before Starting
+
+**Read `docs/reference/design-system.md` first.** It is the canonical reference for all color tokens, container background rules, border radius, shadow scale, touch targets, typography, and component patterns. The rules below summarize the most critical checks — the design system doc has the full detail.
+
+---
+
 ## Principle: Component-First, Not Screen-First
 
 Don't think "fix the close button." Think "what are all the states this component needs, and are they all handled?" Build and review components in terms of their complete state surface, not individual visual complaints.
@@ -92,34 +98,46 @@ Check:
 
 ---
 
-## Step 5: Dark/Light Mode Compliance
+## Step 5: 4-Theme Compliance
 
-- [ ] No hardcoded color values (`text-gray-500`, `bg-white` without a dark equivalent)
-- [ ] All colors use paired Tailwind classes: `text-surface-600 dark:text-surface-400`
-- [ ] Source type badge colors are defined in `tailwind.config.ts` — do not add new ones in component files
-- [ ] Test by toggling theme in the app: does anything look broken in dark mode?
+ContentDeck has **4 themes** (Light, Dark, Sepia, Navy) — not just dark/light. Every UI change must work in all four. See `docs/reference/design-system.md` for the full token reference.
 
-**Color system — use these token pairs:**
+- [ ] No hardcoded Tailwind color classes (`text-gray-500`, `text-zinc-*`, `text-slate-*`) — use `surface-*` tokens only
+- [ ] All colors use paired classes: `text-surface-600 dark:text-surface-400`
+- [ ] No `bg-white` on panels/cards/modals — use `bg-surface-50` (sepia remaps this to warm cream; `bg-white` ignores it)
+- [ ] All standalone icon/close buttons have explicit text color: `text-surface-500 dark:text-surface-400`
+- [ ] Source type badge colors are defined in `src/index.css` as `--color-source-*` CSS variables — do not add new ones in component files (there is no `tailwind.config.ts`)
+- [ ] After any bg/text/border change: cycle all 4 themes in `npm run dev` and verify
 
-| Use | Light | Dark |
-|-----|-------|------|
-| Page background | `bg-surface-50` | `dark:bg-surface-950` |
-| Card / panel | `bg-white` | `dark:bg-surface-900` |
-| Borders | `border-surface-200` | `dark:border-surface-800` |
-| Primary text | `text-surface-900` | `dark:text-surface-100` |
-| Secondary text | `text-surface-600` | `dark:text-surface-400` |
-| Muted text | `text-surface-400` | `dark:text-surface-500` |
-| Primary action | `bg-primary-600` | (same — primary-600 works in both) |
+**Container background rules (from design-system.md):**
+
+| Surface | Class |
+|---------|-------|
+| Panels, cards, modals, sidebar | `bg-surface-50 dark:bg-surface-900` |
+| Form inputs, textareas, selects | `bg-white dark:bg-surface-800` (intentional white contrast) |
+| Translucent fixed bars | `bg-surface-50/80 dark:bg-surface-900/80 backdrop-blur-md` |
+| Hover state | `hover:bg-surface-100 dark:hover:bg-surface-800` |
+
+**Text color pairs:**
+
+| Use | Classes |
+|-----|---------|
+| Primary content | `text-surface-900 dark:text-surface-100` |
+| Secondary / nav | `text-surface-600 dark:text-surface-400` |
+| Icon / close buttons | `text-surface-500 dark:text-surface-400` |
+| Muted / timestamps | `text-surface-400 dark:text-surface-500` |
 
 ---
 
 ## Step 6: Design Consistency
 
+Read `docs/reference/design-system.md` as the canonical reference. Key rules:
+
 - [ ] New components use existing patterns — don't invent new ones unless the existing ones are wrong
-- [ ] Spacing: use Tailwind scale (`p-4`, `gap-3`, `mt-6`) — no arbitrary values unless justified
-- [ ] Border radius: `rounded-lg` for cards/modals, `rounded-md` for buttons, `rounded-full` for badges/pills
-- [ ] Shadows: `shadow-sm` for elevated cards, none for inline elements
-- [ ] Typography scale: `text-sm` for body, `text-xs` for metadata/labels, `text-lg`/`text-xl` for headings
+- [ ] Spacing: `p-3` for compact cards, `p-4` for panels/modals, `p-5`/`p-6` for prominent sections; `gap-3`/`gap-2` for rows; `space-y-6` for stacked sections
+- [ ] Border radius: `rounded-lg` for buttons/inputs (94× usage), `rounded-xl` for cards (18×), `rounded-2xl` for modals/bottom-sheets (5×), `rounded-full` for pill tags/avatars
+- [ ] Shadows: `shadow-xl` for modals/overlays, `shadow-lg` for toasts, `shadow-sm` for active toggle pill only — cards use borders, not shadows
+- [ ] Typography: `text-sm` for body/buttons (116× usage), `text-xs` for metadata/badges/labels (111×), `text-base` for form inputs (prevents iOS zoom), `text-lg` for modal headings
 
 ---
 
@@ -140,7 +158,7 @@ States:
 Mobile parity: PASS / GAP — [what's missing]
 Touch targets: PASS / FAIL — [which elements]
 Accessibility: PASS / ISSUES — [list]
-Dark mode:     PASS / ISSUES — [list]
+4-theme:       PASS / ISSUES — [list — check Light, Dark, Sepia, Navy]
 Consistency:   PASS / ISSUES — [list]
 
 Priority fixes:

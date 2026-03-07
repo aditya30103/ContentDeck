@@ -19,7 +19,7 @@ All project docs live in `docs/`. Start each session by reading `docs/INDEX.md`.
 | `docs/plan/` | Feature roadmap chunked by phase |
 | `docs/log/` | Implementation records for shipped features |
 | `docs/guides/` | Development workflow and setup guides |
-| `docs/reference/` | Audit trail, integrations, lookup tables |
+| `docs/reference/` | Audit trail, integrations, lookup tables, **design system** |
 
 **Current phase:** Phase 2 (Trusted Curator) — see `docs/plan/phase-2.md`. 2.0 Obsidian Plugin ✅ · 2.1 Values Onboarding ✅ · 2.2 Scoring Engine ✅ · 2.3 Home Screen ✅ · 2.4 Reflection Prompt ✅ · 2.5 Spaced Review ✅ · **Phase 2 COMPLETE. Maintenance mode — no new features planned. Next: Phase 3 or v4.0 Intelligence Layer (deferred).**
 
@@ -77,7 +77,7 @@ supabase/
 - **Supabase Auth:** `useAuth` hook manages session via `supabase.auth`. OAuth callback detected automatically via `onAuthStateChange`. No separate callback page.
 - **Supabase client:** Singleton created from env vars (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`). SupabaseProvider passes it via context; mock client used for demo mode.
 - **All data mutations** use TanStack Query with optimistic updates + automatic rollback on error
-- **Source type colors** defined once in `tailwind.config.ts` (not duplicated in CSS)
+- **Source type colors** defined once in `src/index.css` as `--color-source-*` CSS variables (not duplicated in components). There is no `tailwind.config.ts` — Tailwind v4 uses CSS-first configuration via `@theme` in `index.css`.
 - **Reusable `Modal` component** has focus trapping, ARIA attributes, ESC handling built in
 - **Accessibility first:** `focus-visible:ring-2` on all interactives, proper `<label>` elements, `motion-safe:`/`motion-reduce:` variants. `eslint-plugin-jsx-a11y` enforces a11y rules at lint time.
 - **Clickable cards:** use `<div role="button">` not `<article role="button">` — non-interactive elements cannot take interactive roles per ARIA spec
@@ -89,6 +89,9 @@ supabase/
 - **Edge Functions:** All deployed with `--no-verify-jwt`; verify auth in function code. `save-bookmark` accepts `{ token, url, title? }` via query params or JSON body, validates SHA-256 token hash. `extract-content` uses JWT + ownership check, runs Readability, stores in `content` JSONB. `create-github-issue` uses JWT + ownership check, POSTs to GitHub API, writes back `github_issue_number`/`url`.
 - **Sentry:** `enabled: !!VITE_SENTRY_DSN` — completely inert when DSN absent. Edge functions use `console.error` with context (no Sentry SDK in Deno runtime).
 - **Route split (Phase 2.3):** `/` → HomePage (curator-first; requires real data; no demo mode), `/library` → Dashboard (existing library; demo mode stays here)
+- **Theme pattern:** Container/panel backgrounds → `bg-surface-50 dark:bg-surface-900`. Form inputs keep `bg-white dark:bg-surface-800`. Navy co-applies `.dark` class via `applyTheme()` so all `dark:` variants activate. All close/icon buttons need explicit `text-surface-500 dark:text-surface-400` — icons have no default dark-mode color.
+- **4-theme verification:** Any UI change touching bg/border/text must be checked in all 4 themes (Light, Dark, Sepia, Navy) before shipping.
+- **Design system:** Full token reference, component catalog, spacing conventions, and accessibility patterns live in `docs/reference/design-system.md`. Read it before any UI work.
 
 ## Database (Supabase PostgreSQL)
 

@@ -171,12 +171,13 @@ These features are claimed as shipped. Verify the same set appears in all three 
 
 The next thing to build is stated in: `MEMORY.md`, `docs/INDEX.md`, `docs/plan/phase-1.md`. Verify all three agree and it matches an open GitHub Issue.
 
-### 3d. Skills — co-author and npm scripts
+### 3d. Skills — co-author, npm scripts, and stale references
 
 Read all skill files. Every skill must:
 - Use `npm run <script>` not `npx <tool>`
 - Reference `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` (not Opus)
 - Not reference deleted files (`ENGINEERING-PLAN.md`, `UPGRADE-PLAN.md`, `AUDIT.md`, `WORKFLOW.md`)
+- Not reference `tailwind.config.ts` — that file does not exist. Tailwind v4 is configured via `@theme` in `src/index.css`.
 
 ### 3e. CLAUDE.md vs workflow.md vs skills — branching convention
 
@@ -330,3 +331,5 @@ These are the historical causes of drift in this project. Check these first duri
 11. **philosophy.md not consulted** — feature built without philosophy-first review; may contradict a core principle
 12. **Scoring engine undocumented** — `src/lib/scoring.ts` changes not reflected in phase-2.md scoring formula docs
 13. **Route architecture drift** — new routes added without updating the `/` → home, `/library` → library convention in vision.md and phase-2.md
+14. **Theme token drift** — new UI surfaces added using `bg-white` (ignores sepia remapping) or `zinc-*`/`gray-*`/`slate-*` tokens (hardcoded, bypass CSS variable theming) instead of `surface-*` tokens; or `tailwind.config.ts` referenced (does not exist — Tailwind v4 is CSS-first via `src/index.css`)
+15. **design-system.md not updated** — new UI pattern established but `docs/reference/design-system.md` not updated to reflect it

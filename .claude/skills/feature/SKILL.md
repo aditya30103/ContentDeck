@@ -57,6 +57,7 @@ Complete workflow for developing features professionally: branch → plan → im
 1. **Write code** following `CLAUDE.md` patterns:
    - Use existing conventions (TanStack Query, Supabase client, etc.)
    - Follow TypeScript strict mode
+   - For any UI work: read `docs/reference/design-system.md` before touching bg/text/border classes. Use `surface-*` tokens, never `zinc-*`/`gray-*`/`slate-*`. Panels use `bg-surface-50 dark:bg-surface-900`, not `bg-white`.
    - Maintain accessibility standards (44px touch targets, ARIA, focus-visible)
    - Use `type` imports for type-only imports
 
@@ -89,6 +90,7 @@ All five must pass with zero errors before proceeding to Phase 4.
    - `CLAUDE.md` — if architecture, patterns, or rules changed
    - `README.md` — if user-facing features changed
    - `docs/reference/audit.md` — if bugs were found/fixed
+   - `docs/reference/design-system.md` — if any new UI pattern or token convention was established
 
 2. **Bump SW cache version** in `public/sw.js` if `src/` or `public/` changed.
 

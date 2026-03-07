@@ -34,6 +34,9 @@ Check if any of these files need updates based on what changed this session:
 - **`CLAUDE.md`** — Architecture, key patterns, important rules. Update if new files, patterns, or conventions were added.
 - **`README.md`** — User-facing docs. Update if features, setup steps, or project structure changed.
 - **`docs/reference/audit.md`** — Bug tracking. Update if bugs were found and fixed.
+- **`docs/reference/design-system.md`** — If any new UI pattern, token, component, or convention was established this session, update it here. The design system doc is only useful if it stays current.
+
+If this session included UI changes: visually verify all 4 themes (Light, Dark, Sepia, Navy) in `npm run dev` before committing.
 
 Only update what actually changed. But always check `docs/log/` — a missing log for a shipped feature is a documentation debt.
 
