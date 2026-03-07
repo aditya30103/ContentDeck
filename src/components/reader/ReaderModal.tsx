@@ -274,7 +274,7 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
                 if (block.type === 'heading') {
                   return (
                     <h2
-                      key={i}
+                      key={`heading-${i}`}
                       className={`text-lg font-semibold leading-snug mt-10 mb-3 first:mt-0 ${
                         theme === 'dark'
                           ? 'text-surface-100'
@@ -291,11 +291,11 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
                 if (block.type === 'list') {
                   return (
                     <ul
-                      key={i}
+                      key={`list-${i}`}
                       className={`list-disc ml-6 space-y-2 mb-5 leading-[1.75] ${subtleText}`}
                     >
                       {block.items.map((item, j) => (
-                        <li key={j} className="pl-1">
+                        <li key={`item-${j}`} className="pl-1">
                           <span
                             className={
                               theme === 'dark'
@@ -315,9 +315,9 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
 
                 // paragraph
                 return (
-                  <p key={i} className="mb-5 leading-[1.8]">
+                  <p key={`para-${i}`} className="mb-5 leading-[1.8]">
                     {block.text.split('\n').map((line, j, arr) => (
-                      <span key={j}>
+                      <span key={`line-${j}`}>
                         {line}
                         {j < arr.length - 1 && <br />}
                       </span>
