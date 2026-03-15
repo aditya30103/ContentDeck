@@ -95,13 +95,21 @@ describe('App', () => {
 
   it('renders loading spinner while auth is loading', () => {
     mockUseAuth.mockReturnValue(authState({ loading: true }));
-    const { container } = render(<App />);
+    const { container } = render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+    );
     expect(container.querySelector('.animate-spin')).toBeTruthy();
   });
 
   it('renders AuthScreen when not logged in and not demo', () => {
     mockUseAuth.mockReturnValue(authState());
-    render(<App />);
+    render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+    );
     expect(screen.getByTestId('auth-screen')).toBeInTheDocument();
   });
 

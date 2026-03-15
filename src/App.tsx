@@ -1,5 +1,6 @@
 import { useMemo, useCallback } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from './hooks/useAuth';
 import { useTheme } from './hooks/useTheme';
 import { SupabaseProvider } from './context/SupabaseProvider';
@@ -26,6 +27,7 @@ export default function App() {
   const { user, loading, signInWithMagicLink, signInWithGoogle, signInWithGitHub, signOut } =
     useAuth();
   useTheme();
+  const location = useLocation();
 
   const isDemo = localStorage.getItem(DEMO_KEY) === 'true';
   const mockClient = useMemo(() => (isDemo ? createMockSupabaseClient() : undefined), [isDemo]);
@@ -86,30 +88,46 @@ export default function App() {
               Skip to main content
             </a>
             {isDemo ? <DemoBanner onSignIn={handleExitDemo} /> : <UpdateBanner />}
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <HomePage
-                    userEmail={userEmail}
-                    onSignOut={isDemo ? handleExitDemo : handleSignOut}
-                    isDemo={isDemo}
-                  />
-                }
-              />
-              <Route
-                path="/library"
-                element={
-                  <Dashboard
-                    userEmail={userEmail}
-                    onSignOut={isDemo ? handleExitDemo : handleSignOut}
-                    isDemo={isDemo}
-                    sharedUrl={sharedUrl}
-                  />
-                }
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <AnimatePresence mode="wait">
+              <Routes location={location} key={location.key}>
+                <Route
+                  path="/"
+                  element={
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <HomePage
+                        userEmail={userEmail}
+                        onSignOut={isDemo ? handleExitDemo : handleSignOut}
+                        isDemo={isDemo}
+                      />
+                    </motion.div>
+                  }
+                />
+                <Route
+                  path="/library"
+                  element={
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Dashboard
+                        userEmail={userEmail}
+                        onSignOut={isDemo ? handleExitDemo : handleSignOut}
+                        isDemo={isDemo}
+                        sharedUrl={sharedUrl}
+                      />
+                    </motion.div>
+                  }
+                />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </AnimatePresence>
           </ToastProvider>
         </UIProvider>
       </SupabaseProvider>
