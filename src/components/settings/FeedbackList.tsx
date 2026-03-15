@@ -158,7 +158,7 @@ function FeedbackCard({ item }: { item: FeedbackItem }) {
           id={`status-select-${item.id}`}
           value={selectedStatus}
           onChange={(e) => handleStatusChange(e.target.value as FeedbackStatus)}
-          className="text-xs px-2 py-1 rounded border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-700 dark:text-surface-300 min-h-[32px]"
+          className="text-base px-2 py-1 rounded border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-700 dark:text-surface-300 min-h-[44px]"
         >
           <option value="open">Open</option>
           <option value="investigating">Investigating</option>
@@ -175,7 +175,7 @@ function FeedbackCard({ item }: { item: FeedbackItem }) {
             placeholder="Resolution note (optional)"
             value={resolutionNote}
             onChange={(e) => setResolutionNote(e.target.value)}
-            className="w-full text-xs px-2.5 py-1.5 rounded border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 min-h-[36px]"
+            className="w-full text-base px-2.5 py-1.5 rounded border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-surface-100 placeholder:text-surface-400 min-h-[44px]"
           />
           <div className="flex gap-2">
             <button
