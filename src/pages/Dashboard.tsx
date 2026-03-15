@@ -354,6 +354,9 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
             setFeedbackBookmark(activeBookmark);
             setShowFeedback(true);
           }}
+          onRefresh={() => {
+            queryClient.invalidateQueries();
+          }}
           showSearch={showSearch}
         >
           {metaProgress && (
