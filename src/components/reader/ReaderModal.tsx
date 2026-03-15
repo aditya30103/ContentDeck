@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { X, BookOpen, Type } from 'lucide-react';
 import { useReaderPrefs } from '../../hooks/useReaderPrefs';
 import { parseContentBlocks } from '../../lib/reader';
@@ -74,6 +75,8 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
   const { fontSize, fontFamily, theme, update } = useReaderPrefs();
   const [scrollProgress, setScrollProgress] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const opacity = useTransform(x, [0, 200], [1, 0.7]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -152,11 +155,21 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
   };
 
   return (
-    <div
+    <motion.div
       className={`fixed inset-0 z-[60] flex flex-col ${themeClasses}`}
       role="dialog"
       aria-modal="true"
       aria-label={`Reading: ${bookmark.title ?? 'Article'}`}
+      style={{ x, opacity }}
+      drag="x"
+      dragDirectionLock
+      dragConstraints={{ left: 0, right: typeof window !== 'undefined' ? window.innerWidth : 400 }}
+      dragElastic={{ left: 0, right: 0.3 }}
+      onDragEnd={(_, info) => {
+        if (info.offset.x >= 80 || info.velocity.x >= 400) {
+          onClose();
+        }
+      }}
     >
       {/* Progress bar */}
       <div className="h-0.5 w-full bg-transparent">
@@ -358,6 +371,6 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
           <span className="text-xs font-medium text-green-600 dark:text-green-400">✓ Done</span>
         )}
       </footer>
-    </div>
+    </motion.div>
   );
 }
