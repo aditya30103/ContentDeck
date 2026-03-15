@@ -39,8 +39,7 @@ export function usePullToRefresh(
       const container = scrollRef.current;
 
       // Only track pulls from top of the page (scrollTop at 0)
-      const currentScroll =
-        (container as unknown as { scrollTop?: number })?.scrollTop || 0;
+      const currentScroll = (container as unknown as { scrollTop?: number })?.scrollTop || 0;
       if (currentScroll > 0) {
         pullDistanceRef.current = 0;
         setPulling(false);

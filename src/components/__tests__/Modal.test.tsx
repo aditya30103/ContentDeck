@@ -7,22 +7,15 @@ import Modal from '../ui/Modal';
 vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   motion: {
-    div: React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-      (props, ref) => {
-        // Strip framer-specific props that aren't valid HTML attributes
-        const {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          children,
-          ...divProps
-        } = props;
-        return (
-          // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- mock only; keyboard users have ESC via document handler
-          <div ref={ref} {...divProps}>
-            {children}
-          </div>
-        );
-      },
-    ),
+    div: React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>((props, ref) => {
+      // Strip framer-specific props that aren't valid HTML attributes
+      const { children, ...divProps } = props;
+      return (
+        <div ref={ref} {...divProps}>
+          {children}
+        </div>
+      );
+    }),
   },
 }));
 

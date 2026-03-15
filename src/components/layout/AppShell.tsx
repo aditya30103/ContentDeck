@@ -31,7 +31,10 @@ export default function AppShell({
   children,
 }: AppShellProps) {
   const mainRef = useRef<HTMLElement>(null);
-  const { pullDistance, isPulling, isRefreshing } = usePullToRefresh(mainRef, onRefresh || (() => {}));
+  const { pullDistance, isPulling, isRefreshing } = usePullToRefresh(
+    mainRef,
+    onRefresh || (() => {}),
+  );
   const pullTop = useTransform(pullDistance, (v) => `calc(${v}px + 12px)`);
   const pullOpacity = useTransform(pullDistance, [0, 32], [0, 1]);
 
