@@ -1,21 +1,9 @@
-import {
-  Search,
-  Sun,
-  Moon,
-  BookOpen,
-  Plus,
-  Settings,
-  MessageSquare,
-  BarChart3,
-} from 'lucide-react';
-import { useTheme } from '../../hooks/useTheme';
+import { Search, Plus, Settings } from 'lucide-react';
 
 interface MobileHeaderProps {
   onAdd: () => void;
   onToggleSearch: () => void;
   onSettings: () => void;
-  onStats: () => void;
-  onFeedback: () => void;
   showSearch: boolean;
 }
 
@@ -23,17 +11,15 @@ export default function MobileHeader({
   onAdd,
   onToggleSearch,
   onSettings,
-  onStats,
-  onFeedback,
 }: MobileHeaderProps) {
-  const { toggleTheme, theme } = useTheme();
-
   return (
     <header
       className="lg:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-surface-50/80 dark:bg-surface-900/80 backdrop-blur-md border-b border-surface-200 dark:border-surface-800"
       style={{ paddingTop: 'calc(12px + var(--safe-top))' }}
     >
-      <h1 className="text-lg font-bold text-surface-900 dark:text-surface-100">ContentDeck</h1>
+      <h1 className="text-lg font-bold text-surface-900 dark:text-surface-100">
+        ContentDeck
+      </h1>
       <div className="flex items-center gap-1">
         <button
           onClick={onToggleSearch}
@@ -48,35 +34,6 @@ export default function MobileHeader({
           aria-label="Settings"
         >
           <Settings size={20} className="text-surface-600 dark:text-surface-400" />
-        </button>
-        <button
-          onClick={onStats}
-          className="p-2.5 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center"
-          aria-label="View statistics"
-        >
-          <BarChart3 size={20} className="text-surface-600 dark:text-surface-400" />
-        </button>
-        <button
-          onClick={onFeedback}
-          className="p-2.5 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center"
-          aria-label="Send feedback"
-        >
-          <MessageSquare size={20} className="text-surface-600 dark:text-surface-400" />
-        </button>
-        <button
-          onClick={toggleTheme}
-          className="p-2.5 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center"
-          aria-label="Cycle theme"
-        >
-          {theme === 'dark' ? (
-            <Sun size={20} className="text-surface-400" />
-          ) : theme === 'sepia' ? (
-            <Moon size={20} className="text-surface-600" />
-          ) : theme === 'navy' ? (
-            <BookOpen size={20} className="text-surface-600" />
-          ) : (
-            <Moon size={20} className="text-surface-600" />
-          )}
         </button>
         <button
           onClick={onAdd}

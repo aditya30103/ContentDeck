@@ -44,8 +44,6 @@ export default function AppShell({
           onAdd={onAdd}
           onToggleSearch={onToggleSearch}
           onSettings={onSettings}
-          onStats={onStats}
-          onFeedback={onFeedback}
           showSearch={showSearch}
         />
 
