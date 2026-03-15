@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { motion, useTransform } from 'framer-motion';
 import { usePullToRefresh } from '../../hooks/usePullToRefresh';
 import Sidebar from './Sidebar';
 import MobileHeader from './MobileHeader';
@@ -30,7 +31,9 @@ export default function AppShell({
   children,
 }: AppShellProps) {
   const mainRef = useRef<HTMLElement>(null);
-  const { pullDistance, isPulling } = usePullToRefresh(mainRef.current, onRefresh || (() => {}));
+  const { pullDistance, isPulling, isRefreshing } = usePullToRefresh(mainRef, onRefresh || (() => {}));
+  const pullTop = useTransform(pullDistance, (v) => `calc(${v}px + 12px)`);
+  const pullOpacity = useTransform(pullDistance, [0, 32], [0, 1]);
 
   return (
     <div className="flex flex-1 min-w-0">
@@ -55,21 +58,20 @@ export default function AppShell({
         />
 
         {/* Pull indicator */}
-        {pullDistance > 0 && (
-          <div
-            className={`absolute left-1/2 -translate-x-1/2 px-3 py-2 rounded-full text-xs font-medium transition-all ${
-              isPulling
-                ? 'bg-primary-600 text-white'
-                : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-400'
-            }`}
-            style={{
-              top: `calc(${pullDistance}px + 12px)`,
-              opacity: Math.min(1, pullDistance / 32),
-            }}
-          >
-            {isPulling ? 'Release to refresh' : 'Pull to refresh'}
-          </div>
-        )}
+        <motion.div
+          className={`absolute left-1/2 -translate-x-1/2 px-3 py-2 rounded-full text-xs font-medium transition-colors ${
+            isPulling
+              ? 'bg-primary-600 text-white'
+              : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-400'
+          }`}
+          style={{
+            top: pullTop,
+            opacity: pullOpacity,
+            pointerEvents: 'none',
+          }}
+        >
+          {isRefreshing ? 'Refreshing…' : isPulling ? 'Release to refresh' : 'Pull to refresh'}
+        </motion.div>
 
         {/* Content Area */}
         <main

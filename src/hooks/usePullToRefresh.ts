@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useMotionValue } from 'framer-motion';
+import { useMotionValue, type MotionValue } from 'framer-motion';
 
 interface UsePullToRefreshReturn {
-  pullDistance: number;
+  pullDistance: MotionValue<number>;
   isPulling: boolean;
-  pullY: ReturnType<typeof useMotionValue<number>>;
+  isRefreshing: boolean;
 }
 
 /**
@@ -13,14 +13,14 @@ interface UsePullToRefreshReturn {
  * and triggers callback when user pulls past 64px threshold.
  */
 export function usePullToRefresh(
-  container: HTMLElement | null,
-  onRefresh: () => void,
+  scrollRef: React.RefObject<HTMLElement>,
+  onRefresh: () => void | Promise<void>,
 ): UsePullToRefreshReturn {
-  const [pullDistance, setPullDistance] = useState(0);
   const [isPulling, setPulling] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const startYRef = useRef(0);
   const pullDistanceRef = useRef(0);
-  const pullY = useMotionValue(0);
+  const pullDistance = useMotionValue(0);
   const THRESHOLD = 64; // pixels
   const RESISTANCE = 0.5; // Resistance factor for over-pull
 
@@ -36,13 +36,15 @@ export function usePullToRefresh(
     (e: TouchEvent) => {
       if (!e.touches.length) return;
 
+      const container = scrollRef.current;
+
       // Only track pulls from top of the page (scrollTop at 0)
       const currentScroll =
         (container as unknown as { scrollTop?: number })?.scrollTop || 0;
       if (currentScroll > 0) {
-        setPullDistance(0);
         pullDistanceRef.current = 0;
         setPulling(false);
+        pullDistance.set(0);
         return;
       }
 
@@ -55,32 +57,37 @@ export function usePullToRefresh(
       if (diff > 0) {
         // Apply resistance curve: distance decreases in sensitivity as it gets larger
         const resistedDistance = diff * RESISTANCE;
-        setPullDistance(resistedDistance);
         pullDistanceRef.current = resistedDistance;
         setPulling(resistedDistance >= THRESHOLD);
-        pullY.set(resistedDistance);
+        pullDistance.set(resistedDistance);
       } else {
-        setPullDistance(0);
         pullDistanceRef.current = 0;
         setPulling(false);
-        pullY.set(0);
+        pullDistance.set(0);
       }
     },
-    [container, pullY, THRESHOLD, RESISTANCE],
+    [scrollRef, pullDistance, THRESHOLD, RESISTANCE],
   );
 
   const handleTouchEnd = useCallback(() => {
     if (pullDistanceRef.current >= THRESHOLD) {
-      onRefresh();
+      const result = onRefresh();
+      if (result && typeof result.then === 'function') {
+        setIsRefreshing(true);
+        void result.finally(() => setIsRefreshing(false));
+      } else {
+        setIsRefreshing(true);
+        setTimeout(() => setIsRefreshing(false), 1000);
+      }
     }
     // Reset
-    setPullDistance(0);
     pullDistanceRef.current = 0;
     setPulling(false);
-    pullY.set(0);
-  }, [onRefresh, pullY, THRESHOLD]);
+    pullDistance.set(0);
+  }, [onRefresh, pullDistance, THRESHOLD]);
 
   useEffect(() => {
+    const container = scrollRef.current;
     if (!container) return;
 
     container.addEventListener('touchstart', handleTouchStart);
@@ -92,11 +99,11 @@ export function usePullToRefresh(
       container.removeEventListener('touchmove', handleTouchMove);
       container.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [container, handleTouchStart, handleTouchMove, handleTouchEnd]);
+  }, [scrollRef, handleTouchStart, handleTouchMove, handleTouchEnd]);
 
   return {
     pullDistance,
     isPulling,
-    pullY,
+    isRefreshing,
   };
 }
