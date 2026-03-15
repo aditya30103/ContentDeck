@@ -98,10 +98,15 @@
 /* Base styles */
 html {
   scroll-behavior: smooth;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 /* Focus visible for accessibility */
@@ -125,6 +130,13 @@ body {
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* iOS auto-zoom prevention — any input below 16px triggers zoom on focus */
+input,
+textarea,
+select {
+  font-size: max(16px, 1rem);
 }
 
 @keyframes fadeSlideUp {
