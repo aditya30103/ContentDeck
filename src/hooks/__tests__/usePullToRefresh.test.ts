@@ -63,7 +63,7 @@ describe('usePullToRefresh', () => {
 
   it('calls onRefresh callback when released above 64px threshold', () => {
     const mockOnRefresh = vi.fn();
-    const { result } = renderHook(() => usePullToRefresh(containerEl, mockOnRefresh));
+    renderHook(() => usePullToRefresh(containerEl, mockOnRefresh));
 
     act(() => {
       const touchStart = new TouchEvent('touchstart', {

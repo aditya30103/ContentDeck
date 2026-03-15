@@ -58,11 +58,14 @@ export default function DetailPanel({
 
   if (!bookmark) return null;
 
-  const handleDragEnd = (event: { offset?: { y?: number }; velocity?: { y?: number } }) => {
+  const handleDragEnd = (
+    _event: TouchEvent | MouseEvent | PointerEvent,
+    info: { offset?: { y?: number }; velocity?: { y?: number } },
+  ) => {
     const panelHeight = panelRef.current?.offsetHeight || 400;
     const dragThreshold = panelHeight * 0.4; // 40% of panel height
-    const offset = event.offset?.y ?? 0;
-    const velocity = event.velocity?.y ?? 0;
+    const offset = info.offset?.y ?? 0;
+    const velocity = info.velocity?.y ?? 0;
 
     // Dismiss if dragged down > 40% of height OR velocity > 500px/s
     if (offset > dragThreshold || velocity > 500) {
@@ -135,63 +138,63 @@ export default function DetailPanel({
                 dragElastic={0.2}
                 onDragEnd={handleDragEnd}
               >
-          {/* Mobile header with drag handle */}
-          <div
-            className="sticky top-0 flex flex-col items-center p-2 bg-surface-50 dark:bg-surface-900 rounded-t-2xl z-10 cursor-grab active:cursor-grabbing"
-            style={{ touchAction: 'none' }}
-          >
-            {/* Drag handle pill */}
-            <div className="w-12 h-1 rounded-full bg-surface-300 dark:bg-surface-700 mb-3" />
+                {/* Mobile header with drag handle */}
+                <div
+                  className="sticky top-0 flex flex-col items-center p-2 bg-surface-50 dark:bg-surface-900 rounded-t-2xl z-10 cursor-grab active:cursor-grabbing"
+                  style={{ touchAction: 'none' }}
+                >
+                  {/* Drag handle pill */}
+                  <div className="w-12 h-1 rounded-full bg-surface-300 dark:bg-surface-700 mb-3" />
 
-            <div className="flex items-center justify-between w-full px-2 border-b border-surface-200 dark:border-surface-700 pb-4">
-              <h2 className="text-base font-semibold text-surface-900 dark:text-surface-100 truncate">
-                Details
-              </h2>
-              <button
-                onClick={onClose}
-                className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center text-surface-500 dark:text-surface-400"
-                aria-label="Close"
-              >
-                <X size={20} />
-              </button>
-            </div>
-          </div>
+                  <div className="flex items-center justify-between w-full px-2 border-b border-surface-200 dark:border-surface-700 pb-4">
+                    <h2 className="text-base font-semibold text-surface-900 dark:text-surface-100 truncate">
+                      Details
+                    </h2>
+                    <button
+                      onClick={onClose}
+                      className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center text-surface-500 dark:text-surface-400"
+                      aria-label="Close"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                </div>
 
-          <div className="p-4 space-y-6">
-            <MetadataHeader
-              bookmark={bookmark}
-              onCycleStatus={onCycleStatus}
-              onToggleFavorite={onToggleFavorite}
-              onRefreshMetadata={onRefreshMetadata}
-              isRefreshing={isRefreshing}
-            />
-            {(canRead || isExtracting) && (
-              <button
-                onClick={() => setShowReader(true)}
-                disabled={!canRead}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
-                aria-label={isExtracting ? 'Extracting content…' : 'Open reader mode'}
-              >
-                <BookOpen size={16} />
-                {isExtracting ? 'Extracting…' : 'Read'}
-              </button>
-            )}
-            <NotesTab
-              notes={bookmark.notes}
-              onAddNote={(type, content) => onAddNote(bookmark.id, type, content)}
-              onDeleteNote={(index) => onDeleteNote(bookmark.id, index)}
-              isPending={isNotePending}
-            />
-            <DetailActions
-              bookmark={bookmark}
-              onEdit={() => {
-                onClose();
-                onEdit(bookmark);
-              }}
-              onExport={() => onExport(bookmark)}
-              onDelete={handleDelete}
-            />
-          </div>
+                <div className="p-4 space-y-6">
+                  <MetadataHeader
+                    bookmark={bookmark}
+                    onCycleStatus={onCycleStatus}
+                    onToggleFavorite={onToggleFavorite}
+                    onRefreshMetadata={onRefreshMetadata}
+                    isRefreshing={isRefreshing}
+                  />
+                  {(canRead || isExtracting) && (
+                    <button
+                      onClick={() => setShowReader(true)}
+                      disabled={!canRead}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
+                      aria-label={isExtracting ? 'Extracting content…' : 'Open reader mode'}
+                    >
+                      <BookOpen size={16} />
+                      {isExtracting ? 'Extracting…' : 'Read'}
+                    </button>
+                  )}
+                  <NotesTab
+                    notes={bookmark.notes}
+                    onAddNote={(type, content) => onAddNote(bookmark.id, type, content)}
+                    onDeleteNote={(index) => onDeleteNote(bookmark.id, index)}
+                    isPending={isNotePending}
+                  />
+                  <DetailActions
+                    bookmark={bookmark}
+                    onEdit={() => {
+                      onClose();
+                      onEdit(bookmark);
+                    }}
+                    onExport={() => onExport(bookmark)}
+                    onDelete={handleDelete}
+                  />
+                </div>
               </motion.div>
             </motion.div>
           </>

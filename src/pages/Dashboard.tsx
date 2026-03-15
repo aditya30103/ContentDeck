@@ -355,7 +355,7 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
             setShowFeedback(true);
           }}
           onRefresh={() => {
-            queryClient.invalidateQueries();
+            void queryClient.invalidateQueries();
           }}
           showSearch={showSearch}
         >

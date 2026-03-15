@@ -4,7 +4,7 @@ import { useMotionValue } from 'framer-motion';
 interface UsePullToRefreshReturn {
   pullDistance: number;
   isPulling: boolean;
-  pullY: any; // Framer Motion MotionValue
+  pullY: ReturnType<typeof useMotionValue<number>>;
 }
 
 /**
@@ -25,8 +25,11 @@ export function usePullToRefresh(
   const RESISTANCE = 0.5; // Resistance factor for over-pull
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
-    if (!e.touches.length) return;
-    startYRef.current = e.touches[0].clientY;
+    if (e.touches.length === 0) return;
+    const touch = e.touches[0];
+    if (touch) {
+      startYRef.current = touch.clientY;
+    }
   }, []);
 
   const handleTouchMove = useCallback(
@@ -34,7 +37,8 @@ export function usePullToRefresh(
       if (!e.touches.length) return;
 
       // Only track pulls from top of the page (scrollTop at 0)
-      const currentScroll = (container as any)?.scrollTop || 0;
+      const currentScroll =
+        (container as unknown as { scrollTop?: number })?.scrollTop || 0;
       if (currentScroll > 0) {
         setPullDistance(0);
         pullDistanceRef.current = 0;
@@ -42,7 +46,9 @@ export function usePullToRefresh(
         return;
       }
 
-      const currentY = e.touches[0].clientY;
+      const touch = e.touches[0];
+      if (!touch) return;
+      const currentY = touch.clientY;
       const diff = currentY - startYRef.current;
 
       // Only track downward pulls

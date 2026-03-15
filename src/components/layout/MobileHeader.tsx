@@ -7,19 +7,13 @@ interface MobileHeaderProps {
   showSearch: boolean;
 }
 
-export default function MobileHeader({
-  onAdd,
-  onToggleSearch,
-  onSettings,
-}: MobileHeaderProps) {
+export default function MobileHeader({ onAdd, onToggleSearch, onSettings }: MobileHeaderProps) {
   return (
     <header
       className="lg:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-surface-50/80 dark:bg-surface-900/80 backdrop-blur-md border-b border-surface-200 dark:border-surface-800"
       style={{ paddingTop: 'calc(12px + var(--safe-top))' }}
     >
-      <h1 className="text-lg font-bold text-surface-900 dark:text-surface-100">
-        ContentDeck
-      </h1>
+      <h1 className="text-lg font-bold text-surface-900 dark:text-surface-100">ContentDeck</h1>
       <div className="flex items-center gap-1">
         <button
           onClick={onToggleSearch}
