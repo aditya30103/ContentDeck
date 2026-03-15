@@ -53,7 +53,10 @@ export default function AppShell({
         <main
           id="main-content"
           className="flex-1 overflow-y-auto"
-          style={{ paddingBottom: 'calc(72px + var(--safe-bottom))' }}
+          style={{
+            paddingBottom: 'calc(72px + var(--safe-bottom))',
+            overscrollBehavior: 'contain',
+          }}
         >
           {children}
         </main>
