@@ -32,3 +32,6 @@ rename-project.bat
 
 # Obsidian workspace config
 .obsidian/
+
+# Brainstorm mockups
+.superpowers/
