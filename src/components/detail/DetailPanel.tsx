@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence, useTransform, useMotionValue } from 'framer-motion';
 import { X, BookOpen } from 'lucide-react';
 import MetadataHeader from './MetadataHeader';
 import NotesTab from './NotesTab';
@@ -38,6 +39,8 @@ export default function DetailPanel({
   const [showReader, setShowReader] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const dragY = useMotionValue(0);
+  const backdropOpacity = useTransform(dragY, [0, 300], [0.5, 0]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -54,6 +57,21 @@ export default function DetailPanel({
   }, [bookmark, handleKeyDown]);
 
   if (!bookmark) return null;
+
+  const handleDragEnd = (event: { offset?: { y?: number }; velocity?: { y?: number } }) => {
+    const panelHeight = panelRef.current?.offsetHeight || 400;
+    const dragThreshold = panelHeight * 0.4; // 40% of panel height
+    const offset = event.offset?.y ?? 0;
+    const velocity = event.velocity?.y ?? 0;
+
+    // Dismiss if dragged down > 40% of height OR velocity > 500px/s
+    if (offset > dragThreshold || velocity > 500) {
+      onClose();
+    } else {
+      // Snap back
+      dragY.set(0);
+    }
+  };
 
   const canRead = bookmark.content_status === 'success' && !!bookmark.content?.text;
   const isExtracting =
@@ -77,37 +95,66 @@ export default function DetailPanel({
       />
 
       {/* Mobile: full-screen slide-up overlay */}
-      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- backdrop click-to-close is progressive enhancement; keyboard users have ESC via document-level handler */}
-      <div
-        ref={overlayRef}
-        className="lg:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
-        onClick={(e) => {
-          if (e.target === overlayRef.current) onClose();
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') onClose();
-        }}
-      >
-        <div
-          ref={panelRef}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Bookmark details"
-          className="absolute inset-x-0 bottom-0 top-12 bg-surface-50 dark:bg-surface-900 rounded-t-2xl shadow-xl overflow-y-auto motion-safe:animate-[slideUp_0.2s_ease-out]"
-          style={{ paddingBottom: 'calc(16px + var(--safe-bottom))' }}
-        >
-          {/* Mobile header */}
-          <div className="sticky top-0 flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900 rounded-t-2xl z-10">
-            <h2 className="text-base font-semibold text-surface-900 dark:text-surface-100 truncate">
-              Details
-            </h2>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center text-surface-500 dark:text-surface-400"
-              aria-label="Close"
+      <AnimatePresence>
+        {bookmark && (
+          <>
+            <motion.div
+              ref={overlayRef}
+              className="lg:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              style={{ opacity: backdropOpacity }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={(e) => {
+                if (e.target === overlayRef.current) onClose();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') onClose();
+              }}
             >
-              <X size={20} />
-            </button>
+              <motion.div
+                ref={panelRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Bookmark details"
+                className="absolute inset-x-0 bottom-0 top-12 bg-surface-50 dark:bg-surface-900 rounded-t-2xl shadow-xl overflow-y-auto"
+                style={{
+                  paddingBottom: 'calc(16px + var(--safe-bottom))',
+                  y: dragY,
+                }}
+                initial={{ y: 500 }}
+                animate={{ y: 0 }}
+                exit={{ y: 500 }}
+                transition={{
+                  type: 'spring',
+                  damping: 25,
+                  stiffness: 500,
+                }}
+                drag="y"
+                dragConstraints={{ top: 0 }}
+                dragElastic={0.2}
+                onDragEnd={handleDragEnd}
+              >
+          {/* Mobile header with drag handle */}
+          <div
+            className="sticky top-0 flex flex-col items-center p-2 bg-surface-50 dark:bg-surface-900 rounded-t-2xl z-10 cursor-grab active:cursor-grabbing"
+            style={{ touchAction: 'none' }}
+          >
+            {/* Drag handle pill */}
+            <div className="w-12 h-1 rounded-full bg-surface-300 dark:bg-surface-700 mb-3" />
+
+            <div className="flex items-center justify-between w-full px-2 border-b border-surface-200 dark:border-surface-700 pb-4">
+              <h2 className="text-base font-semibold text-surface-900 dark:text-surface-100 truncate">
+                Details
+              </h2>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center text-surface-500 dark:text-surface-400"
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
+            </div>
           </div>
 
           <div className="p-4 space-y-6">
@@ -145,8 +192,11 @@ export default function DetailPanel({
               onDelete={handleDelete}
             />
           </div>
-        </div>
-      </div>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Desktop: right column panel */}
       <aside className="hidden lg:flex flex-col w-[400px] h-screen border-l border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 overflow-y-auto">
