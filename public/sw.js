@@ -36,25 +36,34 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Network-first for navigation requests (HTML pages)
+  // Network-first for navigation requests (HTML pages) with 4s timeout for Safari
   // This prevents serving stale HTML that references old JS/CSS bundles
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
+      (async () => {
+        const cached = await caches.match(event.request);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+        try {
+          const response = await fetch(event.request, { signal: controller.signal });
+          clearTimeout(timeoutId);
           if (response.ok) {
-            const clone = response.clone()
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone))
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(event.request, response.clone());
           }
-          return response
-        })
-        .catch(() =>
-          caches.match(event.request).then(
-            (cached) => cached ?? new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } })
-          )
-        )
-    )
-    return
+          return response;
+        } catch {
+          clearTimeout(timeoutId);
+          if (cached) return cached;
+          return new Response('Offline', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' },
+          });
+        }
+      })()
+    );
+    return;
   }
 
   // Stale-while-revalidate for other assets (JS, CSS, images, fonts)

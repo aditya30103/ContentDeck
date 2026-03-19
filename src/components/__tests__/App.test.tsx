@@ -99,24 +99,24 @@ describe('App', () => {
     expect(container.querySelector('.animate-spin')).toBeTruthy();
   });
 
-  it('renders AuthScreen when not logged in and not demo', () => {
+  it('renders AuthScreen when not logged in and not demo', async () => {
     mockUseAuth.mockReturnValue(authState());
     render(<App />);
-    expect(screen.getByTestId('auth-screen')).toBeInTheDocument();
+    expect(await screen.findByTestId('auth-screen')).toBeInTheDocument();
   });
 
-  it('renders Dashboard when user is logged in', () => {
+  it('renders Dashboard when user is logged in', async () => {
     mockUseAuth.mockReturnValue(authState({ user: { id: 'u1', email: 'test@test.com' } as never }));
     render(
       <MemoryRouter initialEntries={['/library']}>
         <App />
       </MemoryRouter>,
     );
-    expect(screen.getByTestId('dashboard')).toBeInTheDocument();
+    expect(await screen.findByTestId('dashboard')).toBeInTheDocument();
     expect(screen.getByTestId('update-banner')).toBeInTheDocument();
   });
 
-  it('renders Dashboard with DemoBanner in demo mode', () => {
+  it('renders Dashboard with DemoBanner in demo mode', async () => {
     localStorage.setItem('contentdeck_demo', 'true');
     mockUseAuth.mockReturnValue(authState());
     render(
@@ -124,11 +124,11 @@ describe('App', () => {
         <App />
       </MemoryRouter>,
     );
-    expect(screen.getByTestId('dashboard')).toBeInTheDocument();
+    expect(await screen.findByTestId('dashboard')).toBeInTheDocument();
     expect(screen.getByTestId('demo-banner')).toBeInTheDocument();
   });
 
-  it('skips loading spinner in demo mode even if auth is loading', () => {
+  it('skips loading spinner in demo mode even if auth is loading', async () => {
     localStorage.setItem('contentdeck_demo', 'true');
     mockUseAuth.mockReturnValue(authState({ loading: true }));
     render(
@@ -136,10 +136,10 @@ describe('App', () => {
         <App />
       </MemoryRouter>,
     );
-    expect(screen.getByTestId('dashboard')).toBeInTheDocument();
+    expect(await screen.findByTestId('dashboard')).toBeInTheDocument();
   });
 
-  it('extracts shared URL from ?url= query param', () => {
+  it('extracts shared URL from ?url= query param', async () => {
     window.location.search = '?url=https%3A%2F%2Fexample.com';
     mockUseAuth.mockReturnValue(authState({ user: { id: 'u1', email: 'test@test.com' } as never }));
     render(
@@ -147,7 +147,7 @@ describe('App', () => {
         <App />
       </MemoryRouter>,
     );
-    const dashboard = screen.getByTestId('dashboard');
+    const dashboard = await screen.findByTestId('dashboard');
     expect(dashboard).toBeInTheDocument();
   });
 });
