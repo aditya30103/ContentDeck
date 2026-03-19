@@ -36,34 +36,30 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Network-first for navigation requests (HTML pages) with 4s timeout for Safari
-  // This prevents serving stale HTML that references old JS/CSS bundles
+  // Network-first for navigation requests (HTML pages) with 8s timeout
+  // Uses Promise.race instead of AbortController — AbortController in SW fetch
+  // is unreliable on iOS Safari (catch block may not fire, causing indefinite hang)
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      (async () => {
-        const cached = await caches.match(event.request);
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-        try {
-          const response = await fetch(event.request, { signal: controller.signal });
-          clearTimeout(timeoutId);
+      caches.match(event.request).then((cached) => {
+        const networkFetch = fetch(event.request).then((response) => {
           if (response.ok) {
-            const cache = await caches.open(CACHE_NAME);
-            cache.put(event.request, response.clone());
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()))
           }
-          return response;
-        } catch {
-          clearTimeout(timeoutId);
-          if (cached) return cached;
-          return new Response('Offline', {
+          return response
+        })
+
+        const timeout = new Promise((resolve) =>
+          setTimeout(() => resolve(cached ?? new Response('Offline', {
             status: 503,
             headers: { 'Content-Type': 'text/plain' },
-          });
-        }
-      })()
-    );
-    return;
+          })), 8000)
+        )
+
+        return Promise.race([networkFetch, timeout])
+      })
+    )
+    return
   }
 
   // Stale-while-revalidate for other assets (JS, CSS, images, fonts)
