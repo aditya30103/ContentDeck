@@ -84,7 +84,7 @@ supabase/
 - **Modal structure:** `role="dialog"` goes on the inner content panel, not the backdrop `<div>`; backdrop is a plain div with no role
 - **Demo mode:** `localStorage.getItem('contentdeck_demo') === 'true'` → mock Supabase client operates on in-memory arrays, zero hook changes needed
 - **PWA Share Target:** `manifest.json` `share_target` + `?url=` query param handling in App.tsx → AddBookmarkModal pre-fill
-- **Service worker:** Network-first for navigation, stale-while-revalidate for assets. Version in `CACHE_NAME` must be bumped manually on deploys.
+- **Service worker:** Network-first for navigation, stale-while-revalidate for assets. `CACHE_NAME` is auto-injected at build time — `swVersionPlugin` in `vite.config.ts` replaces the `__SW_BUILD__` placeholder in `public/sw.js` with `Date.now()`, so every deploy gets a unique cache name. Never bump manually.
 - **Loading state:** Inline CSS spinner in `index.html` shown until React mounts (no blank page)
 - **Edge Functions:** All deployed with `--no-verify-jwt`; verify auth in function code. `save-bookmark` accepts `{ token, url, title? }` via query params or JSON body, validates SHA-256 token hash. `extract-content` uses JWT + ownership check, runs Readability, stores in `content` JSONB. `create-github-issue` uses JWT + ownership check, POSTs to GitHub API, writes back `github_issue_number`/`url`.
 - **Sentry:** `enabled: !!VITE_SENTRY_DSN` — completely inert when DSN absent. Edge functions use `console.error` with context (no Sentry SDK in Deno runtime).
