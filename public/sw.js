@@ -23,8 +23,8 @@ self.addEventListener('message', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = event.request.url
 
-  // Always go to network for API calls; return graceful error if offline
-  if (url.includes('supabase') || url.includes('openrouter.ai') || url.includes('microlink.io') || url.includes('oembed') || url.includes('googleapis.com')) {
+  // Always go to network for API calls and analytics; never cache or intercept
+  if (url.includes('supabase') || url.includes('openrouter.ai') || url.includes('microlink.io') || url.includes('oembed') || url.includes('googleapis.com') || url.includes('/_vercel/')) {
     event.respondWith(
       fetch(event.request).catch(
         () => new Response(JSON.stringify({ error: 'offline' }), {
