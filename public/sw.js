@@ -56,20 +56,10 @@ self.addEventListener('fetch', (event) => {
         } catch {
           clearTimeout(timeoutId);
           if (cached) return cached;
-          // First visit, no cache — retry without timeout
-          try {
-            const response = await fetch(event.request);
-            if (response.ok) {
-              const cache = await caches.open(CACHE_NAME);
-              cache.put(event.request, response.clone());
-            }
-            return response;
-          } catch {
-            return new Response('Offline', {
-              status: 503,
-              headers: { 'Content-Type': 'text/plain' },
-            });
-          }
+          return new Response('Offline', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' },
+          });
         }
       })()
     );

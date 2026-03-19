@@ -8,6 +8,7 @@ import { ToastProvider } from './components/ui/Toast';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import UpdateBanner from './components/ui/UpdateBanner';
 import DemoBanner from './components/ui/DemoBanner';
+import Spinner from './components/ui/Spinner';
 
 const AuthScreen = lazy(() => import('./components/auth/AuthScreen'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -21,7 +22,7 @@ const DEMO_KEY = 'contentdeck_demo';
 function LoadingSpinner() {
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-surface-50 dark:bg-surface-950">
-      <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
+      <Spinner size={32} />
     </div>
   );
 }
@@ -59,11 +60,7 @@ export default function App() {
 
   // Loading state
   if (loading && !isDemo) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-surface-50 dark:bg-surface-950">
-        <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   // Auth screen (not logged in, not demo)
