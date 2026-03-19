@@ -2,7 +2,7 @@
 
 > Start here. This file orients each session.
 
-**Version:** v3.6 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) COMPLETE ✅ — Obsidian Plugin ✅ · Values Onboarding ✅ · Scoring Engine ✅ · Home Screen ✅ · Reflection Prompt ✅ · Spaced Review ✅
+**Version:** v3.7 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) COMPLETE ✅ — Obsidian Plugin ✅ · Values Onboarding ✅ · Scoring Engine ✅ · Home Screen ✅ · Reflection Prompt ✅ · Spaced Review ✅ · v3.7 Performance ✅
 **Mode: Maintenance.** No new features planned. Next feature work: Phase 3 (Platform) or v4.0 (Intelligence Layer) — both deferred until signals from production use.
 **Feedback:** In-app button in Sidebar/MobileHeader → Settings → Feedback tab to review
 **Active plan:** [Phase 2 — Trusted Curator](plan/phase-2.md) | **Philosophy:** [Product Philosophy](plan/philosophy.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
@@ -60,7 +60,9 @@ docs/
 │   ├── v3.4-obsidian-export-phase-a.md  # Obsidian export Phase A: areas wikilinks, auto-export, batch, reflection
 │   ├── v3.4-obsidian-plugin-phase-b.md  # Obsidian Community Plugin (Phase B): sync-done edge function + BRAT plugin
 │   ├── v3.5-trusted-curator.md          # Phase 2.1+2.2+2.3 — Values Onboarding, Scoring Engine, Home Screen
-│   └── v3.5-phase-2.4.md                # Phase 2.4 — Just Added strip, Mark Done, Reflection Prompt (240 tests)
+│   ├── v3.5-phase-2.4.md                # Phase 2.4 — Just Added strip, Mark Done, Reflection Prompt (240 tests)
+│   ├── v3.6-phase-2.5.md               # Phase 2.5 — Spaced Review SM-2 + bug fixes #42 #43 #38 (264 tests)
+│   └── v3.7-performance.md             # v3.7 — Code splitting, SW timeout, Sentry deferred, onboarding fix (261 tests)
 ├── guides/                         # How-to references
 │   ├── workflow.md                 # Development practices, session workflow
 │   └── supabase-auth-setup.md      # Supabase Auth provider configuration
@@ -76,6 +78,7 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
+| v3.7 | Performance: code splitting (34% smaller initial load), SW 4s timeout, Sentry deferred init, onboarding fix (#48, 261 tests) | [log/v3.7-performance.md](log/v3.7-performance.md) |
 | v3.6 | Spaced Review (2.5) + ReflectionModal cancel fix + YouTube skipped status (#42 #43 #38, 264 tests) | [log/v3.6-phase-2.5.md](log/v3.6-phase-2.5.md) |
 | v3.5 | Close the Loop: Just Added strip + Mark Done on Continue + Reflection Prompt modal (2.4, 240 tests) | [log/v3.5-phase-2.4.md](log/v3.5-phase-2.4.md) |
 | v3.5 | Trusted Curator: Values Onboarding (2.1) + Scoring Engine (2.2) + New Home Screen (2.3) | [log/v3.5-trusted-curator.md](log/v3.5-trusted-curator.md) |
