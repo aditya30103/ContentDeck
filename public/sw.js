@@ -1,4 +1,4 @@
-const CACHE_NAME = 'contentdeck-v3.6.1'
+const CACHE_NAME = 'contentdeck-__SW_BUILD__'
 
 self.addEventListener('install', () => {
   self.skipWaiting() // Auto-activate immediately — personal tool, seamless updates desired
