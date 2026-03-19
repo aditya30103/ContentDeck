@@ -11,9 +11,7 @@ import DemoBanner from './components/ui/DemoBanner';
 
 const AuthScreen = lazy(() => import('./components/auth/AuthScreen'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
-const HomePage = lazy(
-  () => import('./pages/HomePage').then((m) => ({ default: m.HomePage })),
-);
+const HomePage = lazy(() => import('./pages/HomePage').then((m) => ({ default: m.HomePage })));
 import { createMockSupabaseClient } from './lib/mock-supabase';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from '@vercel/analytics/react';
