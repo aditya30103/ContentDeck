@@ -434,13 +434,11 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
   const [mood, setMood] = useState<MoodMode>('default');
   const [now, setNow] = useState(() => new Date());
   const [showSettings, setShowSettings] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(
-    () => localStorage.getItem('contentdeck_values') === null && !isDemo,
-  );
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [pendingDoneBookmark, setPendingDoneBookmark] = useState<Bookmark | null>(null);
   const [pendingReviewBookmark, setPendingReviewBookmark] = useState<Bookmark | null>(null);
 
-  const { areas } = useTagAreas();
+  const { areas, isLoading: areasLoading } = useTagAreas();
   const { setValues } = useUserValues();
   const { topPick, continueItem, quickWin } = useScoring(mood);
   const { isLoading, bookmarks, cycleStatus, addNote, updateBookmark } = useBookmarks();
@@ -451,6 +449,18 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
     const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
   }, []);
+
+  // Show onboarding only once areas have loaded and the user has at least one area
+  useEffect(() => {
+    if (
+      !areasLoading &&
+      areas.length > 0 &&
+      localStorage.getItem('contentdeck_values') === null &&
+      !isDemo
+    ) {
+      setShowOnboarding(true);
+    }
+  }, [areas, areasLoading, isDemo]);
 
   // Most recently saved unread bookmark that wasn't already surfaced as the primary pick.
   // ISO 8601 strings are lexicographically sortable — no Date parsing needed.
