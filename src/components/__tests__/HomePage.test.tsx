@@ -102,7 +102,7 @@ function renderHome(props: Partial<typeof defaultProps> = {}) {
 const mockCycleStatusMutate = vi.fn();
 
 function setupDefaultMocks() {
-  vi.mocked(useTagAreas).mockReturnValue({ areas: [] } as unknown as ReturnType<
+  vi.mocked(useTagAreas).mockReturnValue({ areas: [], isLoading: false } as unknown as ReturnType<
     typeof useTagAreas
   >);
   vi.mocked(useUserValues).mockReturnValue({
@@ -244,10 +244,31 @@ describe('HomePage', () => {
     expect(screen.getByTestId('settings-modal')).toBeInTheDocument();
   });
 
-  it('10. shows onboarding modal when contentdeck_values is null', () => {
+  it('10. shows onboarding modal when contentdeck_values is null and areas exist', async () => {
     localStorage.removeItem('contentdeck_values');
+    vi.mocked(useTagAreas).mockReturnValue({
+      areas: [{ id: 'a1', name: 'Tech', emoji: '💻', color: 'blue', sort_order: 0, user_id: 'u1' }],
+      isLoading: false,
+    } as unknown as ReturnType<typeof useTagAreas>);
     renderHome();
-    expect(screen.getByTestId('onboarding-modal')).toBeInTheDocument();
+    expect(await screen.findByTestId('onboarding-modal')).toBeInTheDocument();
+  });
+
+  it('10b. does not show onboarding modal when user has no areas', () => {
+    localStorage.removeItem('contentdeck_values');
+    // setupDefaultMocks already sets areas: []
+    renderHome();
+    expect(screen.queryByTestId('onboarding-modal')).not.toBeInTheDocument();
+  });
+
+  it('10c. does not show onboarding modal while areas are loading', () => {
+    localStorage.removeItem('contentdeck_values');
+    vi.mocked(useTagAreas).mockReturnValue({
+      areas: [],
+      isLoading: true,
+    } as unknown as ReturnType<typeof useTagAreas>);
+    renderHome();
+    expect(screen.queryByTestId('onboarding-modal')).not.toBeInTheDocument();
   });
 
   it('11. does not show onboarding modal when values exist in localStorage', () => {
