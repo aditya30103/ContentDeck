@@ -39,13 +39,11 @@ export default function AppShell({
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile Header */}
+        {/* Mobile Header — 3 buttons only (Search, Settings, Add) */}
         <MobileHeader
           onAdd={onAdd}
           onToggleSearch={onToggleSearch}
           onSettings={onSettings}
-          onStats={onStats}
-          onFeedback={onFeedback}
           showSearch={showSearch}
         />
 
@@ -53,7 +51,10 @@ export default function AppShell({
         <main
           id="main-content"
           className="flex-1 overflow-y-auto"
-          style={{ paddingBottom: 'calc(72px + var(--safe-bottom))' }}
+          style={{
+            paddingBottom: 'calc(72px + var(--safe-bottom))',
+            overscrollBehavior: 'contain',
+          }}
         >
           {children}
         </main>

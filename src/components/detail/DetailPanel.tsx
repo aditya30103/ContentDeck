@@ -149,7 +149,7 @@ export default function DetailPanel({
       </div>
 
       {/* Desktop: right column panel */}
-      <aside className="hidden lg:flex flex-col w-[400px] h-screen border-l border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 overflow-y-auto">
+      <aside className="hidden lg:flex flex-col w-[400px] h-[100dvh] border-l border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900 z-10">
           <h2 className="text-base font-semibold text-surface-900 dark:text-surface-100">
