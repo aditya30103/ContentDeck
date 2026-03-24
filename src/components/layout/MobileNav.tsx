@@ -36,8 +36,8 @@ export default function MobileNav({ counts }: MobileNavProps) {
               aria-current={active ? 'page' : undefined}
             >
               <Icon size={20} />
-              <span className="text-[10px] font-medium">{label}</span>
-              {counts[status] > 0 && <span className="text-[10px]">{counts[status]}</span>}
+              <span className="text-xs font-medium">{label}</span>
+              {counts[status] > 0 && <span className="text-xs">{counts[status]}</span>}
             </button>
           );
         })}
@@ -52,8 +52,8 @@ export default function MobileNav({ counts }: MobileNavProps) {
           aria-current={showFavorites ? 'page' : undefined}
         >
           <Star size={20} />
-          <span className="text-[10px] font-medium">Favorites</span>
-          {counts.favorited > 0 && <span className="text-[10px]">{counts.favorited}</span>}
+          <span className="text-xs font-medium">Favorites</span>
+          {counts.favorited > 0 && <span className="text-xs">{counts.favorited}</span>}
         </button>
 
         {/* View toggle */}
@@ -63,9 +63,7 @@ export default function MobileNav({ counts }: MobileNavProps) {
           aria-label={`Switch to ${currentView === 'list' ? 'areas' : 'list'} view`}
         >
           {currentView === 'list' ? <LayoutGrid size={20} /> : <List size={20} />}
-          <span className="text-[10px] font-medium">
-            {currentView === 'list' ? 'Areas' : 'List'}
-          </span>
+          <span className="text-xs font-medium">{currentView === 'list' ? 'Areas' : 'List'}</span>
         </button>
       </div>
     </nav>

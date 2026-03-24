@@ -194,7 +194,7 @@ export default function TagAreaInput({
           onFocus={() => setShowDropdown(true)}
           onKeyDown={handleKeyDown}
           placeholder={areas.length === 0 && tags.length === 0 ? 'Add areas or tags...' : ''}
-          className="flex-1 min-w-[80px] bg-transparent text-sm text-surface-900 dark:text-surface-100 placeholder:text-surface-400 outline-none py-1"
+          className="flex-1 min-w-[80px] bg-transparent text-base text-surface-900 dark:text-surface-100 placeholder:text-surface-400 outline-none py-1"
         />
       </div>
 

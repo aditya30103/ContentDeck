@@ -78,6 +78,7 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
+| v3.8 | Mobile UX: pinch zoom disabled, overscroll eliminated, 100dvh, MobileHeader 3 buttons, input font-size (#55, 270 tests) | [log/v3.8-mobile-ux.md](log/v3.8-mobile-ux.md) |
 | v3.7 | Performance: code splitting (34% smaller initial load), SW 4s timeout, Sentry deferred init, onboarding fix (#48, 261 tests) | [log/v3.7-performance.md](log/v3.7-performance.md) |
 | v3.6 | Spaced Review (2.5) + ReflectionModal cancel fix + YouTube skipped status (#42 #43 #38, 264 tests) | [log/v3.6-phase-2.5.md](log/v3.6-phase-2.5.md) |
 | v3.5 | Close the Loop: Just Added strip + Mark Done on Continue + Reflection Prompt modal (2.4, 240 tests) | [log/v3.5-phase-2.4.md](log/v3.5-phase-2.4.md) |

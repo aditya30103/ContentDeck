@@ -557,8 +557,8 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
 
   return (
     <div
-      className="min-h-screen bg-surface-50 dark:bg-surface-950"
-      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+      className="h-[100dvh] overflow-y-auto bg-surface-50 dark:bg-surface-950"
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)', overscrollBehavior: 'contain' }}
     >
       <div
         className="max-w-lg mx-auto px-4 py-6"

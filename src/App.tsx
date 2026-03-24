@@ -1,4 +1,4 @@
-import { useMemo, useCallback, lazy, Suspense } from 'react';
+import { useMemo, useCallback, lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { useTheme } from './hooks/useTheme';
@@ -36,6 +36,17 @@ export default function App() {
   const { user, loading, signInWithMagicLink, signInWithGoogle, signInWithGitHub, signOut } =
     useAuth();
   useTheme();
+
+  // Prevent iOS Safari pinch-to-zoom (viewport meta user-scalable=no is sometimes bypassed)
+  useEffect(() => {
+    const prevent = (e: Event) => e.preventDefault();
+    document.addEventListener('gesturestart', prevent, { passive: false });
+    document.addEventListener('gesturechange', prevent, { passive: false });
+    return () => {
+      document.removeEventListener('gesturestart', prevent);
+      document.removeEventListener('gesturechange', prevent);
+    };
+  }, []);
 
   const isDemo = localStorage.getItem(DEMO_KEY) === 'true';
   const mockClient = useMemo(() => (isDemo ? createMockSupabaseClient() : undefined), [isDemo]);

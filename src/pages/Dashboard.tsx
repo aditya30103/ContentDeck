@@ -342,7 +342,7 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
 
   return (
     <>
-      <div className="flex h-screen bg-surface-50 dark:bg-surface-950">
+      <div className="flex h-[100dvh] bg-surface-50 dark:bg-surface-950">
         <AppShell
           counts={counts}
           onAdd={() => setShowAddModal(true)}

@@ -95,13 +95,39 @@
   scrollbar-color: var(--color-surface-600) transparent;
 }
 
-/* Base styles */
+/* Base styles — native app foundation */
 html {
   scroll-behavior: smooth;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation; /* disables double-tap zoom */
+  /* Background matches app surface so overscroll bleed is invisible */
+  background-color: var(--color-surface-50);
+}
+
+html.dark {
+  /* dark + navy both carry .dark — surface-950 covers both */
+  background-color: var(--color-surface-950);
+}
+
+html.sepia {
+  background-color: var(--color-surface-50); /* sepia surface-50 = #fdf9f0 via :root.sepia */
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background-color: inherit;
+}
+
+/* Prevent iOS auto-zoom on input focus (triggers when font-size < 16px) */
+input,
+textarea,
+select {
+  font-size: max(16px, 1rem);
 }
 
 /* Focus visible for accessibility */
