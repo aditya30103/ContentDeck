@@ -11,58 +11,35 @@
 
 ---
 
-## Next Session Plan — Mobile UX (2026-03-19)
+## Mobile UX — Gesture Layer (v3.9, 2026-03-30)
 
-> All changes below were attempted, reverted due to bugs introduced by a plugin workflow mismatch. Re-implement next session using our standard `/feature` skill workflow — no superpowers plugin. Tackle Track 1 first, verify on real device, then Track 2.
+### Track 1 — Layout & Rendering ✅ COMPLETE (PR #56, v3.8)
+- MobileHeader slimmed to 3 buttons, CSS 100dvh foundation, overscroll elimination, input zoom fix, AppShell overscroll contain, input text-sm audit
 
-### What's already done (kept on main, safe)
-- ✅ SW cache auto-versioning (`swVersionPlugin` in `vite.config.ts` — never manually bump again)
-- ✅ Branch protection rules on GitHub (`protect-main` ruleset)
+### Track 2 — Framer Motion Gestures ✅ COMPLETE (v3.9)
+- ✅ `framer-motion` installed, `vendor-motion` chunk (42.5KB gzip, deferred)
+- ✅ `src/lib/motion.ts` — shared thresholds + spring configs
+- ✅ `src/hooks/useIsMobile.ts` — matchMedia hook
+- ✅ **DetailPanel**: bottom sheet drag-to-dismiss (40% or 500px/s), drag handle pill, backdrop fade, desktop slide-in
+- ✅ **Modal.tsx**: all 8 modals — slide-up + drag-to-dismiss on mobile, fade+scale on desktop
+- ✅ **ReaderModal**: slide-in from right, swipe-right-to-dismiss with `dragDirectionLock`
+- ✅ **MobileNav**: count badges (icon overlay), 44px height, content padding trimmed
+- → [Implementation log](log/v3.9-gestures.md)
 
-### Track 1 — Layout & Rendering Fixes (do first, in order)
+### Track 3 — Deferred Gestures (next gesture session)
 
-**T1-1: MobileHeader — slim to 3 buttons**
-- Problem: 6 buttons (Search, Settings, Stats, Feedback, Theme, Add) overflow 390px iPhone 15
-- Fix: Remove Stats, Feedback, Theme shortcuts from header — all 3 are accessible inside Settings modal already
-- New props: `{ onAdd, onToggleSearch, onSettings, showSearch }` only
-- Remove `onStats`/`onFeedback` from MobileHeader JSX in AppShell (keep on AppShellProps for Sidebar)
-- Write test first: `MobileHeader.test.tsx` asserting exactly 3 buttons
+| Gesture | Notes |
+|---------|-------|
+| **Pull-to-refresh** | `usePullToRefresh` hook, 64px threshold, resistance curve. Must return `MotionValue<number>`, accept `RefObject<HTMLElement>` |
+| **Route transitions** | `AnimatePresence mode="wait"` + `useLocation` key in App.tsx. Only 2 routes — low priority |
+| **Card swipe actions** | Swipe bookmark cards left/right for quick actions (delete, mark done). Per-card gesture handlers — evaluate after more production use |
 
-**T1-2: CSS foundation**
-- `html { height: 100dvh; overflow: hidden; }` — fixes iOS Safari address bar reflow
-- `body { height: 100dvh; overflow: hidden; overscroll-behavior: none; }` — stops rubber-band
-- `input, textarea, select { font-size: max(16px, 1rem); }` — prevents iOS auto-zoom on focus
-
-**T1-3: App.tsx**
-- Replace `min-h-screen` → `min-h-[100dvh]` on loading/auth containers
-
-**T1-4: AppShell — main scroll container**
-- Add `overscrollBehavior: 'contain'` to style prop on `<main id="main-content">`
-
-**T1-5: HomePage outer container — CRITICAL LESSON**
-- Must use `h-[100dvh]` (fixed height), NOT `min-h-[100dvh]`
-- Reason: `overflow-y-auto` only creates a scroll container when the element has a *fixed* height. `min-height` lets the div grow freely → body clips it → scroll never activates
-- Also add `overflow-y-auto` and `overscrollBehavior: 'contain'`
-
-**T1-6: Input audit**
-- Search for `<input>`, `<textarea>`, `<select>` with `text-sm` in className — replace with `text-base`
-- Known locations from previous audit: `TagAreaInput.tsx`, `SortSelect.tsx`, `FeedbackList.tsx`
-
-> After T1-1 through T1-6: deploy and test on real iPhone 15 before proceeding to Track 2.
-
-### Track 2 — Framer Motion Gestures (only after Track 1 verified on device)
-
-- Install: `npm install framer-motion`
-- **DetailPanel**: draggable bottom sheet — `drag="y"`, spring dismiss (40% height or velocity > 500px/s), animated backdrop via `useTransform`, drag handle pill, `AnimatePresence`
-- **Modal base**: `AnimatePresence` + slide-up enter/exit. Remove `document.body.style.overflow` side effect (already locked globally by T1-2). Add drag-to-dismiss on mobile only.
-- **usePullToRefresh hook**: touch events, 64px threshold, resistance curve. Return `{ pullDistance: MotionValue<number>, isPulling, isRefreshing }` — NOT a plain number. Accept `RefObject<HTMLElement>`, not `HTMLElement | null`.
-- **ReaderModal**: `drag="x"` + `dragDirectionLock` (prevents fighting vertical scroll). Dismiss on offset ≥ 80px or velocity ≥ 400px/s.
-- **Route transitions**: `AnimatePresence mode="wait"` + `useLocation` key in App.tsx. Wrap each route element in `motion.div` with 0.2s fade+slide.
-
-### Key lessons from this session (do NOT repeat)
+### Key lessons (do NOT repeat)
 - `min-h-[100dvh]` ≠ `h-[100dvh]` — use fixed height on scroll containers
 - `usePullToRefresh` must return `MotionValue<number>` for `pullDistance`, not a plain number
 - `usePullToRefresh` must accept `RefObject<HTMLElement>`, not `HTMLElement | null` (stale-ref problem)
+- `if (!open) return null` guard must be removed when `AnimatePresence` controls mounting — guard fires during exit animation and kills it
+- `dragDirectionLock` is the correct pattern for horizontal drag coexisting with vertical scroll
 - Do NOT use the superpowers plugin — its subagent-driven workflow conflicts with our codebase's established patterns and skill workflows
 
 ---

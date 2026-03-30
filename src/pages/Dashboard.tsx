@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import AppShell from '../components/layout/AppShell';
 import SourceTabs from '../components/feed/SourceTabs';
@@ -392,26 +393,29 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
           </div>
         </AppShell>
 
-        {/* Desktop Detail Panel */}
-        {activeBookmark && (
-          <DetailPanel
-            bookmark={activeBookmark}
-            onClose={() => setSelectedBookmark(null)}
-            onCycleStatus={handleCycleStatus}
-            onToggleFavorite={handleToggleFavorite}
-            onAddNote={handleAddNote}
-            onDeleteNote={handleDeleteNote}
-            onEdit={(bm) => setEditingBookmark(bm)}
-            onExport={handleExport}
-            onDelete={(id) => {
-              handleDelete(id);
-              setSelectedBookmark(null);
-            }}
-            onRefreshMetadata={handleRefreshMetadata}
-            isNotePending={addNote.isPending}
-            isRefreshing={isRefreshingMeta}
-          />
-        )}
+        {/* Detail Panel — AnimatePresence enables entry/exit animations */}
+        <AnimatePresence>
+          {activeBookmark && (
+            <DetailPanel
+              key={activeBookmark.id}
+              bookmark={activeBookmark}
+              onClose={() => setSelectedBookmark(null)}
+              onCycleStatus={handleCycleStatus}
+              onToggleFavorite={handleToggleFavorite}
+              onAddNote={handleAddNote}
+              onDeleteNote={handleDeleteNote}
+              onEdit={(bm) => setEditingBookmark(bm)}
+              onExport={handleExport}
+              onDelete={(id) => {
+                handleDelete(id);
+                setSelectedBookmark(null);
+              }}
+              onRefreshMetadata={handleRefreshMetadata}
+              isNotePending={addNote.isPending}
+              isRefreshing={isRefreshingMeta}
+            />
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Modals */}

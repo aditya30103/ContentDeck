@@ -18,7 +18,7 @@ export default function BulkActionBar({
   if (selectedCount === 0) return null;
 
   return (
-    <div className="fixed bottom-[calc(56px+var(--safe-bottom))] lg:bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-900 dark:bg-surface-100 text-white dark:text-surface-900 shadow-xl">
+    <div className="fixed bottom-[calc(44px+var(--safe-bottom))] lg:bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-900 dark:bg-surface-100 text-white dark:text-surface-900 shadow-xl">
       <span className="text-sm font-medium mr-2">{selectedCount} selected</span>
 
       <button

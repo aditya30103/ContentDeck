@@ -1,9 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { X, BookOpen, Type } from 'lucide-react';
 import { useReaderPrefs } from '../../hooks/useReaderPrefs';
 import { parseContentBlocks } from '../../lib/reader';
 import type { Bookmark, Status } from '../../types';
 import { STATUS_NEXT } from '../../types';
+import {
+  SPRING_SHEET,
+  SWIPE_DISMISS_OFFSET,
+  SWIPE_DISMISS_VELOCITY,
+  REDUCED_MOTION_TRANSITION,
+} from '../../lib/motion';
 
 interface ReaderModalProps {
   bookmark: Bookmark;
@@ -74,6 +81,7 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
   const { fontSize, fontFamily, theme, update } = useReaderPrefs();
   const [scrollProgress, setScrollProgress] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -112,8 +120,6 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
     }
   }, [open, bookmark.id]);
 
-  if (!open) return null;
-
   const contentText = bookmark.content?.text ?? '';
   const blocks = parseContentBlocks(contentText);
   const wordCount = bookmark.content?.word_count ?? 0;
@@ -151,12 +157,31 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
     lg: 'text-base',
   };
 
+  const transition = shouldReduceMotion ? REDUCED_MOTION_TRANSITION : SPRING_SHEET;
+
   return (
-    <div
+    <motion.div
       className={`fixed inset-0 z-[60] flex flex-col ${themeClasses}`}
       role="dialog"
       aria-modal="true"
       aria-label={`Reading: ${bookmark.title ?? 'Article'}`}
+      initial={{ x: '100%' }}
+      animate={{ x: 0 }}
+      exit={{ x: '100%' }}
+      transition={transition}
+      drag="x"
+      dragDirectionLock
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={{ left: 0.05, right: 0.3 }}
+      dragMomentum={false}
+      onDragEnd={(_, info) => {
+        if (info.offset.x > SWIPE_DISMISS_OFFSET || info.velocity.x > SWIPE_DISMISS_VELOCITY) {
+          // Clean up the history entry that was pushed on open
+          const state = history.state as Record<string, unknown> | null;
+          if (state?.reader) history.back();
+          onClose();
+        }
+      }}
     >
       {/* Progress bar */}
       <div className="h-0.5 w-full bg-transparent">
@@ -358,6 +383,6 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
           <span className="text-xs font-medium text-green-600 dark:text-green-400">✓ Done</span>
         )}
       </footer>
-    </div>
+    </motion.div>
   );
 }

@@ -30,6 +30,19 @@ const localStorageMock: Storage = {
 };
 vi.stubGlobal('localStorage', localStorageMock);
 
+// Mock window.matchMedia (used by useIsMobile and useTheme)
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
+
 // Mock window.location.origin
 Object.defineProperty(window, 'location', {
   value: { ...window.location, origin: 'https://contentdeck.vercel.app' },

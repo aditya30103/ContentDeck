@@ -6,11 +6,25 @@ interface MobileNavProps {
   counts: { unread: number; reading: number; done: number; favorited: number };
 }
 
-const tabs: { status: Status; label: string; icon: React.ElementType }[] = [
-  { status: 'unread', label: 'Unread', icon: Inbox },
-  { status: 'reading', label: 'Reading', icon: BookOpen },
-  { status: 'done', label: 'Done', icon: CheckCircle },
+const tabs: {
+  status: Status;
+  label: string;
+  icon: React.ElementType;
+  countKey: keyof MobileNavProps['counts'];
+}[] = [
+  { status: 'unread', label: 'Unread', icon: Inbox, countKey: 'unread' },
+  { status: 'reading', label: 'Reading', icon: BookOpen, countKey: 'reading' },
+  { status: 'done', label: 'Done', icon: CheckCircle, countKey: 'done' },
 ];
+
+function NavBadge({ count }: { count: number }) {
+  if (count === 0) return null;
+  return (
+    <span className="absolute -top-1 -right-2 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-primary-600 text-white text-[10px] font-bold leading-none px-0.5">
+      {count > 99 ? '99+' : count}
+    </span>
+  );
+}
 
 export default function MobileNav({ counts }: MobileNavProps) {
   const { currentStatus, setStatus, currentView, setView, showFavorites, setFavorites } = useUI();
@@ -22,22 +36,24 @@ export default function MobileNav({ counts }: MobileNavProps) {
       aria-label="Bottom navigation"
     >
       <div className="flex items-center">
-        {tabs.map(({ status, label, icon: Icon }) => {
-          // Active reflects only the status dimension — favorites is independent.
+        {tabs.map(({ status, label, icon: Icon, countKey }) => {
           const active = currentStatus === status;
+          const count = counts[countKey];
           return (
             <button
               key={status}
               onClick={() => setStatus(status)}
-              className={`flex-1 flex flex-col items-center gap-0.5 py-2 min-h-[56px] transition-colors
+              className={`flex-1 flex flex-col items-center gap-0.5 py-2 min-h-[44px] transition-colors
                 ${active ? 'text-primary-600 dark:text-primary-400' : 'text-surface-400 dark:text-surface-500'}
               `}
-              aria-label={`${label} (${counts[status]})`}
+              aria-label={`${label} (${count})`}
               aria-current={active ? 'page' : undefined}
             >
-              <Icon size={20} />
+              <div className="relative">
+                <Icon size={20} />
+                <NavBadge count={count} />
+              </div>
               <span className="text-xs font-medium">{label}</span>
-              {counts[status] > 0 && <span className="text-xs">{counts[status]}</span>}
             </button>
           );
         })}
@@ -45,21 +61,23 @@ export default function MobileNav({ counts }: MobileNavProps) {
         {/* Favorites — toggles independently; does not reset status or area */}
         <button
           onClick={() => setFavorites(!showFavorites)}
-          className={`flex-1 flex flex-col items-center gap-0.5 py-2 min-h-[56px] transition-colors
+          className={`flex-1 flex flex-col items-center gap-0.5 py-2 min-h-[44px] transition-colors
             ${showFavorites ? 'text-primary-600 dark:text-primary-400' : 'text-surface-400 dark:text-surface-500'}
           `}
           aria-label={`Favorites (${counts.favorited})`}
           aria-current={showFavorites ? 'page' : undefined}
         >
-          <Star size={20} />
+          <div className="relative">
+            <Star size={20} />
+            <NavBadge count={counts.favorited} />
+          </div>
           <span className="text-xs font-medium">Favorites</span>
-          {counts.favorited > 0 && <span className="text-xs">{counts.favorited}</span>}
         </button>
 
         {/* View toggle */}
         <button
           onClick={() => setView(currentView === 'list' ? 'areas' : 'list')}
-          className="flex-1 flex flex-col items-center gap-0.5 py-2 min-h-[56px] text-surface-400 dark:text-surface-500"
+          className="flex-1 flex flex-col items-center gap-0.5 py-2 min-h-[44px] text-surface-400 dark:text-surface-500"
           aria-label={`Switch to ${currentView === 'list' ? 'areas' : 'list'} view`}
         >
           {currentView === 'list' ? <LayoutGrid size={20} /> : <List size={20} />}

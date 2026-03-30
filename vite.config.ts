@@ -40,6 +40,7 @@ export default defineConfig({
           'vendor-supabase': ['@supabase/supabase-js'],
           'vendor-query': ['@tanstack/react-query'],
           'vendor-sentry': ['@sentry/react'],
+          'vendor-motion': ['framer-motion'],
         },
       },
     },

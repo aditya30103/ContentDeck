@@ -52,7 +52,7 @@ export default function AppShell({
           id="main-content"
           className="flex-1 overflow-y-auto"
           style={{
-            paddingBottom: 'calc(72px + var(--safe-bottom))',
+            paddingBottom: 'calc(44px + var(--safe-bottom))',
             overscrollBehavior: 'contain',
           }}
         >

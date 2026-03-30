@@ -144,8 +144,10 @@ describe('ReaderModal', () => {
     expect(progressBar).toBeInTheDocument();
   });
 
-  it('does not render when open is false', () => {
-    render(<ReaderModal bookmark={makeBookmark()} {...defaultProps} open={false} />);
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  it('renders the dialog when mounted', () => {
+    // ReaderModal is always mounted with open=true — AnimatePresence in DetailPanel
+    // controls mount/unmount; this confirms the dialog is present when rendered.
+    render(<ReaderModal bookmark={makeBookmark()} {...defaultProps} />);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });

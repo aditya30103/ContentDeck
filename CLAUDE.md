@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ContentDeck — a personal content bookmarking PWA dashboard for the Capture → Consume → Reflect → Export workflow. Bridges web browsing and Obsidian knowledge management.
 
-**Status: v3.6 — Phase 2 COMPLETE (all 5 Trusted Curator features shipped). Maintenance mode. React + Vite + Tailwind + TypeScript. Supabase Auth, demo mode, PWA share target, Sentry error tracking, GitHub Issues sync, Obsidian export + Community Plugin (Phase A+B complete). Spaced Review (SM-2) complete.**
+**Status: v3.9 — Phase 2 COMPLETE. Maintenance mode. React + Vite + Tailwind + TypeScript + framer-motion. Supabase Auth, demo mode, PWA share target, Sentry, GitHub Issues sync, Obsidian export + Community Plugin, Spaced Review (SM-2). v3.8 mobile UX overhaul (native app feel). v3.9 gesture layer (bottom sheet drag, modal slide-up/drag-dismiss, reader swipe).**
 
 See `docs/reference/audit.md` for the full audit trail (39/47 v1 issues resolved, 14 v2.0 bugs fixed, 8 v2.2 shipping fixes).
 
