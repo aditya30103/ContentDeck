@@ -1,4 +1,5 @@
 import type { BookmarkMetadata } from '../types';
+import { supabase } from './supabase';
 
 interface MetadataResult {
   title?: string;
@@ -171,44 +172,16 @@ function extractArxivId(url: string): string | null {
   return m?.[1] ?? null;
 }
 
-/** Fetch metadata for an arXiv paper via the export API (CORS-safe, no key needed) */
+/** Fetch metadata for an arXiv paper via the fetch-arxiv-metadata Edge Function.
+ * Direct browser requests to export.arxiv.org are blocked by CORS — the Edge
+ * Function proxies the request server-side and returns structured JSON. */
 async function fetchArxivMetadata(url: string): Promise<MetadataResult> {
   const id = extractArxivId(url);
   if (!id) return {};
   try {
-    const apiUrl = `https://export.arxiv.org/api/query?id_list=${id}`;
-    const resp = await fetch(apiUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
-    if (!resp.ok) return {};
-    const xml = await resp.text();
-
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(xml, 'application/xml');
-    // getElementsByTagName is used instead of querySelector because Atom XML has a default
-    // namespace (xmlns="http://www.w3.org/2005/Atom") which makes querySelector unreliable
-    // in browsers — it returns null for namespace-qualified elements.
-    const entry = doc.getElementsByTagName('entry')[0];
-    if (!entry) return {};
-
-    const rawTitle = entry.getElementsByTagName('title')[0]?.textContent?.trim() ?? '';
-    const title = rawTitle.replace(/\s+/g, ' ');
-    const abstract =
-      entry.getElementsByTagName('summary')[0]?.textContent?.trim().replace(/\s+/g, ' ') ?? '';
-    const published =
-      entry.getElementsByTagName('published')[0]?.textContent?.slice(0, 10) ?? undefined;
-    const authors = Array.from(entry.getElementsByTagName('name')).map(
-      (n) => n.textContent?.trim() ?? '',
-    );
-
-    return {
-      title: title || undefined,
-      excerpt: abstract.slice(0, 300) || undefined,
-      metadata: {
-        authors: authors.length > 0 ? authors : undefined,
-        abstract: abstract || undefined,
-        arxiv_id: id,
-        published,
-      },
-    };
+    const res = await supabase.functions.invoke('fetch-arxiv-metadata', { body: { id } });
+    if (res.error) return {};
+    return (res.data as MetadataResult | null) ?? {};
   } catch {
     return {};
   }
