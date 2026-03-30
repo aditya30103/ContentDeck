@@ -51,8 +51,13 @@ export function useTagAreas() {
       toast.success('Area created');
     },
     onError: (err) => {
-      // Don't send expected client-side duplicate validation errors to Sentry
-      if (!(err instanceof Error && err.message.includes('already exists'))) {
+      // Don't send expected duplicate validation errors to Sentry.
+      // Supabase returns a plain object (not Error) with code '23505' for unique violations.
+      const errObj = err as unknown as Record<string, unknown>;
+      const isDuplicate =
+        (err instanceof Error && err.message.includes('already exists')) ||
+        (typeof err === 'object' && err !== null && errObj.code === '23505');
+      if (!isDuplicate) {
         Sentry.captureException(err);
       }
       toast.error(err instanceof Error ? err.message : 'Failed to create area');
