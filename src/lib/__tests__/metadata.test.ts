@@ -1,6 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fetchMetadata } from '../metadata';
 
+// vi.mock is hoisted to the top of the file by Vitest, so mockInvoke must be
+// declared via vi.hoisted() to be accessible inside the mock factory.
+const { mockInvoke } = vi.hoisted(() => ({ mockInvoke: vi.fn() }));
+vi.mock('../supabase', () => ({
+  supabase: { functions: { invoke: mockInvoke } },
+}));
+
 const mockFetch = vi.mocked(fetch);
 
 function jsonResponse(data: unknown, status = 200): Response {
@@ -214,101 +221,68 @@ describe('fetchMetadata — generic (Microlink)', () => {
 });
 
 describe('fetchMetadata — arXiv', () => {
-  function xmlResponse(xml: string, status = 200): Response {
-    return {
-      ok: status >= 200 && status < 300,
-      status,
-      text: () => Promise.resolve(xml),
-    } as Response;
-  }
+  // arXiv metadata is fetched via the fetch-arxiv-metadata Edge Function (server-side
+  // proxy) to avoid CORS restrictions. Tests mock supabase.functions.invoke.
 
-  function makeArxivXml(
-    overrides: {
-      title?: string;
-      summary?: string;
-      published?: string;
-      authors?: string[];
-    } = {},
-  ): string {
-    const title = overrides.title ?? 'Attention Is All You Need';
-    const summary = overrides.summary ?? 'We propose the Transformer architecture.';
-    const published = overrides.published ?? '2017-06-12T00:00:00Z';
-    const authors = overrides.authors ?? ['Ashish Vaswani', 'Noam Shazeer'];
-    const authorXml = authors.map((a) => `<author><name>${a}</name></author>`).join('\n');
-    return `<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <entry>
-    <id>http://arxiv.org/abs/1706.03762v5</id>
-    <title>${title}</title>
-    <summary>${summary}</summary>
-    <published>${published}</published>
-    ${authorXml}
-  </entry>
-</feed>`;
-  }
+  beforeEach(() => {
+    mockInvoke.mockReset();
+  });
 
-  it('returns title, authors, abstract, arxiv_id from API', async () => {
-    mockFetch.mockResolvedValueOnce(xmlResponse(makeArxivXml()));
+  it('passes structured data through from the Edge Function', async () => {
+    mockInvoke.mockResolvedValueOnce({
+      data: {
+        title: 'Attention Is All You Need',
+        excerpt: 'We propose the Transformer architecture.',
+        metadata: {
+          authors: ['Ashish Vaswani', 'Noam Shazeer'],
+          abstract: 'We propose the Transformer architecture.',
+          arxiv_id: '1706.03762',
+          published: '2017-06-12',
+        },
+      },
+      error: null,
+    });
 
     const result = await fetchMetadata('https://arxiv.org/abs/1706.03762', 'arxiv');
 
     expect(result.title).toBe('Attention Is All You Need');
     expect(result.excerpt).toContain('Transformer');
     expect(result.metadata?.authors).toEqual(['Ashish Vaswani', 'Noam Shazeer']);
-    expect(result.metadata?.abstract).toContain('Transformer');
     expect(result.metadata?.arxiv_id).toBe('1706.03762');
     expect(result.metadata?.published).toBe('2017-06-12');
   });
 
-  it('returns empty when API returns no entry element', async () => {
-    mockFetch.mockResolvedValueOnce(
-      xmlResponse(`<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"></feed>`),
-    );
+  it('calls invoke with the correct arXiv ID extracted from URL', async () => {
+    mockInvoke.mockResolvedValueOnce({ data: {}, error: null });
+
+    await fetchMetadata('https://arxiv.org/abs/1706.03762', 'arxiv');
+
+    expect(mockInvoke).toHaveBeenCalledWith('fetch-arxiv-metadata', {
+      body: { id: '1706.03762' },
+    });
+  });
+
+  it('returns empty when invoke returns an error', async () => {
+    mockInvoke.mockResolvedValueOnce({ data: null, error: new Error('Function error') });
 
     const result = await fetchMetadata('https://arxiv.org/abs/9999.99999', 'arxiv');
 
     expect(result).toEqual({});
   });
 
-  it('returns empty when fetch throws (network error)', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Network error'));
+  it('returns empty when invoke throws (network error)', async () => {
+    mockInvoke.mockRejectedValueOnce(new Error('Network error'));
 
     const result = await fetchMetadata('https://arxiv.org/abs/1234.56789', 'arxiv');
 
     expect(result).toEqual({});
   });
 
-  it('routes arxiv URLs to arXiv handler', async () => {
-    mockFetch.mockResolvedValueOnce(xmlResponse(makeArxivXml()));
-    await fetchMetadata('https://arxiv.org/abs/1706.03762', 'arxiv');
+  it('returns empty for non-arXiv URLs', async () => {
+    const result = await fetchMetadata('https://notarxiv.com/paper', 'arxiv');
 
-    const calledUrl = mockFetch.mock.calls[0]?.[0] as string;
-    expect(calledUrl).toContain('export.arxiv.org/api/query');
-    expect(calledUrl).toContain('1706.03762');
-  });
-
-  it('parses title and authors from Atom XML with default namespace (getElementsByTagName)', async () => {
-    // Verifies that the namespace-safe getElementsByTagName approach works on
-    // XML where querySelector('entry') would return null in browsers due to
-    // the default Atom namespace (xmlns="http://www.w3.org/2005/Atom").
-    const namespacedXml = `<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
-  <entry>
-    <id>http://arxiv.org/abs/2301.00001v1</id>
-    <title>Namespace Test Paper</title>
-    <summary>An abstract about namespace handling.</summary>
-    <published>2023-01-01T00:00:00Z</published>
-    <author><name>Alice Example</name></author>
-  </entry>
-</feed>`;
-    mockFetch.mockResolvedValueOnce(xmlResponse(namespacedXml));
-
-    const result = await fetchMetadata('https://arxiv.org/abs/2301.00001', 'arxiv');
-
-    expect(result.title).toBe('Namespace Test Paper');
-    expect(result.metadata?.authors).toEqual(['Alice Example']);
-    expect(result.metadata?.abstract).toBe('An abstract about namespace handling.');
-    expect(result.metadata?.published).toBe('2023-01-01');
+    expect(result).toEqual({});
+    expect(mockInvoke).not.toHaveBeenCalled();
   });
 });
 
@@ -340,5 +314,14 @@ describe('fetchMetadata — routing', () => {
 
     const calledUrl = mockFetch.mock.calls[0]?.[0] as string;
     expect(calledUrl).toContain('api.microlink.io');
+  });
+
+  it('routes arXiv URLs to the fetch-arxiv-metadata Edge Function', async () => {
+    mockInvoke.mockResolvedValueOnce({ data: {}, error: null });
+
+    await fetchMetadata('https://arxiv.org/abs/1706.03762', 'arxiv');
+
+    expect(mockInvoke).toHaveBeenCalledWith('fetch-arxiv-metadata', expect.any(Object));
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 });
