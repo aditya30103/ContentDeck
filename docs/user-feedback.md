@@ -161,11 +161,8 @@ Free model rate limits on OpenRouter hit silently. The AI tagging fires for ever
 - Detect `github.com/*/*` URLs, fetch repo metadata via GitHub public API (no key needed)
 - Metadata: repo name, description, stars, language, topics
 
-### [FEATURE P2] arXiv paper source type
-**Reported:** 24 Feb | **Status:** Planned
-- Detect `arxiv.org/abs/` and `arxiv.org/pdf/` URLs
-- Fetch title, authors, abstract via arXiv API (free, no key)
-- Reader mode: show abstract + link to PDF
+### [DONE] arXiv paper source type + CORS fix (PR #58 — 2026-03-30)
+- arXiv source type shipped in v3.3; CORS bug fixed via `fetch-arxiv-metadata` Edge Function (PR #58, closes #52)
 
 ### [FEATURE P3] YouTube transcript extraction
 **Reported:** 24 Feb | **Status:** Backlog

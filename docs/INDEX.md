@@ -2,7 +2,7 @@
 
 > Start here. This file orients each session.
 
-**Version:** v3.7 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) COMPLETE ✅ — Obsidian Plugin ✅ · Values Onboarding ✅ · Scoring Engine ✅ · Home Screen ✅ · Reflection Prompt ✅ · Spaced Review ✅ · v3.7 Performance ✅
+**Version:** v3.9.1 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) COMPLETE ✅ — Obsidian Plugin ✅ · Values Onboarding ✅ · Scoring Engine ✅ · Home Screen ✅ · Reflection Prompt ✅ · Spaced Review ✅ · v3.7 Performance ✅ · v3.8 Mobile UX ✅ · v3.9 Gesture Layer ✅
 **Mode: Maintenance.** No new features planned. Next feature work: Phase 3 (Platform) or v4.0 (Intelligence Layer) — both deferred until signals from production use.
 **Feedback:** In-app button in Sidebar/MobileHeader → Settings → Feedback tab to review
 **Active plan:** [Phase 2 — Trusted Curator](plan/phase-2.md) | **Philosophy:** [Product Philosophy](plan/philosophy.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
@@ -78,6 +78,8 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
+| v3.9.1 | Maintenance: arXiv CORS fix (Edge Function proxy, #52) + Sentry PostgrestError filter (CONTENTDECK-3), 271 tests | [log/v3.9.1-maintenance-fixes.md](log/v3.9.1-maintenance-fixes.md) |
+| v3.9 | Gesture layer: framer-motion bottom sheets, drag-dismiss modals, reader swipe, route transitions | [log/v3.9-gestures.md](log/v3.9-gestures.md) |
 | v3.8 | Mobile UX: pinch zoom disabled, overscroll eliminated, 100dvh, MobileHeader 3 buttons, input font-size (#55, 270 tests) | [log/v3.8-mobile-ux.md](log/v3.8-mobile-ux.md) |
 | v3.7 | Performance: code splitting (34% smaller initial load), SW 4s timeout, Sentry deferred init, onboarding fix (#48, 261 tests) | [log/v3.7-performance.md](log/v3.7-performance.md) |
 | v3.6 | Spaced Review (2.5) + ReflectionModal cancel fix + YouTube skipped status (#42 #43 #38, 264 tests) | [log/v3.6-phase-2.5.md](log/v3.6-phase-2.5.md) |
