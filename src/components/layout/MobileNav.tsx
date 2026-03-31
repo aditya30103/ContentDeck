@@ -31,11 +31,11 @@ export default function MobileNav({ counts }: MobileNavProps) {
 
   return (
     <nav
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-surface-50/80 dark:bg-surface-900/80 backdrop-blur-md border-t border-surface-200 dark:border-surface-800"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-surface-50 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-800"
       style={{ paddingBottom: 'var(--safe-bottom)' }}
       aria-label="Bottom navigation"
     >
-      <div className="flex items-center">
+      <div className="flex h-[44px]">
         {tabs.map(({ status, label, icon: Icon, countKey }) => {
           const active = currentStatus === status;
           const count = counts[countKey];
@@ -43,7 +43,7 @@ export default function MobileNav({ counts }: MobileNavProps) {
             <button
               key={status}
               onClick={() => setStatus(status)}
-              className={`flex-1 flex flex-col items-center gap-0.5 py-2 min-h-[44px] transition-colors
+              className={`flex-1 flex items-center justify-center h-full transition-colors
                 ${active ? 'text-primary-600 dark:text-primary-400' : 'text-surface-400 dark:text-surface-500'}
               `}
               aria-label={`${label} (${count})`}
@@ -53,7 +53,6 @@ export default function MobileNav({ counts }: MobileNavProps) {
                 <Icon size={20} />
                 <NavBadge count={count} />
               </div>
-              <span className="text-xs font-medium">{label}</span>
             </button>
           );
         })}
@@ -61,7 +60,7 @@ export default function MobileNav({ counts }: MobileNavProps) {
         {/* Favorites — toggles independently; does not reset status or area */}
         <button
           onClick={() => setFavorites(!showFavorites)}
-          className={`flex-1 flex flex-col items-center gap-0.5 py-2 min-h-[44px] transition-colors
+          className={`flex-1 flex items-center justify-center h-full transition-colors
             ${showFavorites ? 'text-primary-600 dark:text-primary-400' : 'text-surface-400 dark:text-surface-500'}
           `}
           aria-label={`Favorites (${counts.favorited})`}
@@ -71,17 +70,15 @@ export default function MobileNav({ counts }: MobileNavProps) {
             <Star size={20} />
             <NavBadge count={counts.favorited} />
           </div>
-          <span className="text-xs font-medium">Favorites</span>
         </button>
 
         {/* View toggle */}
         <button
           onClick={() => setView(currentView === 'list' ? 'areas' : 'list')}
-          className="flex-1 flex flex-col items-center gap-0.5 py-2 min-h-[44px] text-surface-400 dark:text-surface-500"
+          className="flex-1 flex items-center justify-center h-full text-surface-400 dark:text-surface-500"
           aria-label={`Switch to ${currentView === 'list' ? 'areas' : 'list'} view`}
         >
           {currentView === 'list' ? <LayoutGrid size={20} /> : <List size={20} />}
-          <span className="text-xs font-medium">{currentView === 'list' ? 'Areas' : 'List'}</span>
         </button>
       </div>
     </nav>
