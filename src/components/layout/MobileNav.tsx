@@ -32,7 +32,6 @@ export default function MobileNav({ counts }: MobileNavProps) {
   return (
     <nav
       className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-surface-50 dark:bg-surface-950 border-t border-surface-200 dark:border-surface-800"
-      style={{ paddingBottom: 'var(--safe-bottom)' }}
       aria-label="Bottom navigation"
     >
       <div className="flex h-[44px]">
