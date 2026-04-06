@@ -195,6 +195,71 @@ describe('callOpenRouter — retry and error handling', () => {
   });
 });
 
+describe('suggestTags — edge cases', () => {
+  beforeEach(() => {
+    // Reset persistent mocks from previous describe blocks (e.g. mockResolvedValue from 500 test)
+    mockFetch.mockReset();
+    localStorage.setItem('openrouter_key', 'test-api-key');
+  });
+
+  it('rejects on invalid JSON response (not silently empty)', async () => {
+    mockFetch.mockResolvedValueOnce(aiResponse('{invalid json}'));
+    await expect(suggestTags(makeBookmark(), [], [])).rejects.toThrow();
+  });
+
+  it('throws "Empty AI response" when choices[0].message.content is null', async () => {
+    // The code retries all caught errors, so mock all 3 attempts with null content.
+    // After MAX_RETRIES the loop throws lastError = "Empty AI response".
+    const nullContentResponse = {
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ choices: [{ message: { content: null } }] }),
+    } as Response;
+    mockFetch.mockResolvedValue(nullContentResponse);
+    await expect(suggestTags(makeBookmark(), [], [])).rejects.toThrow('Empty AI response');
+  });
+
+  it('does not crash when excerpt is null', async () => {
+    mockFetch.mockResolvedValueOnce(aiResponse('{"tags": [], "areas": []}'));
+    await expect(suggestTags(makeBookmark({ excerpt: null }), [], [])).resolves.not.toThrow();
+  });
+
+  it('does not crash when areas list is empty', async () => {
+    mockFetch.mockResolvedValueOnce(aiResponse('{"tags": ["test"], "areas": []}'));
+    const result = await suggestTags(makeBookmark(), [], []);
+    expect(result.tags).toEqual(['test']);
+  });
+
+  it('passes through area names that are not in user list (no filtering at this layer)', async () => {
+    // The prompt tells the AI to only use areas from the user list, but suggestTags
+    // doesn't enforce this — filtering would need to happen at the caller level
+    mockFetch.mockResolvedValueOnce(
+      aiResponse('{"tags": [], "areas": ["NonExistentArea"], "suggestedArea": ""}'),
+    );
+    const result = await suggestTags(makeBookmark(), [], testAreas);
+    expect(result.areas).toContain('NonExistentArea');
+  });
+});
+
+describe('callOpenRouter — max retries exhausted', () => {
+  it('throws after 3 consecutive 429 responses', { timeout: 15_000 }, async () => {
+    vi.useFakeTimers();
+    mockFetch
+      .mockResolvedValueOnce(aiResponse('', 429))
+      .mockResolvedValueOnce(aiResponse('', 429))
+      .mockResolvedValueOnce(aiResponse('', 429));
+
+    const promise = suggestTags(makeBookmark(), [], []);
+    // Suppress unhandled rejection that fires between creation and the expect below
+    promise.catch(() => {});
+    // Advance past all backoff delays (1s + 2s = 3s, but 3rd attempt also has delay)
+    await vi.runAllTimersAsync();
+    await expect(promise).rejects.toThrow();
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+    vi.useRealTimers();
+  });
+});
+
 describe('bulkSuggestTags', () => {
   it('accumulates tags across iterations', async () => {
     mockFetch.mockResolvedValueOnce(aiResponse('{"tags": ["tag-a"], "areas": []}'));

@@ -2,7 +2,7 @@
 
 > Start here. This file orients each session.
 
-**Version:** v3.9.1 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) COMPLETE ✅ — Obsidian Plugin ✅ · Values Onboarding ✅ · Scoring Engine ✅ · Home Screen ✅ · Reflection Prompt ✅ · Spaced Review ✅ · v3.7 Performance ✅ · v3.8 Mobile UX ✅ · v3.9 Gesture Layer ✅
+**Version:** v3.9.2 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) COMPLETE ✅ — Obsidian Plugin ✅ · Values Onboarding ✅ · Scoring Engine ✅ · Home Screen ✅ · Reflection Prompt ✅ · Spaced Review ✅ · v3.7 Performance ✅ · v3.8 Mobile UX ✅ · v3.9 Gesture Layer ✅ · v3.9.2 Test Hardening ✅
 **Mode: Maintenance.** No new features planned. Next feature work: Phase 3 (Platform) or v4.0 (Intelligence Layer) — both deferred until signals from production use.
 **Feedback:** In-app button in Sidebar/MobileHeader → Settings → Feedback tab to review
 **Active plan:** [Phase 2 — Trusted Curator](plan/phase-2.md) | **Philosophy:** [Product Philosophy](plan/philosophy.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
@@ -23,6 +23,7 @@
 | Doing any UI work (colors, spacing, components, themes)  | [reference/design-system.md](reference/design-system.md) — read before touching any bg/text/border class                |
 | Looking for integration ideas                            | [reference/integrations.md](reference/integrations.md)                                                                   |
 | Planning infrastructure                                  | [plan/infrastructure.md](plan/infrastructure.md)                                                                         |
+| Hardening tests or reviewing test coverage               | [reference/test-audit.md](reference/test-audit.md) — comprehensive 2026-04-06 audit, per-file grades, gap list          |
 
 ---
 
@@ -62,14 +63,16 @@ docs/
 │   ├── v3.5-trusted-curator.md          # Phase 2.1+2.2+2.3 — Values Onboarding, Scoring Engine, Home Screen
 │   ├── v3.5-phase-2.4.md                # Phase 2.4 — Just Added strip, Mark Done, Reflection Prompt (240 tests)
 │   ├── v3.6-phase-2.5.md               # Phase 2.5 — Spaced Review SM-2 + bug fixes #42 #43 #38 (264 tests)
-│   └── v3.7-performance.md             # v3.7 — Code splitting, SW timeout, Sentry deferred, onboarding fix (261 tests)
+│   ├── v3.7-performance.md             # v3.7 — Code splitting, SW timeout, Sentry deferred, onboarding fix (261 tests)
+│   └── v3.9.2-test-hardening.md       # v3.9.2 — Test suite hardening: 271 → 470 tests, 7 hook files, Modal, TagAreaInput
 ├── guides/                         # How-to references
 │   ├── workflow.md                 # Development practices, session workflow
 │   └── supabase-auth-setup.md      # Supabase Auth provider configuration
 └── reference/                      # Lookup tables
     ├── audit.md                    # Bug tracking trail (v1→v2→v2.2)
     ├── design-system.md            # Color tokens, component catalog, theme rules, spacing, a11y patterns
-    └── integrations.md             # Potential integrations & extensions
+    ├── integrations.md             # Potential integrations & extensions
+    └── test-audit.md              # 2026-04-06 test suite audit — per-file grades, gaps, hardening plan
 ```
 
 ---
@@ -78,6 +81,7 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
+| v3.9.2 | Test suite hardening: 271 → 470 tests (+199), 7 new hook tests, Modal + TagAreaInput component tests, centralized test-utils | [log/v3.9.2-test-hardening.md](log/v3.9.2-test-hardening.md) |
 | v3.9.1 | Maintenance: arXiv CORS fix (Edge Function proxy, #52) + Sentry PostgrestError filter (CONTENTDECK-3), 271 tests | [log/v3.9.1-maintenance-fixes.md](log/v3.9.1-maintenance-fixes.md) |
 | v3.9 | Gesture layer: framer-motion bottom sheets, drag-dismiss modals, reader swipe, route transitions | [log/v3.9-gestures.md](log/v3.9-gestures.md) |
 | v3.8 | Mobile UX: pinch zoom disabled, overscroll eliminated, 100dvh, MobileHeader 3 buttons, input font-size (#55, 270 tests) | [log/v3.8-mobile-ux.md](log/v3.8-mobile-ux.md) |

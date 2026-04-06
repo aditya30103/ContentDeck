@@ -114,6 +114,72 @@ describe('fetchMetadata — YouTube', () => {
     const result = await fetchMetadata('https://www.youtube.com/watch?v=xyz', 'youtube');
     expect(result.metadata?.duration).toBe('5:30');
   });
+
+  it('uses maxres thumbnail over high/medium when all are present', async () => {
+    mockFetch.mockResolvedValueOnce(
+      jsonResponse({
+        items: [
+          {
+            snippet: {
+              title: 'Thumb Priority',
+              channelTitle: 'Ch',
+              thumbnails: {
+                maxres: { url: 'https://img.youtube.com/maxres.jpg' },
+                high: { url: 'https://img.youtube.com/high.jpg' },
+                medium: { url: 'https://img.youtube.com/medium.jpg' },
+              },
+            },
+            contentDetails: { duration: 'PT1M' },
+          },
+        ],
+      }),
+    );
+
+    const result = await fetchMetadata('https://www.youtube.com/watch?v=abc', 'youtube');
+    expect(result.image).toBe('https://img.youtube.com/maxres.jpg');
+  });
+
+  it('falls back to oEmbed when items array is empty (no crash)', async () => {
+    // Data API returns empty items (video not found / unlisted)
+    mockFetch.mockResolvedValueOnce(jsonResponse({ items: [] }));
+    // oEmbed fallback
+    mockFetch.mockResolvedValueOnce(
+      jsonResponse({ title: 'oEmbed Fallback', thumbnail_url: 'https://img.jpg', author_name: 'Ch' }),
+    );
+
+    const result = await fetchMetadata('https://www.youtube.com/watch?v=abc', 'youtube');
+    expect(result.title).toBe('oEmbed Fallback');
+  });
+
+  it('returns "0:00" for PT0S duration', async () => {
+    mockFetch.mockResolvedValueOnce(
+      jsonResponse({
+        items: [
+          {
+            snippet: { title: 'Zero', channelTitle: 'Ch', thumbnails: {} },
+            contentDetails: { duration: 'PT0S' },
+          },
+        ],
+      }),
+    );
+    const result = await fetchMetadata('https://www.youtube.com/watch?v=abc', 'youtube');
+    expect(result.metadata?.duration).toBe('0:00');
+  });
+
+  it('returns "0:01" for PT1S duration', async () => {
+    mockFetch.mockResolvedValueOnce(
+      jsonResponse({
+        items: [
+          {
+            snippet: { title: 'One', channelTitle: 'Ch', thumbnails: {} },
+            contentDetails: { duration: 'PT1S' },
+          },
+        ],
+      }),
+    );
+    const result = await fetchMetadata('https://www.youtube.com/watch?v=abc', 'youtube');
+    expect(result.metadata?.duration).toBe('0:01');
+  });
 });
 
 describe('fetchMetadata — Twitter', () => {
@@ -160,6 +226,28 @@ describe('fetchMetadata — Twitter', () => {
 
     expect(result.title).not.toContain('https://t.co/');
     expect(result.excerpt).not.toContain('https://t.co/');
+  });
+
+  it('falls back to Microlink when author_name is missing from oEmbed', async () => {
+    // oEmbed without author_name → should use Microlink fallback (not empty title)
+    mockFetch.mockResolvedValueOnce(
+      jsonResponse({
+        html: '<blockquote class="twitter-tweet"><p lang="en">Tweet without author</p></blockquote>',
+        // no author_name
+      }),
+    );
+    mockFetch.mockResolvedValueOnce(
+      jsonResponse({
+        data: {
+          title: 'Microlink Title',
+          description: 'From microlink',
+          image: null,
+        },
+      }),
+    );
+
+    const result = await fetchMetadata('https://twitter.com/user/status/123', 'twitter');
+    expect(result.title).toBe('Microlink Title');
   });
 
   it('falls back to Microlink when oEmbed fails', async () => {
@@ -218,6 +306,25 @@ describe('fetchMetadata — generic (Microlink)', () => {
 
     expect(result).toEqual({});
   });
+
+  it('handles partial Microlink response — only title populated', async () => {
+    mockFetch.mockResolvedValueOnce(
+      jsonResponse({
+        data: {
+          title: 'Just A Title',
+          description: null,
+          image: null,
+          readability: null,
+        },
+      }),
+    );
+
+    const result = await fetchMetadata('https://example.com/post', 'blog');
+    expect(result.title).toBe('Just A Title');
+    expect(result.image).toBeUndefined();
+    expect(result.excerpt).toBeUndefined();
+    expect(result.metadata?.word_count).toBeUndefined();
+  });
 });
 
 describe('fetchMetadata — arXiv', () => {
@@ -260,6 +367,13 @@ describe('fetchMetadata — arXiv', () => {
     expect(mockInvoke).toHaveBeenCalledWith('fetch-arxiv-metadata', {
       body: { id: '1706.03762' },
     });
+  });
+
+  it('returns empty when invoke returns { data: null, error: null }', async () => {
+    mockInvoke.mockResolvedValueOnce({ data: null, error: null });
+
+    const result = await fetchMetadata('https://arxiv.org/abs/9999.99999', 'arxiv');
+    expect(result).toEqual({});
   });
 
   it('returns empty when invoke returns an error', async () => {

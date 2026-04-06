@@ -151,4 +151,45 @@ describe('BookmarkCard', () => {
     await user.click(screen.getByText('Test Article'));
     expect(onClick).toHaveBeenCalledWith('b1');
   });
+
+  it('tag click calls setTag with tag name', async () => {
+    const user = userEvent.setup();
+    render(<BookmarkCard bookmark={makeBookmark({ tags: ['react', 'testing'] })} {...defaultCallbacks} />);
+    await user.click(screen.getByRole('button', { name: 'react' }));
+    expect(mockSetTag).toHaveBeenCalledWith('react');
+  });
+
+  it('area pill click calls setTag with area name', async () => {
+    const user = userEvent.setup();
+    render(
+      <BookmarkCard
+        bookmark={makeBookmark({
+          areas: [{ id: 'a1', name: 'Dev', emoji: null, color: '#6366f1', description: null, sort_order: 0, created_at: '' }],
+        })}
+        {...defaultCallbacks}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: 'Dev' }));
+    expect(mockSetTag).toHaveBeenCalledWith('Dev');
+  });
+
+  it('hides "Open original" link for book with sentinel URL', () => {
+    render(
+      <BookmarkCard
+        bookmark={makeBookmark({ source_type: 'book', url: 'book://no-url', title: 'Deep Work' })}
+        {...defaultCallbacks}
+      />,
+    );
+    expect(screen.queryByRole('link')).toBeNull();
+  });
+
+  it('Enter key on card triggers onClick', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(<BookmarkCard bookmark={makeBookmark()} {...defaultCallbacks} onClick={onClick} />);
+    const card = screen.getByRole('button', { name: /Test Article/ });
+    card.focus();
+    await user.keyboard('{Enter}');
+    expect(onClick).toHaveBeenCalledWith('b1');
+  });
 });

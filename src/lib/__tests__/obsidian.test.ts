@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { generateMarkdown } from '../obsidian';
+import { describe, it, expect, vi } from 'vitest';
+import { generateMarkdown, exportToObsidianUri } from '../obsidian';
 import type { Bookmark } from '../../types';
 
 function makeBookmark(overrides: Partial<Bookmark> = {}): Bookmark {
@@ -239,5 +239,118 @@ describe('generateMarkdown — arXiv abstract', () => {
     const md = generateMarkdown(makeBookmark({ source_type: 'blog', excerpt: 'Blog excerpt' }));
     expect(md).toContain('## Summary');
     expect(md).not.toContain('## Abstract');
+  });
+});
+
+describe('generateMarkdown — folder mapping', () => {
+  it.each([
+    ['youtube', 'Videos'],
+    ['twitter', 'Threads'],
+    ['linkedin', 'LinkedIn'],
+    ['substack', 'Articles'],
+    ['blog', 'Articles'],
+    ['book', 'Books'],
+    ['arxiv', 'Papers'],
+  ] as const)('maps source_type %s to folder %s', (source_type, expectedFolder) => {
+    const windowOpen = vi.spyOn(window, 'open').mockImplementation(() => null);
+    exportToObsidianUri(
+      makeBookmark({ source_type }),
+      'MyVault',
+      'ContentDeck',
+    );
+    const uri = (windowOpen.mock.calls[0]?.[0] as string) ?? '';
+    expect(decodeURIComponent(uri)).toContain(expectedFolder);
+    windowOpen.mockRestore();
+  });
+});
+
+describe('generateMarkdown — special character escaping', () => {
+  it('escapes double-quote in YAML values', () => {
+    const md = generateMarkdown(makeBookmark({ title: 'Say "Hello"' }));
+    expect(md).toContain('title: "Say \\"Hello\\""');
+  });
+
+  it('renders area name with & in wikilink', () => {
+    const md = generateMarkdown(
+      makeBookmark({
+        areas: [{ id: 'a1', name: 'Design & UX', description: null, color: null, emoji: null, sort_order: 0, created_at: '2024-01-01T00:00:00Z' }],
+      }),
+    );
+    expect(md).toContain('"[[Design & UX]]"');
+  });
+});
+
+describe('generateMarkdown — metadata footer', () => {
+  it('renders footer with only duration (no word_count)', () => {
+    const md = generateMarkdown(
+      makeBookmark({ metadata: { duration: '10:30' } }),
+    );
+    expect(md).toContain('Duration: 10:30');
+    expect(md).not.toContain('Words:');
+  });
+
+  it('renders footer with only word_count (no duration)', () => {
+    const md = generateMarkdown(
+      makeBookmark({ metadata: { word_count: 1500 } }),
+    );
+    expect(md).toContain('Words: 1,500');
+    expect(md).not.toContain('Duration:');
+  });
+
+  it('renders both duration and word_count separated by pipe', () => {
+    const md = generateMarkdown(
+      makeBookmark({ metadata: { duration: '5:30', word_count: 800 } }),
+    );
+    expect(md).toContain('Duration: 5:30 | Words: 800');
+  });
+
+  it('omits footer when no duration or word_count', () => {
+    const md = generateMarkdown(makeBookmark({ metadata: {} }));
+    // Footer separator should not appear (no --- after body)
+    const footerSepCount = (md.match(/^---$/gm) ?? []).length;
+    expect(footerSepCount).toBe(2); // only opening and closing frontmatter
+  });
+});
+
+describe('exportToObsidianUri', () => {
+  it('calls window.open with obsidian:// URI', () => {
+    const windowOpen = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    exportToObsidianUri(makeBookmark({ title: 'Test' }), 'MyVault', 'ContentDeck');
+
+    expect(windowOpen).toHaveBeenCalledOnce();
+    const uri = windowOpen.mock.calls[0]?.[0] as string;
+    expect(uri).toMatch(/^obsidian:\/\/new\?/);
+    windowOpen.mockRestore();
+  });
+
+  it('URI contains vault= and file= parameters', () => {
+    const windowOpen = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    exportToObsidianUri(makeBookmark({ title: 'My Article' }), 'MyVault', 'ContentDeck');
+
+    const uri = windowOpen.mock.calls[0]?.[0] as string;
+    expect(uri).toContain('vault=');
+    expect(uri).toContain('file=');
+    expect(uri).toContain('content=');
+    expect(decodeURIComponent(uri)).toContain('MyVault');
+    windowOpen.mockRestore();
+  });
+
+  it('returns false and does not open when vaultName is empty', () => {
+    const windowOpen = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    const result = exportToObsidianUri(makeBookmark(), '', 'ContentDeck');
+
+    expect(result).toBe(false);
+    expect(windowOpen).not.toHaveBeenCalled();
+    windowOpen.mockRestore();
+  });
+
+  it('returns true on success', () => {
+    vi.spyOn(window, 'open').mockImplementation(() => null);
+    const result = exportToObsidianUri(makeBookmark(), 'Vault', 'Folder');
+    expect(result).toBe(true);
+    vi.restoreAllMocks();
   });
 });

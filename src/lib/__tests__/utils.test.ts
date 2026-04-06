@@ -6,6 +6,8 @@ import {
   truncate,
   getDomain,
   formatDate,
+  getFaviconUrl,
+  isBookWithoutUrl,
 } from '../utils';
 
 describe('detectSourceType', () => {
@@ -155,5 +157,56 @@ describe('getDomain', () => {
 
   it('returns original string for invalid URLs', () => {
     expect(getDomain('not-a-url')).toBe('not-a-url');
+  });
+});
+
+describe('isBookWithoutUrl', () => {
+  it('returns true for a book with sentinel URL', () => {
+    expect(isBookWithoutUrl({ source_type: 'book', url: 'book://no-url' })).toBe(true);
+  });
+
+  it('returns false for a book with a real https URL', () => {
+    expect(isBookWithoutUrl({ source_type: 'book', url: 'https://amazon.com/book' })).toBe(false);
+  });
+
+  it('returns false for a non-book source with any URL', () => {
+    expect(isBookWithoutUrl({ source_type: 'blog', url: 'book://no-url' })).toBe(false);
+  });
+
+  it('returns false for non-book with https URL', () => {
+    expect(isBookWithoutUrl({ source_type: 'youtube', url: 'https://youtube.com' })).toBe(false);
+  });
+
+  it('returns true for book with any non-http URL (e.g. empty protocol)', () => {
+    expect(isBookWithoutUrl({ source_type: 'book', url: 'no-url-at-all' })).toBe(true);
+  });
+});
+
+describe('getFaviconUrl', () => {
+  it('returns Google Favicon API URL with the domain', () => {
+    const result = getFaviconUrl('https://example.com/article');
+    expect(result).toBe('https://www.google.com/s2/favicons?domain=example.com&sz=32');
+  });
+
+  it('strips www from domain in favicon URL', () => {
+    const result = getFaviconUrl('https://www.github.com');
+    expect(result).toBe('https://www.google.com/s2/favicons?domain=github.com&sz=32');
+  });
+});
+
+describe('timeAgo — edge cases', () => {
+  it('returns "just now" for a future date (negative seconds)', () => {
+    const futureDate = new Date(Date.now() + 10_000).toISOString();
+    expect(timeAgo(futureDate)).toBe('just now');
+  });
+
+  it('returns "1m ago" for exactly 60 seconds', () => {
+    const sixtySecondsAgo = new Date(Date.now() - 60_000).toISOString();
+    expect(timeAgo(sixtySecondsAgo)).toBe('1m ago');
+  });
+
+  it('returns "just now" for 59 seconds ago', () => {
+    const fiftyNineSecondsAgo = new Date(Date.now() - 59_000).toISOString();
+    expect(timeAgo(fiftyNineSecondsAgo)).toBe('just now');
   });
 });

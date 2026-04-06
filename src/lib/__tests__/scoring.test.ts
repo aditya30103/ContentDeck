@@ -255,6 +255,73 @@ describe('Effort: item near target beats far-off items', () => {
     const targetScore = scoreBookmark(target, ctx).components.effort;
     expect(targetScore).toBeGreaterThan(shortScore);
   });
+
+  it('extreme 1000-min item scores near 0 for effort (gaussian falloff)', () => {
+    const extreme = makeBookmark({ id: 'extreme', content: { reading_time: 1000 } });
+    const ctx = defaultCtx([extreme]);
+    const score = scoreBookmark(extreme, ctx).components.effort;
+    expect(score).toBeLessThan(0.05);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getReadingMinutes edge cases
+// ---------------------------------------------------------------------------
+
+describe('getReadingMinutes — edge cases', () => {
+  it('returns null for null bookmark (no metadata or content)', () => {
+    const b = makeBookmark({ metadata: {}, content: {} });
+    expect(getReadingMinutes(b)).toBeNull();
+  });
+
+  it('falls back to word_count when duration is invalid string', () => {
+    const b = makeBookmark({
+      metadata: { duration: 'not-a-duration', word_count: 400 },
+    });
+    // parseDurationToMinutes("not-a-duration") returns null → falls back to word_count / 200
+    expect(getReadingMinutes(b)).toBe(2); // 400 / 200 = 2
+  });
+
+  it('returns 0 for "0:00" duration', () => {
+    const b = makeBookmark({ metadata: { duration: '0:00' } });
+    expect(getReadingMinutes(b)).toBe(0);
+  });
+
+  it('parses "1:2:3:4" (too many parts) as null → falls through to word_count', () => {
+    const b = makeBookmark({
+      metadata: { duration: '1:2:3:4', word_count: 600 },
+    });
+    expect(getReadingMinutes(b)).toBe(3); // 600 / 200 = 3
+  });
+
+  it('prefers content.reading_time over metadata.reading_time', () => {
+    const b = makeBookmark({
+      content: { reading_time: 7 },
+      metadata: { reading_time: 20 },
+    });
+    expect(getReadingMinutes(b)).toBe(7);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildScoreContext — recentDone edge case
+// ---------------------------------------------------------------------------
+
+describe('buildScoreContext — recentDone', () => {
+  it('recentDone is empty when all bookmarks are unread', () => {
+    const bookmarks = [
+      makeBookmark({ id: 'b1', status: 'unread' }),
+      makeBookmark({ id: 'b2', status: 'unread' }),
+    ];
+    const ctx = buildScoreContext(bookmarks, null, 'default');
+    expect(ctx.recentDone).toHaveLength(0);
+  });
+
+  it('medianQueueDays defaults gracefully when recentDone is empty (no crash)', () => {
+    // This exercises the median([]) → 14 fallback path
+    const bookmarks = [makeBookmark({ id: 'b1', status: 'unread' })];
+    expect(() => buildScoreContext(bookmarks, null, 'default')).not.toThrow();
+  });
 });
 
 // ---------------------------------------------------------------------------

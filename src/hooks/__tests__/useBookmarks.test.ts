@@ -488,7 +488,6 @@ describe('triggerExtraction — invoke and invalidate', () => {
     await waitFor(() => expect(result.current.addBookmark.isSuccess).toBe(true));
 
     // Extraction runs after autoFetchMetadataAndTag — give it a tick
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     await waitFor(() =>
       expect(mockSupabaseClient.functions.invoke).toHaveBeenCalledWith(
         'extract-content',
@@ -550,6 +549,91 @@ describe('useBookmarks — triggerExtraction (youtube transcript)', () => {
         expect.objectContaining({ body: { bookmark_id: 'bm-yt' } }),
       ),
     );
+  });
+});
+
+describe('useBookmarks — bulkDelete', () => {
+  it('removes bookmarks from cache and succeeds', async () => {
+    const builder = mockSupabaseClient._getBuilder('bookmarks');
+    builder._resolve = {
+      data: [makeRawBookmark({ id: 'bm-1' }), makeRawBookmark({ id: 'bm-2' })],
+      error: null,
+    };
+
+    const { result } = renderHook(() => useBookmarks(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.bookmarks.length).toBe(2));
+
+    builder._resolve = { data: null, error: null };
+
+    result.current.bulkDelete.mutate(['bm-1', 'bm-2']);
+
+    await waitFor(() => expect(result.current.bulkDelete.isSuccess).toBe(true));
+  });
+
+  it('does not call DB delete when ids array is empty', async () => {
+    const builder = mockSupabaseClient._getBuilder('bookmarks');
+    builder._resolve = { data: [], error: null };
+
+    const { result } = renderHook(() => useBookmarks(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    builder._resolve = { data: null, error: null };
+
+    act(() => {
+      result.current.bulkDelete.mutate([]);
+    });
+
+    await waitFor(() => expect(result.current.bulkDelete.isSuccess).toBe(true));
+    // The .in() was called but with empty array — no crash
+    expect(result.current.bulkDelete.isError).toBe(false);
+  });
+});
+
+describe('useBookmarks — arXiv content write', () => {
+  it('writes abstract to content.text for arxiv bookmarks', async () => {
+    const { fetchMetadata } = await import('../../lib/metadata');
+    vi.mocked(fetchMetadata).mockResolvedValueOnce({
+      title: 'arXiv Paper',
+      metadata: {
+        abstract: 'This paper explores something amazing.',
+      } as Record<string, unknown>,
+    });
+
+    const builder = mockSupabaseClient._getBuilder('bookmarks');
+    builder._resolve = { data: [], error: null };
+
+    const { result } = renderHook(() => useBookmarks(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    builder._resolve = {
+      data: makeRawBookmark({
+        id: 'bm-arxiv',
+        url: 'https://arxiv.org/abs/2301.00001',
+        source_type: 'arxiv',
+      }),
+      error: null,
+    };
+
+    act(() => {
+      result.current.addBookmark.mutate({ url: 'https://arxiv.org/abs/2301.00001' });
+    });
+
+    await waitFor(() => expect(result.current.addBookmark.isSuccess).toBe(true));
+
+    // Wait for the fire-and-forget arXiv content write
+    await waitFor(() => {
+      const updateCalls = builder.update.mock.calls as Array<[Record<string, unknown>]>;
+      return updateCalls.some((call) => {
+        const arg = call[0];
+        return (
+          typeof arg === 'object' &&
+          arg !== null &&
+          'content' in arg &&
+          typeof (arg.content as Record<string, unknown>).text === 'string' &&
+          (arg.content as Record<string, unknown>).text === 'This paper explores something amazing.'
+        );
+      });
+    });
   });
 });
 

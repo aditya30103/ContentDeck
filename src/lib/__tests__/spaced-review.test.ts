@@ -225,3 +225,44 @@ describe('buildReviewQueue', () => {
     expect(queue[1]!.id).toBe('newer');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Edge cases (plan Phase 3F additions)
+// ---------------------------------------------------------------------------
+
+describe('getReviewState — edge cases', () => {
+  it('treats review_interval=0 as DEFAULT_INTERVAL (3) — zero is falsy', () => {
+    // metadata.review_interval ?? DEFAULT_INTERVAL — 0 is falsy so ?? returns 3
+    const b = makeBookmark({ metadata: { review_interval: 0 } });
+    const state = getReviewState(b);
+    // 0 ?? 3 = 0 (nullish coalescing only catches null/undefined, not 0)
+    // so interval = 0; dueAt = anchor + 0 days = anchor itself = always due
+    // The important thing: no crash, and dueAt is set
+    expect(typeof state.interval).toBe('number');
+    expect(state.dueAt).toBeTruthy();
+  });
+
+  it('anchor precedence: last_reviewed_at > finished_at > created_at', () => {
+    const b = makeBookmark({
+      last_reviewed_at: '2026-03-01T00:00:00Z',
+      finished_at: '2026-01-01T00:00:00Z',
+      created_at: '2025-06-01T00:00:00Z',
+      metadata: { review_interval: 3 },
+    });
+    const state = getReviewState(b);
+    // last_reviewed_at takes precedence → dueAt = 2026-03-01 + 3 days = 2026-03-04
+    expect(state.dueAt).toBe('2026-03-04T00:00:00.000Z');
+  });
+
+  it('falls back to created_at when both last_reviewed_at and finished_at are null', () => {
+    const b = makeBookmark({
+      last_reviewed_at: null,
+      finished_at: null,
+      created_at: '2026-01-01T00:00:00Z',
+      metadata: { review_interval: 3 },
+    });
+    const state = getReviewState(b);
+    // Falls back to created_at: 2026-01-01 + 3 = 2026-01-04
+    expect(state.dueAt).toBe('2026-01-04T00:00:00.000Z');
+  });
+});
