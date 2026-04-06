@@ -150,11 +150,8 @@ Free model rate limits on OpenRouter hit silently. The AI tagging fires for ever
 - NOT in scope now: Apple Books API sync, in-app reading
 - Fix direction: Make URL optional when source_type = 'book' in AddBookmarkModal; add author field
 
-### [FEATURE P2] Obsidian export: tags as wikilinks
-**Reported:** 24 Feb | **Status:** Planned
-- Currently exports `tags: ["tag1", "tag2"]` in YAML frontmatter
-- Desired: `[[tag1]]` wikilink format for Obsidian backlink graph integration
-- Fix direction: Add toggle in export options OR always use `[[tag]]` in YAML
+### [DONE] Obsidian export: tags as wikilinks (v3.3)
+- Both `areas` and `tags` exported as `[[wikilink]]` format in YAML frontmatter (`obsidian.ts:30,33`)
 
 ### [FEATURE P2] GitHub repository source type
 **Reported:** 24 Feb | **Status:** Planned
@@ -164,19 +161,14 @@ Free model rate limits on OpenRouter hit silently. The AI tagging fires for ever
 ### [DONE] arXiv paper source type + CORS fix (PR #58 — 2026-03-30)
 - arXiv source type shipped in v3.3; CORS bug fixed via `fetch-arxiv-metadata` Edge Function (PR #58, closes #52)
 
-### [FEATURE P3] YouTube transcript extraction
-**Reported:** 24 Feb | **Status:** Backlog
+### [DONE] YouTube transcript extraction (v3.3)
+- Caption scraping via `extract-content` edge function; `content_status=skipped` shows "No transcript available" for unavailable captions
 
-### [FEATURE P3] Warm/Sepia theme for main app
-**Reported:** 24 Feb | **Status:** Backlog
-- Reader mode already has sepia; main app dashboard is zinc-only
+### [DONE] Warm/Sepia + Navy theme for main app (v3.3)
+- Sepia and Navy themes added to main dashboard; 4-button theme picker in Settings
 
-### [QUALITY P1] Fix tests to catch race conditions and metadata failures
-**Reported:** 24 Feb | **Status:** Planned
-- Current tests mock `fetchMetadata` entirely — race conditions and real failure modes are invisible
-- Need: test for `triggerExtraction` → `invalidateQueries` race
-- Need: test that areas are preserved after `autoFetchMetadataAndTag` completes
-- Need: test that `enrichAndTag` batch awaits DB writes before invalidating
+### [DONE] Fix tests to catch race conditions and metadata failures (v3.0)
+- `useBookmarks.test.ts`: areas-preserved test (line 422), triggerExtraction/invalidate test (line 471), YouTube transcript test (line 501)
 
 ---
 
