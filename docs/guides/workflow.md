@@ -62,7 +62,7 @@ These are genuinely ahead of many solo developers:
 | Conventional commits | Adopted |
 | Quality pipeline | `format → lint → typecheck → test → build` |
 | Feature branches + PRs | All work goes through branches, PRs to main |
-| Vitest (unit + component) | 261 tests — unit + component across 12+ files; scoring engine (27 unit), spaced review (19 unit), react-router-dom v7 |
+| Vitest (unit + component) | 470 tests — unit + component across 28 files; all hooks covered, Modal, TagAreaInput, scoring engine (27 unit), spaced review (19 unit) |
 | GitHub Actions CI | `.github/workflows/ci.yml` — runs on PR + push to main |
 | Sentry error tracking | Active — all mutations, ErrorBoundary, unhandledrejection |
 | Vercel Analytics + Speed Insights | Active — web vitals per route |
@@ -104,7 +104,7 @@ Adopt practices in tiers. Each tier should feel habitual before moving to the ne
 - Easy rollback (revert a PR, not hunt through commits)
 - Vercel gives you free preview deployments per branch
 
-**Vitest (Unit + Component Tests).** 165 tests across 12+ files. Unit tests in `src/lib/`, component tests in `src/components/__tests__/` and `src/hooks/__tests__/`. All new features require tests.
+**Vitest (Unit + Component Tests).** 470 tests across 28 files. Unit tests in `src/lib/`, component tests in `src/components/__tests__/` and `src/hooks/__tests__/`. All new features require tests.
 
 **GitHub Actions CI.** `.github/workflows/ci.yml` runs `format → lint → typecheck → test → build` on every PR and push to `main`. Secrets (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) configured in GitHub Actions settings.
 

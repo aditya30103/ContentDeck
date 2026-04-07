@@ -383,8 +383,15 @@ export function useBookmarks() {
     const { error } = await db
       .from('bookmark_tags')
       .insert({ bookmark_id: bookmarkId, tag_area_id: area.id });
-    if (error) throw error;
-    // Update cache
+    if (error) {
+      // '23505' = unique violation (duplicate assignment) — not an error worth reporting
+      const code = (error as unknown as Record<string, unknown>).code;
+      if (code !== '23505') {
+        Sentry.captureException(error, { extra: { bookmarkId, areaId: area.id } });
+        toast.error('Failed to assign area');
+      }
+      return;
+    }
     queryClient.setQueryData<Bookmark[]>(QUERY_KEY, (old) =>
       old?.map((b) =>
         b.id === bookmarkId
@@ -401,7 +408,11 @@ export function useBookmarks() {
       .delete()
       .eq('bookmark_id', bookmarkId)
       .eq('tag_area_id', areaId);
-    if (error) throw error;
+    if (error) {
+      Sentry.captureException(error, { extra: { bookmarkId, areaId } });
+      toast.error('Failed to remove area');
+      return;
+    }
     queryClient.setQueryData<Bookmark[]>(QUERY_KEY, (old) =>
       old?.map((b) =>
         b.id === bookmarkId ? { ...b, areas: b.areas.filter((a) => a.id !== areaId) } : b,
@@ -411,17 +422,28 @@ export function useBookmarks() {
 
   /** Replace all area assignments for a bookmark */
   async function setAreas(bookmarkId: string, areas: TagArea[]) {
+    const prev = queryClient.getQueryData<Bookmark[]>(QUERY_KEY);
     // Delete existing junction rows
     const { error: delError } = await db
       .from('bookmark_tags')
       .delete()
       .eq('bookmark_id', bookmarkId);
-    if (delError) throw delError;
+    if (delError) {
+      Sentry.captureException(delError, { extra: { bookmarkId } });
+      toast.error('Failed to update areas');
+      return;
+    }
     // Insert new ones
     if (areas.length > 0) {
       const rows = areas.map((a) => ({ bookmark_id: bookmarkId, tag_area_id: a.id }));
       const { error: insError } = await db.from('bookmark_tags').insert(rows);
-      if (insError) throw insError;
+      if (insError) {
+        // Rollback: restore previous cache state so UI isn't stuck with wrong areas
+        if (prev) queryClient.setQueryData(QUERY_KEY, prev);
+        Sentry.captureException(insError, { extra: { bookmarkId } });
+        toast.error('Failed to update areas');
+        return;
+      }
     }
     queryClient.setQueryData<Bookmark[]>(QUERY_KEY, (old) =>
       old?.map((b) => (b.id === bookmarkId ? { ...b, areas } : b)),
@@ -433,7 +455,9 @@ export function useBookmarks() {
     // Skip metadata fetch for URL-less books — no URL to scrape
     if (isBookWithoutUrl(bookmark)) {
       if (bookmark.tags.length === 0 && bookmark.title && localStorage.getItem('openrouter_key')) {
-        void autoSuggestTags(bookmark);
+        void autoSuggestTags(bookmark).catch((err) =>
+          console.warn('[autoSuggestTags] failed', err),
+        );
       }
       return;
     }
@@ -461,26 +485,37 @@ export function useBookmarks() {
       // other metadata fields needed updating — abstract should always be stored.
       if (bookmark.source_type === 'arxiv' && result.metadata?.abstract) {
         const text = result.metadata.abstract;
-        void db
-          .from('bookmarks')
-          .update({
-            content: {
-              text,
-              method: 'arxiv_api',
-              word_count: text.split(/\s+/).filter(Boolean).length,
-              extracted_at: new Date().toISOString(),
-            },
-            content_status: 'success',
-            content_fetched_at: new Date().toISOString(),
-          })
-          .eq('id', bookmark.id);
+        try {
+          const { error: contentError } = await db
+            .from('bookmarks')
+            .update({
+              content: {
+                text,
+                method: 'arxiv_api',
+                word_count: text.split(/\s+/).filter(Boolean).length,
+                extracted_at: new Date().toISOString(),
+              },
+              content_status: 'success',
+              content_fetched_at: new Date().toISOString(),
+            })
+            .eq('id', bookmark.id);
+          if (contentError) {
+            console.error('[autoFetchMetadata] arXiv content write failed', contentError);
+            Sentry.captureException(contentError, { extra: { bookmarkId: bookmark.id } });
+          }
+        } catch (contentErr) {
+          console.error('[autoFetchMetadata] arXiv content write error', contentErr);
+          Sentry.captureException(contentErr, { extra: { bookmarkId: bookmark.id } });
+        }
       }
     } catch (err) {
       // Silent fail for metadata — still attempt tagging with whatever we have
       if (import.meta.env.DEV) console.warn('[autoFetchMetadata] failed', err);
     }
     if (enriched.tags.length === 0 && localStorage.getItem('openrouter_key')) {
-      void autoSuggestTags(enriched);
+      void autoSuggestTags(enriched).catch((err) =>
+        console.warn('[autoSuggestTags] failed', err),
+      );
     }
   }
 
@@ -500,15 +535,22 @@ export function useBookmarks() {
 
     const { error } = await db.from('bookmarks').update(updates).eq('id', bookmark.id);
     if (error) throw error;
-    const enriched = { ...bookmark, ...updates } as Bookmark;
     queryClient.setQueryData<Bookmark[]>(QUERY_KEY, (old) =>
-      old?.map((b) => (b.id === bookmark.id ? enriched : b)),
+      old?.map((b) => (b.id === bookmark.id ? { ...b, ...updates } : b)),
     );
-    // Re-extract content
-    void triggerExtraction(bookmark);
-    // Re-tag with AI using refreshed metadata
+    const enriched =
+      queryClient.getQueryData<Bookmark[]>(QUERY_KEY)?.find((b) => b.id === bookmark.id) ??
+      ({ ...bookmark, ...updates } as Bookmark);
+    // Re-extract content first, then re-tag so AI has fresh content context
+    try {
+      await triggerExtraction(bookmark);
+    } catch {
+      // extraction failure shouldn't block re-tagging
+    }
     if (localStorage.getItem('openrouter_key')) {
-      void autoSuggestTags(enriched);
+      void autoSuggestTags(enriched).catch((err) =>
+        console.warn('[autoSuggestTags] failed', err),
+      );
     }
   }
 
@@ -519,13 +561,29 @@ export function useBookmarks() {
     if (isDemo) return;
     if (SKIP_EXTRACTION_SOURCES.includes(bookmark.source_type)) return;
     try {
-      await db.functions.invoke('extract-content', {
+      const res = await db.functions.invoke('extract-content', {
         body: { bookmark_id: bookmark.id },
       });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      if (res.error) {
+        console.warn('[triggerExtraction] edge function error', res.error);
+        Sentry.addBreadcrumb({
+          category: 'extraction',
+          message: 'extract-content failed',
+          level: 'warning',
+          data: { bookmarkId: bookmark.id, error: String(res.error) },
+        });
+      } else {
+        void queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      }
     } catch (err) {
-      // Silent fail — extraction is non-critical
-      if (import.meta.env.DEV) console.warn('[triggerExtraction] failed', err);
+      // Network-level failure — non-critical, log for visibility
+      console.warn('[triggerExtraction] network error', err);
+      Sentry.addBreadcrumb({
+        category: 'extraction',
+        message: 'extract-content network error',
+        level: 'warning',
+        data: { bookmarkId: bookmark.id },
+      });
     }
   }
 

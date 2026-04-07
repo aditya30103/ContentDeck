@@ -24,10 +24,22 @@ export function useUserValues() {
   const [values, setValuesState] = useState<UserValues | null>(getUserValues);
 
   useEffect(() => {
+    // 'storage' only fires for cross-tab changes; same-tab writes go through
+    // the wrapper functions below which call setValuesState directly.
     const handler = () => setValuesState(getUserValues());
     window.addEventListener('storage', handler);
     return () => window.removeEventListener('storage', handler);
   }, []);
 
-  return { values, setValues: setUserValues, clearValues: clearUserValues };
+  function updateValues(v: UserValues) {
+    setUserValues(v);
+    setValuesState(v);
+  }
+
+  function clearAll() {
+    clearUserValues();
+    setValuesState(null);
+  }
+
+  return { values, setValues: updateValues, clearValues: clearAll };
 }

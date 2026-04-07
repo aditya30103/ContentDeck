@@ -173,10 +173,12 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
       );
       if (untagged.length === 0) return;
 
+      // Read areas from cache at execution time — avoids stale closure from effect deps
+      const freshAreas = queryClient.getQueryData<TagArea[]>(['tagAreas']) ?? [];
       for (const b of untagged) {
         if (cancelled) break;
         try {
-          await autoSuggestTags(b, areas);
+          await autoSuggestTags(b, freshAreas.length > 0 ? freshAreas : undefined);
         } catch {
           /* skip */
         }

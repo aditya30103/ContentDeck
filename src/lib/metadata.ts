@@ -76,8 +76,8 @@ async function fetchYouTubeMetadata(url: string): Promise<MetadataResult> {
           };
         }
       }
-    } catch {
-      // Fall through to oEmbed
+    } catch (err) {
+      console.warn('[metadata:youtube] Data API failed, falling through to oEmbed', err);
     }
   }
 
@@ -96,7 +96,8 @@ async function fetchYouTubeMetadata(url: string): Promise<MetadataResult> {
       image: data.thumbnail_url,
       metadata: { channel: data.author_name },
     };
-  } catch {
+  } catch (err) {
+    console.warn('[metadata:youtube] oEmbed failed', err);
     return {};
   }
 }
@@ -129,8 +130,8 @@ async function fetchTwitterMetadata(url: string): Promise<MetadataResult> {
         };
       }
     }
-  } catch {
-    // Fall through to Microlink
+  } catch (err) {
+    console.warn('[metadata:twitter] oEmbed failed, falling through to Microlink', err);
   }
 
   // Fallback: Microlink (handles X.com well)
@@ -161,7 +162,8 @@ async function fetchMicrolinkMetadata(url: string): Promise<MetadataResult> {
         reading_time: json.data.readability?.minutes,
       },
     };
-  } catch {
+  } catch (err) {
+    console.warn('[metadata:microlink] failed', err);
     return {};
   }
 }
@@ -180,9 +182,13 @@ async function fetchArxivMetadata(url: string): Promise<MetadataResult> {
   if (!id) return {};
   try {
     const res = await supabase.functions.invoke('fetch-arxiv-metadata', { body: { id } });
-    if (res.error) return {};
+    if (res.error) {
+      console.warn('[metadata:arxiv] edge function error', res.error);
+      return {};
+    }
     return (res.data as MetadataResult | null) ?? {};
-  } catch {
+  } catch (err) {
+    console.warn('[metadata:arxiv] failed', err);
     return {};
   }
 }

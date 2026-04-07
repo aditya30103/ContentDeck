@@ -150,8 +150,8 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Failed to save bookmark', detail: insertError.message }, 500);
   }
 
-  // Update last_used_at on the token
-  await adminClient
+  // Update last_used_at on the token — fire-and-forget, non-critical telemetry
+  void adminClient
     .from('user_tokens')
     .update({ last_used_at: new Date().toISOString() })
     .eq('id', tokenRow.id);

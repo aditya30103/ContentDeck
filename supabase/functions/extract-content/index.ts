@@ -303,6 +303,6 @@ Deno.serve(async (req) => {
       })
       .eq('id', bookmarkId);
 
-    return jsonResponse({ status: 'failed', error: errorMessage }, 200);
+    return jsonResponse({ status: 'failed', error: errorMessage }, 500);
   }
 });

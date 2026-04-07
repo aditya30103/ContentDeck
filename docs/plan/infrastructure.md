@@ -9,11 +9,11 @@
 ```
 E2E (Playwright)     — 🔲 10 critical user journeys (not yet added)
 Component (RTL)      — ✅ Hook tests via @testing-library/react (useBookmarks, useFeedback, etc.)
-Unit (Vitest)        — ✅ 165 tests for lib/ functions and query hooks
+Unit (Vitest)        — ✅ 470 tests for lib/ functions, query hooks, and critical components
 Type checking (tsc)  — ✅ Zero tolerance for type errors (enforced in CI)
 ```
 
-Current test count: **165 Vitest tests** — all must pass before merge.
+Current test count: **470 Vitest tests** — all must pass before merge.
 
 ---
 
@@ -29,7 +29,7 @@ jobs:
     - npm run format:check    # Prettier
     - npm run lint             # ESLint + typescript-eslint + jsx-a11y
     - npm run typecheck        # tsc --noEmit
-    - npm run test             # Vitest (165 tests)
+    - npm run test             # Vitest (470 tests)
     - npm run build            # Vite production build
 
   deploy:
@@ -148,7 +148,7 @@ Every service used must have a free tier sufficient for the project's scale.
 1. `npm run format:check` — Prettier formatting
 2. `npm run lint` — ESLint with typescript-eslint + jsx-a11y (zero errors required)
 3. `npm run typecheck` — TypeScript strict mode, zero errors
-4. `npm run test` — all 165 Vitest tests pass
+4. `npm run test` — all 470 Vitest tests pass
 5. `npm run build` — clean Vite production build
 
 ### Manual / Aspirational
