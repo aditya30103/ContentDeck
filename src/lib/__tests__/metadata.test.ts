@@ -144,7 +144,11 @@ describe('fetchMetadata — YouTube', () => {
     mockFetch.mockResolvedValueOnce(jsonResponse({ items: [] }));
     // oEmbed fallback
     mockFetch.mockResolvedValueOnce(
-      jsonResponse({ title: 'oEmbed Fallback', thumbnail_url: 'https://img.jpg', author_name: 'Ch' }),
+      jsonResponse({
+        title: 'oEmbed Fallback',
+        thumbnail_url: 'https://img.jpg',
+        author_name: 'Ch',
+      }),
     );
 
     const result = await fetchMetadata('https://www.youtube.com/watch?v=abc', 'youtube');

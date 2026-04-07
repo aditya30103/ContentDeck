@@ -253,11 +253,7 @@ describe('generateMarkdown — folder mapping', () => {
     ['arxiv', 'Papers'],
   ] as const)('maps source_type %s to folder %s', (source_type, expectedFolder) => {
     const windowOpen = vi.spyOn(window, 'open').mockImplementation(() => null);
-    exportToObsidianUri(
-      makeBookmark({ source_type }),
-      'MyVault',
-      'ContentDeck',
-    );
+    exportToObsidianUri(makeBookmark({ source_type }), 'MyVault', 'ContentDeck');
     const uri = (windowOpen.mock.calls[0]?.[0] as string) ?? '';
     expect(decodeURIComponent(uri)).toContain(expectedFolder);
     windowOpen.mockRestore();
@@ -273,7 +269,17 @@ describe('generateMarkdown — special character escaping', () => {
   it('renders area name with & in wikilink', () => {
     const md = generateMarkdown(
       makeBookmark({
-        areas: [{ id: 'a1', name: 'Design & UX', description: null, color: null, emoji: null, sort_order: 0, created_at: '2024-01-01T00:00:00Z' }],
+        areas: [
+          {
+            id: 'a1',
+            name: 'Design & UX',
+            description: null,
+            color: null,
+            emoji: null,
+            sort_order: 0,
+            created_at: '2024-01-01T00:00:00Z',
+          },
+        ],
       }),
     );
     expect(md).toContain('"[[Design & UX]]"');
@@ -282,25 +288,19 @@ describe('generateMarkdown — special character escaping', () => {
 
 describe('generateMarkdown — metadata footer', () => {
   it('renders footer with only duration (no word_count)', () => {
-    const md = generateMarkdown(
-      makeBookmark({ metadata: { duration: '10:30' } }),
-    );
+    const md = generateMarkdown(makeBookmark({ metadata: { duration: '10:30' } }));
     expect(md).toContain('Duration: 10:30');
     expect(md).not.toContain('Words:');
   });
 
   it('renders footer with only word_count (no duration)', () => {
-    const md = generateMarkdown(
-      makeBookmark({ metadata: { word_count: 1500 } }),
-    );
+    const md = generateMarkdown(makeBookmark({ metadata: { word_count: 1500 } }));
     expect(md).toContain('Words: 1,500');
     expect(md).not.toContain('Duration:');
   });
 
   it('renders both duration and word_count separated by pipe', () => {
-    const md = generateMarkdown(
-      makeBookmark({ metadata: { duration: '5:30', word_count: 800 } }),
-    );
+    const md = generateMarkdown(makeBookmark({ metadata: { duration: '5:30', word_count: 800 } }));
     expect(md).toContain('Duration: 5:30 | Words: 800');
   });
 

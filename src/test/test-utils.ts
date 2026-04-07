@@ -37,9 +37,7 @@ export function makeBookmark(overrides: Partial<Bookmark> = {}): Bookmark {
   };
 }
 
-export function makeRawBookmark(
-  overrides: Record<string, unknown> = {},
-): Record<string, unknown> {
+export function makeRawBookmark(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     id: 'bm-1',
     url: 'https://example.com/article',
@@ -152,7 +150,17 @@ export function createMockBuilder(): MockBuilder {
     single: vi.fn(),
   } satisfies MockBuilder;
 
-  for (const key of ['select', 'insert', 'update', 'delete', 'eq', 'in', 'gte', 'order', 'single']) {
+  for (const key of [
+    'select',
+    'insert',
+    'update',
+    'delete',
+    'eq',
+    'in',
+    'gte',
+    'order',
+    'single',
+  ]) {
     (builder[key as keyof typeof builder] as ReturnType<typeof vi.fn>).mockReturnValue(builder);
   }
 

@@ -154,7 +154,12 @@ describe('BookmarkCard', () => {
 
   it('tag click calls setTag with tag name', async () => {
     const user = userEvent.setup();
-    render(<BookmarkCard bookmark={makeBookmark({ tags: ['react', 'testing'] })} {...defaultCallbacks} />);
+    render(
+      <BookmarkCard
+        bookmark={makeBookmark({ tags: ['react', 'testing'] })}
+        {...defaultCallbacks}
+      />,
+    );
     await user.click(screen.getByRole('button', { name: 'react' }));
     expect(mockSetTag).toHaveBeenCalledWith('react');
   });
@@ -164,7 +169,17 @@ describe('BookmarkCard', () => {
     render(
       <BookmarkCard
         bookmark={makeBookmark({
-          areas: [{ id: 'a1', name: 'Dev', emoji: null, color: '#6366f1', description: null, sort_order: 0, created_at: '' }],
+          areas: [
+            {
+              id: 'a1',
+              name: 'Dev',
+              emoji: null,
+              color: '#6366f1',
+              description: null,
+              sort_order: 0,
+              created_at: '',
+            },
+          ],
         })}
         {...defaultCallbacks}
       />,

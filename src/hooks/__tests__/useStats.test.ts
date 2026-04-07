@@ -33,7 +33,10 @@ afterEach(() => {
 
 // ---- Helpers ----
 
-function renderStats(bookmarks: Bookmark[] = [makeBookmark()], historyData: StatusHistoryEntry[] = []) {
+function renderStats(
+  bookmarks: Bookmark[] = [makeBookmark()],
+  historyData: StatusHistoryEntry[] = [],
+) {
   const builder = mockClient._getBuilder('status_history');
   builder._resolve = { data: historyData, error: null };
 
@@ -94,10 +97,10 @@ describe('useStats — query', () => {
 describe('computeStats — completedThisWeek / completedThisMonth', () => {
   it('counts done entries within 7 days', async () => {
     const history = [
-      doneEntry(0),  // today
-      doneEntry(3),  // 3 days ago
-      doneEntry(6),  // 6 days ago = clearly within 7-day window
-      doneEntry(8),  // 8 days ago = outside
+      doneEntry(0), // today
+      doneEntry(3), // 3 days ago
+      doneEntry(6), // 6 days ago = clearly within 7-day window
+      doneEntry(8), // 8 days ago = outside
     ];
     const { result } = renderStats([], history);
     await waitFor(() => expect(result.current.isLoading).toBe(false));

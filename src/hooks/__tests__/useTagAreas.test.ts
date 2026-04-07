@@ -183,9 +183,7 @@ describe('useTagAreas — createArea', () => {
     await waitFor(() => expect(result.current.createArea.isSuccess).toBe(true));
     // Verify insert call had sort_order: 0
     const tagBuilder = mockClient._getBuilder('tag_areas');
-    expect(tagBuilder.insert).toHaveBeenCalledWith(
-      expect.objectContaining({ sort_order: 0 }),
-    );
+    expect(tagBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({ sort_order: 0 }));
     void queryClient; // suppress unused
   });
 });
@@ -266,9 +264,7 @@ describe('useTagAreas — deleteArea', () => {
     // onMutate fires async; waitFor polls until optimistic remove takes effect
     await waitFor(() => expect(result.current.areas.find((a) => a.id === 'a2')).toBeUndefined());
     await waitFor(() => expect(result.current.deleteArea.isSuccess).toBe(true));
-    expect(mockToast.success).toHaveBeenCalledWith(
-      expect.stringContaining('bookmarks kept'),
-    );
+    expect(mockToast.success).toHaveBeenCalledWith(expect.stringContaining('bookmarks kept'));
   });
 
   it('rolls back delete on DB error', async () => {
@@ -329,10 +325,7 @@ describe('useTagAreas — reorderAreas', () => {
   it('fires one DB update per area', async () => {
     const builder = mockClient._getBuilder('tag_areas');
     builder._resolve = {
-      data: [
-        makeTagArea({ id: 'a1', sort_order: 0 }),
-        makeTagArea({ id: 'a2', sort_order: 1 }),
-      ],
+      data: [makeTagArea({ id: 'a1', sort_order: 0 }), makeTagArea({ id: 'a2', sort_order: 1 })],
       error: null,
     };
 

@@ -513,9 +513,7 @@ export function useBookmarks() {
       if (import.meta.env.DEV) console.warn('[autoFetchMetadata] failed', err);
     }
     if (enriched.tags.length === 0 && localStorage.getItem('openrouter_key')) {
-      void autoSuggestTags(enriched).catch((err) =>
-        console.warn('[autoSuggestTags] failed', err),
-      );
+      void autoSuggestTags(enriched).catch((err) => console.warn('[autoSuggestTags] failed', err));
     }
   }
 
@@ -548,9 +546,7 @@ export function useBookmarks() {
       // extraction failure shouldn't block re-tagging
     }
     if (localStorage.getItem('openrouter_key')) {
-      void autoSuggestTags(enriched).catch((err) =>
-        console.warn('[autoSuggestTags] failed', err),
-      );
+      void autoSuggestTags(enriched).catch((err) => console.warn('[autoSuggestTags] failed', err));
     }
   }
 
