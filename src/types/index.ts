@@ -8,7 +8,7 @@ export type SourceType =
   | 'arxiv';
 export type Status = 'unread' | 'reading' | 'done';
 export type NoteType = 'insight' | 'question' | 'highlight' | 'note' | 'reflection';
-export type ContentStatus = 'pending' | 'extracting' | 'success' | 'failed' | 'skipped';
+export type ContentStatus = 'pending' | 'extracting' | 'success' | 'partial' | 'failed' | 'skipped';
 export type SortOption = 'newest' | 'oldest' | 'title';
 export type ViewMode = 'list' | 'areas';
 
@@ -34,13 +34,23 @@ export interface BookmarkMetadata {
 
 export interface BookmarkContent {
   text?: string;
+  html?: string;
+  html_byte_size?: number;
+  truncated?: boolean;
   author?: string;
   word_count?: number;
   reading_time?: number;
   lead_image?: string;
   excerpt?: string;
   extracted_at?: string;
-  method?: 'readability' | 'arxiv_api' | 'youtube_captions' | 'failed';
+  method?:
+    | 'readability'
+    | 'arxiv_api'
+    | 'youtube_captions'
+    | 'postlight'
+    | 'microlink'
+    | 'partial'
+    | 'failed';
   error?: string;
 }
 

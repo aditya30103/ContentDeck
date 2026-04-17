@@ -30,6 +30,7 @@ interface DetailPanelProps {
   onExport: (bookmark: Bookmark) => void;
   onDelete: (id: string) => void;
   onRefreshMetadata: (bookmark: Bookmark) => void;
+  onRetryExtraction?: (bookmark: Bookmark) => Promise<void>;
   isNotePending: boolean;
   isRefreshing?: boolean;
 }
@@ -45,6 +46,7 @@ export default function DetailPanel({
   onExport,
   onDelete,
   onRefreshMetadata,
+  onRetryExtraction,
   isNotePending,
   isRefreshing,
 }: DetailPanelProps) {
@@ -69,9 +71,17 @@ export default function DetailPanel({
 
   const transition = shouldReduceMotion ? REDUCED_MOTION_TRANSITION : SPRING_SHEET;
 
-  const canRead = bookmark.content_status === 'success' && !!bookmark.content?.text;
+  // Phase 2E: show the Read button whenever a URL exists (except for
+  // book-without-URL sentinels). Reader Modal handles every content_status
+  // state internally — extracting, failed, partial, skipped, success.
   const isExtracting =
     bookmark.content_status === 'pending' || bookmark.content_status === 'extracting';
+  const showReadButton = !!bookmark.url && !bookmark.url.startsWith('book://');
+  const readLabel = isExtracting
+    ? 'Extracting…'
+    : bookmark.content_status === 'failed'
+      ? 'Open Reader (retry available)'
+      : 'Read';
 
   function handleDelete() {
     if (confirm('Delete this bookmark?')) {
@@ -89,12 +99,12 @@ export default function DetailPanel({
         onRefreshMetadata={onRefreshMetadata}
         isRefreshing={isRefreshing}
       />
-      {(canRead || isExtracting) && (
+      {showReadButton && (
         <button
           onClick={() => setShowReader(true)}
-          disabled={!canRead}
+          disabled={isExtracting}
           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
-          aria-label={isExtracting ? 'Extracting content…' : 'Open reader mode'}
+          aria-label={readLabel}
         >
           <BookOpen size={16} />
           {isExtracting ? 'Extracting…' : 'Read'}
@@ -129,6 +139,7 @@ export default function DetailPanel({
             open={showReader}
             onClose={() => setShowReader(false)}
             onCycleStatus={onCycleStatus}
+            onRetryExtraction={onRetryExtraction}
           />
         )}
       </AnimatePresence>

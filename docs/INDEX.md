@@ -2,10 +2,10 @@
 
 > Start here. This file orients each session.
 
-**Version:** v3.9.3 | **Status:** Phase 1 complete · Pre-Phase 2 backlog complete · Phase 2 (Trusted Curator) COMPLETE ✅ — Obsidian Plugin ✅ · Values Onboarding ✅ · Scoring Engine ✅ · Home Screen ✅ · Reflection Prompt ✅ · Spaced Review ✅ · v3.7 Performance ✅ · v3.8 Mobile UX ✅ · v3.9 Gesture Layer ✅ · v3.9.2 Test Hardening ✅ · v3.9.3 Production Audit ✅
-**Mode: Maintenance.** No new features planned. Next feature work: Phase 3 (Platform) or v4.0 (Intelligence Layer) — both deferred until signals from production use.
+**Version:** v3.10.0 | **Status:** Phase 2 (Trusted Curator) COMPLETE ✅ · Reader Mode Overhaul Phase 1 ✅ + Phase 2 🟡 PARTIAL (2A UA+retry ✅, 2D truncation ✅, 2E failed/partial states ✅, 2F progress persistence ✅ · 2B Postlight+Microlink + 2C PDF deferred)
+**Mode: Maintenance + targeted Reader Mode work.** Next session: Phase 2 remainder (Postlight + Microlink fallback chain; PDF extraction via pdfjs-dist) → Phase 3 (Value Unlock).
 **Feedback:** In-app button in Sidebar/MobileHeader → Settings → Feedback tab to review
-**Active plan:** [Phase 2 — Trusted Curator](plan/phase-2.md) | **Philosophy:** [Product Philosophy](plan/philosophy.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
+**Active plan:** [Reader Mode Overhaul](plan/reader-mode-overhaul.md) | **Philosophy:** [Product Philosophy](plan/philosophy.md) | **Feedback tracking:** [user-feedback.md](user-feedback.md)
 
 ---
 
@@ -40,6 +40,7 @@ docs/
 │   ├── phase-3.md                  # Phase 3: Platform (v4.5) — Browser Extension, CLI
 │   ├── phase-4.md                  # Phase 4: Social & Scale — FROZEN (contradicts philosophy)
 │   ├── phase-5.md                  # Phase 5: Ecosystem (v6.0)
+│   ├── reader-mode-overhaul.md     # Reader Mode rebuild — Pipeline / Reliability / Value unlock (audit 2026-04-17)
 │   └── infrastructure.md          # DevOps, budget, quality gates, priority matrix
 ├── log/                            # Implementation records — append-only
 │   ├── v2-migration.md             # v1→v2 React migration plan + record
@@ -65,7 +66,8 @@ docs/
 │   ├── v3.6-phase-2.5.md               # Phase 2.5 — Spaced Review SM-2 + bug fixes #42 #43 #38 (264 tests)
 │   ├── v3.7-performance.md             # v3.7 — Code splitting, SW timeout, Sentry deferred, onboarding fix (261 tests)
 │   ├── v3.9.2-test-hardening.md       # v3.9.2 — Test suite hardening: 271 → 470 tests, 7 hook files, Modal, TagAreaInput
-│   └── v3.9.3-production-audit.md    # v3.9.3 — Production audit: 4 P0 + 4 P1 fixes, silent failure hardening, doc reconciliation
+│   ├── v3.9.3-production-audit.md    # v3.9.3 — Production audit: 4 P0 + 4 P1 fixes, silent failure hardening, doc reconciliation
+│   └── v3.10.0-reader-mode-overhaul.md # v3.10.0 — Reader Mode overhaul Phase 1 + Phase 2 (partial): HTML pipeline, Safari UA + retry, 500KB cap, failed/partial states, progress persistence (481 tests)
 ├── guides/                         # How-to references
 │   ├── workflow.md                 # Development practices, session workflow
 │   └── supabase-auth-setup.md      # Supabase Auth provider configuration
@@ -82,6 +84,7 @@ docs/
 
 | Version | Feature | Log |
 |---|---|---|
+| v3.10.0 | Reader Mode overhaul: HTML pipeline (linkedom + Readability + DOMPurify + `.prose`), Safari UA + 429/5xx retry, 500 KB caps + `truncated` flag, failed/partial reader states with Retry, localStorage progress + Resume pill (481 tests, +19) | [log/v3.10.0-reader-mode-overhaul.md](log/v3.10.0-reader-mode-overhaul.md) |
 | v3.9.3 | Production audit: refreshMetadata cache clobber, arXiv silent fail, save-bookmark latency, area rollback, areas stale closure, useUserValues reactivity, extract-content 200-on-fail, metadata visibility | [log/v3.9.3-production-audit.md](log/v3.9.3-production-audit.md) |
 | v3.9.2 | Test suite hardening: 271 → 470 tests (+199), 7 new hook tests, Modal + TagAreaInput component tests, centralized test-utils | [log/v3.9.2-test-hardening.md](log/v3.9.2-test-hardening.md) |
 | v3.9.1 | Maintenance: arXiv CORS fix (Edge Function proxy, #52) + Sentry PostgrestError filter (CONTENTDECK-3), 271 tests | [log/v3.9.1-maintenance-fixes.md](log/v3.9.1-maintenance-fixes.md) |

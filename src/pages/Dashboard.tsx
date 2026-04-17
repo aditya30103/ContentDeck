@@ -48,6 +48,7 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
     deleteNote,
     markSynced,
     refreshMetadata,
+    retryExtraction,
     setAreas: setBookmarkAreas,
     autoSuggestTags,
   } = useBookmarks();
@@ -413,6 +414,7 @@ export default function Dashboard({ userEmail, onSignOut, isDemo, sharedUrl }: D
                 setSelectedBookmark(null);
               }}
               onRefreshMetadata={handleRefreshMetadata}
+              onRetryExtraction={retryExtraction}
               isNotePending={addNote.isPending}
               isRefreshing={isRefreshingMeta}
             />

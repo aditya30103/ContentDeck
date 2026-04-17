@@ -15,12 +15,167 @@ function jsonResponse(body: Record<string, unknown>, status: number) {
   });
 }
 
-const TEXT_CAP = 100 * 1024; // 100KB max text per bookmark
+const TEXT_CAP = 500 * 1024; // 500KB max text per bookmark (~80k words — covers near-all essays)
+const HTML_CAP = 500 * 1024; // 500KB max sanitized HTML per bookmark
 const FETCH_TIMEOUT = 10_000; // 10s
+const MAX_RETRIES = 2; // on 429/5xx, retry twice with backoff
+const RETRY_DELAYS_MS = [1000, 3000]; // 1s, then 3s
+
+// Safari UA — less bot-flagged by CDNs than ContentDeck/1.0 or Chrome-headless patterns.
+const FETCH_UA =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15';
+const FETCH_HEADERS: HeadersInit = {
+  'User-Agent': FETCH_UA,
+  Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+  'Accept-Language': 'en-US,en;q=0.9',
+};
+
+const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
+
+/**
+ * Fetch with retry on 429/5xx. Respects Retry-After when present; otherwise
+ * uses RETRY_DELAYS_MS. 403 / 404 / other 4xx fall through immediately —
+ * retrying won't help and the fallback chain (Phase 2B) handles those.
+ */
+async function fetchWithRetry(url: string): Promise<Response> {
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await fetch(url, {
+        headers: FETCH_HEADERS,
+        signal: AbortSignal.timeout(FETCH_TIMEOUT),
+      });
+      if (response.ok) return response;
+      if (!RETRYABLE_STATUSES.has(response.status) || attempt === MAX_RETRIES) return response;
+      // Respect Retry-After if provided (seconds or HTTP-date; we only parse seconds).
+      const retryAfter = response.headers.get('Retry-After');
+      const retrySeconds = retryAfter && /^\d+$/.test(retryAfter) ? parseInt(retryAfter, 10) : null;
+      const delay = retrySeconds !== null ? Math.min(retrySeconds * 1000, 10_000) : RETRY_DELAYS_MS[attempt];
+      console.log('extract-content: retrying after transient status', {
+        url,
+        status: response.status,
+        attempt: attempt + 1,
+        delayMs: delay,
+      });
+      await new Promise((r) => setTimeout(r, delay));
+    } catch (err) {
+      lastError = err;
+      if (attempt === MAX_RETRIES) break;
+      const delay = RETRY_DELAYS_MS[attempt];
+      console.log('extract-content: retrying after network error', {
+        url,
+        attempt: attempt + 1,
+        delayMs: delay,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw lastError ?? new Error('Unknown fetch error');
+}
 
 // Sources with no webpage text to extract via Readability
 // (YouTube now handled separately via caption extraction below)
 const SKIP_SOURCES = ['twitter', 'arxiv'];
+
+// ---- HTML sanitizer (allow-list, linkedom-based) ----
+//
+// Readability returns a sanitized-ish HTML string in `article.content`, but
+// we do NOT trust it. This allow-list sanitizer walks the DOM and strips
+// anything not explicitly allowed. Result is safe to render client-side
+// via `dangerouslySetInnerHTML` (the client adds a second DOMPurify pass
+// for defence in depth).
+
+const ALLOWED_TAGS = new Set([
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'p', 'br', 'hr',
+  'strong', 'em', 'b', 'i', 'u', 'sup', 'sub',
+  'ul', 'ol', 'li',
+  'blockquote',
+  'a', 'img',
+  'figure', 'figcaption',
+  'pre', 'code',
+  'table', 'thead', 'tbody', 'tr', 'td', 'th',
+  'div', 'span',
+]);
+
+const ALLOWED_ATTRS: Record<string, Set<string>> = {
+  a: new Set(['href', 'title']),
+  img: new Set(['src', 'alt', 'title', 'width', 'height']),
+  code: new Set(['class']), // preserve language-xxx classes for syntax hinting
+  pre: new Set(['class']),
+  th: new Set(['colspan', 'rowspan', 'scope']),
+  td: new Set(['colspan', 'rowspan']),
+};
+
+function isSafeUrl(value: string): boolean {
+  const trimmed = value.trim().toLowerCase();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return true;
+  if (trimmed.startsWith('mailto:')) return true;
+  if (trimmed.startsWith('/') || trimmed.startsWith('#')) return true;
+  return false;
+}
+
+// deno-lint-ignore no-explicit-any
+function sanitizeNode(node: any): void {
+  // Walk a snapshot of children (live NodeList mutates as we remove)
+  const children = Array.from(node.childNodes ?? []);
+  for (const child of children) {
+    // deno-lint-ignore no-explicit-any
+    const el = child as any;
+    if (el.nodeType === 1) {
+      // Element
+      const tag = String(el.tagName ?? '').toLowerCase();
+      if (!ALLOWED_TAGS.has(tag)) {
+        // Unwrap: replace element with its sanitized children to preserve text
+        sanitizeNode(el);
+        const parent = el.parentNode;
+        if (parent) {
+          while (el.firstChild) parent.insertBefore(el.firstChild, el);
+          parent.removeChild(el);
+        }
+        continue;
+      }
+
+      // Strip disallowed attributes
+      const allowed = ALLOWED_ATTRS[tag] ?? new Set<string>();
+      const attrs = Array.from(el.attributes ?? []) as Array<{ name: string; value: string }>;
+      for (const attr of attrs) {
+        const name = attr.name.toLowerCase();
+        if (!allowed.has(name)) {
+          el.removeAttribute(attr.name);
+          continue;
+        }
+        // URL attributes must be http(s), mailto, relative, or fragment
+        if ((tag === 'a' && name === 'href') || (tag === 'img' && name === 'src')) {
+          if (!isSafeUrl(attr.value)) el.removeAttribute(attr.name);
+        }
+      }
+
+      // Anchor hardening — force safe target/rel
+      if (tag === 'a' && el.hasAttribute?.('href')) {
+        el.setAttribute('target', '_blank');
+        el.setAttribute('rel', 'noopener noreferrer');
+      }
+
+      // Recurse
+      sanitizeNode(el);
+    } else if (el.nodeType === 8) {
+      // Comment → remove
+      el.parentNode?.removeChild(el);
+    }
+    // TextNode (3): keep as-is
+  }
+}
+
+// deno-lint-ignore no-explicit-any
+function sanitizeHtml(rawHtml: string, doc: any): string {
+  // Use the same linkedom document to parse into a fragment we can walk
+  const container = doc.createElement('div');
+  container.innerHTML = rawHtml;
+  sanitizeNode(container);
+  return String(container.innerHTML ?? '');
+}
 
 // ---- YouTube transcript helpers ----
 
@@ -35,10 +190,7 @@ async function fetchYouTubeTranscript(videoId: string): Promise<string | null> {
   try {
     // Fetch YouTube watch page to get caption track URLs
     const pageRes = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept-Language': 'en-US,en;q=0.9',
-      },
+      headers: FETCH_HEADERS,
       signal: AbortSignal.timeout(FETCH_TIMEOUT),
     });
     const html = await pageRes.text();
@@ -211,29 +363,17 @@ Deno.serve(async (req) => {
     .eq('id', bookmarkId);
 
   try {
-    // Fetch the page HTML
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
-
-    const response = await fetch(bookmark.url, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (compatible; ContentDeck/1.0; +https://contentdeck.vercel.app)',
-        Accept: 'text/html,application/xhtml+xml',
-      },
-    });
-
-    clearTimeout(timeout);
+    // Fetch with realistic UA + retry on 429/5xx (Phase 2A)
+    const response = await fetchWithRetry(bookmark.url);
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status} ${response.statusText}`);
     }
 
-    const html = await response.text();
+    const rawHtml = await response.text();
 
     // Parse with linkedom + Readability
-    const { document } = parseHTML(html);
+    const { document } = parseHTML(rawHtml);
 
     // Readability expects documentURI to be set
     // linkedom doesn't set it automatically
@@ -249,17 +389,34 @@ Deno.serve(async (req) => {
       throw new Error('Readability could not extract content');
     }
 
-    // Cap text at 100KB
-    const text =
-      article.textContent.length > TEXT_CAP
-        ? article.textContent.slice(0, TEXT_CAP)
-        : article.textContent;
+    // Cap text at TEXT_CAP; record whether we truncated so the Reader can
+    // surface a "Truncated — open original" notice (Phase 2D).
+    const textTruncated = article.textContent.length > TEXT_CAP;
+    const text = textTruncated ? article.textContent.slice(0, TEXT_CAP) : article.textContent;
+
+    // Sanitize Readability's HTML output and cap at HTML_CAP
+    let html: string | null = null;
+    let htmlByteSize: number | null = null;
+    let htmlTruncated = false;
+    if (article.content) {
+      const sanitized = sanitizeHtml(article.content, document);
+      htmlTruncated = sanitized.length > HTML_CAP;
+      html = htmlTruncated ? sanitized.slice(0, HTML_CAP) : sanitized;
+      htmlByteSize = html.length;
+      if (htmlByteSize > 300 * 1024) {
+        console.log('extract-content: large html', { bookmarkId, htmlByteSize });
+      }
+    }
 
     const wordCount = text.split(/\s+/).filter(Boolean).length;
     const readingTime = Math.ceil(wordCount / 238); // avg reading speed
+    const truncated = textTruncated || htmlTruncated;
 
     const content = {
       text,
+      html,
+      html_byte_size: htmlByteSize,
+      truncated,
       author: article.byline || null,
       word_count: wordCount,
       reading_time: readingTime,

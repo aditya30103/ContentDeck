@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { X, BookOpen, Type } from 'lucide-react';
+import { X, BookOpen, Type, RotateCw, ExternalLink, AlertCircle, ArrowDown } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { useReaderPrefs } from '../../hooks/useReaderPrefs';
-import { parseContentBlocks } from '../../lib/reader';
+import { useReaderProgress, RESUME_THRESHOLD } from '../../hooks/useReaderProgress';
 import type { Bookmark, Status } from '../../types';
 import { STATUS_NEXT } from '../../types';
 import {
@@ -17,12 +18,13 @@ interface ReaderModalProps {
   open: boolean;
   onClose: () => void;
   onCycleStatus: (id: string, newStatus: Status) => void;
+  onRetryExtraction?: (bookmark: Bookmark) => Promise<void>;
 }
 
 const FONT_SIZE_CLASSES = {
-  sm: 'text-sm',
-  md: 'text-base',
-  lg: 'text-lg',
+  sm: 'prose-sm',
+  md: 'prose-base',
+  lg: 'prose-lg',
 } as const;
 
 const FONT_FAMILY_CLASSES = {
@@ -77,9 +79,95 @@ function getDividerClass(theme: 'light' | 'dark' | 'sepia'): string {
   }
 }
 
-export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: ReaderModalProps) {
+// Allow-list — must match the edge function's server-side sanitizer.
+// Client-side sanitization is defence-in-depth: stored HTML is already
+// safe, but we re-sanitize in case of migration accidents or manual edits.
+const PURIFY_CONFIG = {
+  ALLOWED_TAGS: [
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'p',
+    'br',
+    'hr',
+    'strong',
+    'em',
+    'b',
+    'i',
+    'u',
+    'sup',
+    'sub',
+    'ul',
+    'ol',
+    'li',
+    'blockquote',
+    'a',
+    'img',
+    'figure',
+    'figcaption',
+    'pre',
+    'code',
+    'table',
+    'thead',
+    'tbody',
+    'tr',
+    'td',
+    'th',
+    'div',
+    'span',
+  ],
+  ALLOWED_ATTR: [
+    'href',
+    'title',
+    'src',
+    'alt',
+    'width',
+    'height',
+    'target',
+    'rel',
+    'class',
+    'colspan',
+    'rowspan',
+    'scope',
+  ],
+  ALLOW_DATA_ATTR: false,
+  RETURN_TRUSTED_TYPE: false,
+};
+
+// Register DOMPurify hook at module scope — DOMPurify is a global singleton,
+// so hooks persist across all sanitize() calls. Registering here (not in
+// useEffect) guarantees the hook is active before the component's first
+// useMemo sanitization runs.
+DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  if (node.tagName === 'A' && node.getAttribute('href')) {
+    node.setAttribute('target', '_blank');
+    node.setAttribute('rel', 'noopener noreferrer');
+  }
+  if (node.tagName === 'IMG') {
+    node.setAttribute('loading', 'lazy');
+    node.setAttribute('decoding', 'async');
+  }
+});
+
+export default function ReaderModal({
+  bookmark,
+  open,
+  onClose,
+  onCycleStatus,
+  onRetryExtraction,
+}: ReaderModalProps) {
   const { fontSize, fontFamily, theme, update } = useReaderPrefs();
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const {
+    savedProgress,
+    write: writeProgress,
+    clear: clearProgress,
+  } = useReaderProgress(bookmark.id);
+  const [showResumePill, setShowResumePill] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
 
@@ -112,20 +200,51 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
     return () => window.removeEventListener('popstate', handlePopState);
   }, [open, onClose]);
 
-  // Reset scroll when bookmark changes
+  // Reset scroll when bookmark changes.
+  // If we have a saved position > threshold, surface a Resume pill instead
+  // of auto-scrolling (feels less jarring than teleporting into the middle
+  // of an article). Tap-to-resume calls jumpToSavedProgress().
   useEffect(() => {
     if (open && contentRef.current) {
       contentRef.current.scrollTop = 0;
       setScrollProgress(0);
+      setShowResumePill(savedProgress > RESUME_THRESHOLD && savedProgress < 1);
     }
-  }, [open, bookmark.id]);
+  }, [open, bookmark.id, savedProgress]);
 
+  // When the user marks the bookmark done, the reading position is no
+  // longer relevant — clear the saved progress so future opens start fresh.
+  useEffect(() => {
+    if (bookmark.status === 'done') {
+      clearProgress();
+    }
+  }, [bookmark.status, clearProgress]);
+
+  const contentHtml = bookmark.content?.html ?? '';
   const contentText = bookmark.content?.text ?? '';
-  const blocks = parseContentBlocks(contentText);
   const wordCount = bookmark.content?.word_count ?? 0;
   const readingTime =
     bookmark.content?.reading_time ?? (wordCount > 0 ? Math.ceil(wordCount / WPM) : null);
   const author = bookmark.content?.author;
+
+  // Client-side re-sanitization of stored HTML (defence-in-depth).
+  // Anchors get target=_blank + rel=noopener via DOMPurify hook below.
+  const sanitizedHtml = useMemo(() => {
+    if (!contentHtml) return '';
+    return String(DOMPurify.sanitize(contentHtml, PURIFY_CONFIG));
+  }, [contentHtml]);
+
+  // Fallback paragraphs for bookmarks extracted before content.html existed.
+  const textParagraphs = useMemo(() => {
+    if (sanitizedHtml) return [];
+    if (!contentText.trim()) return [];
+    return contentText
+      .split(/\n{2,}/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+  }, [sanitizedHtml, contentText]);
+
+  const hasContent = sanitizedHtml.length > 0 || textParagraphs.length > 0;
 
   const wordsRemaining = Math.ceil((1 - scrollProgress) * wordCount);
   const minutesRemaining = wordCount > 0 ? Math.ceil(wordsRemaining / WPM) : null;
@@ -133,12 +252,38 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
   function handleScroll() {
     const el = contentRef.current;
     if (!el) return;
+    // User scrolled — dismiss the resume pill (they've engaged with the article).
+    if (showResumePill) setShowResumePill(false);
     const scrollable = el.scrollHeight - el.clientHeight;
     if (scrollable <= 0) {
       setScrollProgress(1);
+      writeProgress(1);
       return;
     }
-    setScrollProgress(Math.min(el.scrollTop / scrollable, 1));
+    const pct = Math.min(el.scrollTop / scrollable, 1);
+    setScrollProgress(pct);
+    writeProgress(pct);
+  }
+
+  function jumpToSavedProgress() {
+    const el = contentRef.current;
+    if (!el) return;
+    const scrollable = el.scrollHeight - el.clientHeight;
+    if (scrollable <= 0) return;
+    el.scrollTop = scrollable * savedProgress;
+    setShowResumePill(false);
+  }
+
+  async function handleRetry() {
+    if (!onRetryExtraction || isRetrying) return;
+    setIsRetrying(true);
+    try {
+      await onRetryExtraction(bookmark);
+    } catch {
+      // Toast surfaced by the hook — swallow here to avoid double-report.
+    } finally {
+      setIsRetrying(false);
+    }
   }
 
   const themeClasses = getThemeClasses(theme);
@@ -161,6 +306,7 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
 
   return (
     <motion.div
+      data-reader-theme={theme}
       className={`fixed inset-0 z-[60] flex flex-col ${themeClasses}`}
       role="dialog"
       aria-modal="true"
@@ -275,9 +421,20 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
       </header>
 
       {/* Content */}
-      <div ref={contentRef} className="flex-1 overflow-y-auto" onScroll={handleScroll}>
-        {/* max-w-prose = 65ch — research-backed optimal line length for reading */}
-        <div className={`max-w-prose mx-auto px-6 py-10 ${fontSizeClass} ${fontFamilyClass}`}>
+      <div ref={contentRef} className="flex-1 overflow-y-auto relative" onScroll={handleScroll}>
+        {/* Resume pill — shown when stored scroll > threshold (Phase 2F) */}
+        {showResumePill && (
+          <button
+            onClick={jumpToSavedProgress}
+            className="sticky top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-600 text-white text-xs font-medium shadow-lg hover:bg-primary-700 min-h-[36px] transition-colors motion-safe:animate-[fadeSlideUp_.25s_ease-out]"
+            aria-label={`Resume from ${Math.round(savedProgress * 100)} percent`}
+          >
+            <ArrowDown size={14} />
+            Resume from {Math.round(savedProgress * 100)}%
+          </button>
+        )}
+
+        <div className={`max-w-prose mx-auto px-6 py-10 ${fontFamilyClass}`}>
           {/* Article title */}
           <h1 className="text-2xl sm:text-3xl font-bold leading-tight mb-4">
             {bookmark.title ?? 'Untitled'}
@@ -292,67 +449,109 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
             {wordCount > 0 && <span>{wordCount.toLocaleString()} words</span>}
           </div>
 
-          {/* Structured content */}
-          {blocks.length > 0 ? (
-            <div>
-              {blocks.map((block, i) => {
-                if (block.type === 'heading') {
-                  return (
-                    <h2
-                      key={`heading-${i}`}
-                      className={`text-lg font-semibold leading-snug mt-10 mb-3 first:mt-0 ${
-                        theme === 'dark'
-                          ? 'text-surface-100'
-                          : theme === 'sepia'
-                            ? 'text-[#2e2010]'
-                            : 'text-surface-900'
-                      }`}
-                    >
-                      {block.text}
-                    </h2>
-                  );
-                }
+          {/* Partial-extraction banner (Phase 2E) */}
+          {bookmark.content_status === 'partial' && (
+            <div
+              className={`flex items-start gap-2 mb-6 p-3 rounded-lg border ${divider} ${subtleText} text-sm`}
+              role="status"
+            >
+              <AlertCircle size={16} className="shrink-0 mt-0.5" aria-hidden="true" />
+              <span>
+                Full article could not be extracted — showing excerpt only.{' '}
+                <a
+                  href={bookmark.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline text-primary-600 hover:text-primary-700"
+                >
+                  Open original
+                </a>
+                .
+              </span>
+            </div>
+          )}
 
-                if (block.type === 'list') {
-                  return (
-                    <ul
-                      key={`list-${i}`}
-                      className={`list-disc ml-6 space-y-2 mb-5 leading-[1.75] ${subtleText}`}
-                    >
-                      {block.items.map((item, j) => (
-                        <li key={`item-${j}`} className="pl-1">
-                          <span
-                            className={
-                              theme === 'dark'
-                                ? 'text-surface-200'
-                                : theme === 'sepia'
-                                  ? 'text-[#433422]'
-                                  : 'text-surface-800'
-                            }
-                          >
-                            {item}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  );
-                }
-
-                // paragraph
-                return (
-                  <p key={`para-${i}`} className="mb-5 leading-[1.8]">
-                    {block.text.split('\n').map((line, j, arr) => (
-                      <span key={`line-${j}`}>
-                        {line}
-                        {j < arr.length - 1 && <br />}
-                      </span>
-                    ))}
-                  </p>
-                );
-              })}
+          {/* State-based rendering */}
+          {bookmark.content_status === 'extracting' || bookmark.content_status === 'pending' ? (
+            <div className={`text-center py-16 ${subtleText}`} role="status">
+              <div className="inline-block w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full motion-safe:animate-spin mb-4" />
+              <p className="text-sm">Extracting content…</p>
+            </div>
+          ) : bookmark.content_status === 'failed' ||
+            (bookmark.content_status === 'skipped' &&
+              !sanitizedHtml &&
+              textParagraphs.length === 0) ? (
+            <div className={`text-center py-12 ${subtleText}`} role="status">
+              <AlertCircle size={32} className="mx-auto mb-3 opacity-60" aria-hidden="true" />
+              <p className="text-sm mb-1">
+                {bookmark.content_status === 'skipped'
+                  ? 'Content extraction is not supported for this source.'
+                  : 'We could not extract this article.'}
+              </p>
+              <p className="text-xs opacity-70 mb-5">
+                Some sites block scrapers, require login, or render content in JavaScript.
+              </p>
+              <div className="flex items-center justify-center gap-2 flex-wrap">
+                {bookmark.content_status === 'failed' && onRetryExtraction && (
+                  <button
+                    onClick={handleRetry}
+                    disabled={isRetrying}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-600 text-white text-xs font-medium hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed min-h-[36px] transition-colors"
+                  >
+                    <RotateCw size={14} className={isRetrying ? 'motion-safe:animate-spin' : ''} />
+                    {isRetrying ? 'Retrying…' : 'Retry extraction'}
+                  </button>
+                )}
+                <a
+                  href={bookmark.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium min-h-[36px] transition-colors ${divider} hover:bg-surface-100 dark:hover:bg-surface-800`}
+                >
+                  <ExternalLink size={14} />
+                  Open original
+                </a>
+              </div>
+            </div>
+          ) : sanitizedHtml ? (
+            <div
+              className={`prose prose-reader ${fontSizeClass} max-w-none`}
+              dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+            />
+          ) : textParagraphs.length > 0 ? (
+            <div className={`prose prose-reader ${fontSizeClass} max-w-none`}>
+              {textParagraphs.map((para, i) => (
+                <p key={`para-${i}`}>
+                  {para.split('\n').map((line, j, arr) => (
+                    <span key={`line-${j}`}>
+                      {line}
+                      {j < arr.length - 1 && <br />}
+                    </span>
+                  ))}
+                </p>
+              ))}
             </div>
           ) : (
             <p className={`text-center py-12 ${subtleText}`}>No extracted content available.</p>
+          )}
+
+          {/* Truncation notice (Phase 2D) */}
+          {bookmark.content?.truncated && hasContent && (
+            <div
+              className={`mt-8 pt-4 border-t ${divider} text-xs text-center ${subtleText}`}
+              role="note"
+            >
+              This article was truncated to keep it snappy.{' '}
+              <a
+                href={bookmark.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-primary-600 hover:text-primary-700"
+              >
+                Open original
+              </a>{' '}
+              to read the full text.
+            </div>
           )}
 
           {/* Bottom padding for footer */}
@@ -365,9 +564,9 @@ export default function ReaderModal({ bookmark, open, onClose, onCycleStatus }: 
         className={`flex items-center justify-between px-4 py-2 border-t ${headerThemeClasses} shrink-0`}
       >
         <span className={`text-xs ${subtleText}`}>
-          {minutesRemaining !== null && minutesRemaining > 0
+          {hasContent && minutesRemaining !== null && minutesRemaining > 0
             ? `${minutesRemaining} min remaining`
-            : wordCount > 0
+            : hasContent && wordCount > 0
               ? 'Finished'
               : ''}
         </span>

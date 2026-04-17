@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ContentDeck — a personal content bookmarking PWA dashboard for the Capture → Consume → Reflect → Export workflow. Bridges web browsing and Obsidian knowledge management.
 
-**Status: v3.9.3 — Phase 2 COMPLETE. Maintenance mode. React + Vite + Tailwind + TypeScript + framer-motion. Supabase Auth, demo mode, PWA share target, Sentry, GitHub Issues sync, Obsidian export + Community Plugin, Spaced Review (SM-2). v3.8 mobile UX overhaul (native app feel). v3.9 gesture layer (bottom sheet drag, modal slide-up/drag-dismiss, reader swipe). v3.9.2 test suite hardening (271 → 470 tests, 28 files). v3.9.3 production audit (P0/P1 bug fixes, silent failure hardening).**
+**Status: v3.10.0 — Reader Mode Overhaul Phase 1 + Phase 2 (partial). React + Vite + Tailwind + TypeScript + framer-motion. Supabase Auth, demo mode, PWA share target, Sentry, GitHub Issues sync, Obsidian export + Community Plugin, Spaced Review (SM-2). Reader Mode now stores + renders sanitized HTML (DOMPurify + `@tailwindcss/typography`); edge function uses Safari UA with 429/5xx retry + `Retry-After`; 500KB text/HTML caps with `truncated` flag + footer notice; failed/partial reader states with Retry + Open Original actions; localStorage reading-progress persistence + Resume pill. 481 tests (19 new). Phase 2 remainder (2B Postlight+Microlink, 2C PDF) and Phase 3 deferred. Prior: v3.9.3 production audit, v3.9.2 test hardening (470 tests), v3.9 gesture layer, v3.8 mobile UX overhaul.**
 
 See `docs/reference/audit.md` for the full audit trail (39/47 v1 issues resolved, 14 v2.0 bugs fixed, 8 v2.2 shipping fixes).
 

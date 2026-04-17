@@ -583,6 +583,46 @@ export function useBookmarks() {
     }
   }
 
+  /**
+   * User-initiated retry from the Reader "Extraction unavailable" state
+   * (Phase 2E). Unlike triggerExtraction this surfaces errors to the caller
+   * via thrown exception + toast so the button can show feedback. Optimistic
+   * flip to 'extracting' gives immediate UI response.
+   */
+  async function retryExtraction(bookmark: Bookmark) {
+    if (isDemo) {
+      toast.info('Extraction is disabled in demo mode.');
+      return;
+    }
+    if (SKIP_EXTRACTION_SOURCES.includes(bookmark.source_type)) {
+      toast.info('This source type does not support content extraction.');
+      return;
+    }
+    // Optimistic status flip so the Reader UI reacts immediately
+    queryClient.setQueryData<Bookmark[]>(QUERY_KEY, (old) =>
+      old?.map((b) => (b.id === bookmark.id ? { ...b, content_status: 'extracting' } : b)),
+    );
+    try {
+      const res = await db.functions.invoke('extract-content', {
+        body: { bookmark_id: bookmark.id },
+      });
+      if (res.error) {
+        throw new Error(String(res.error));
+      }
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+    } catch (err) {
+      // Roll back optimistic status
+      queryClient.setQueryData<Bookmark[]>(QUERY_KEY, (old) =>
+        old?.map((b) =>
+          b.id === bookmark.id ? { ...b, content_status: bookmark.content_status } : b,
+        ),
+      );
+      Sentry.captureException(err, { extra: { bookmarkId: bookmark.id } });
+      toast.error('Could not extract content. Try again later.');
+      throw err;
+    }
+  }
+
   async function autoSuggestTags(bookmark: Bookmark, allAreas?: TagArea[]) {
     const areas = allAreas ?? queryClient.getQueryData<TagArea[]>(['tagAreas']) ?? [];
     try {
@@ -643,6 +683,7 @@ export function useBookmarks() {
     deleteNote,
     markSynced,
     refreshMetadata,
+    retryExtraction,
     assignArea,
     removeArea,
     setAreas,
