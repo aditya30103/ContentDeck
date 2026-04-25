@@ -60,10 +60,21 @@ export default function Sidebar({
     <aside className="hidden lg:flex flex-col w-64 h-[100dvh] bg-surface-50 dark:bg-surface-900 border-r border-surface-200 dark:border-surface-800">
       {/* Header */}
       <div className="p-4 border-b border-surface-200 dark:border-surface-800">
-        <h1 className="text-lg font-bold text-surface-900 dark:text-surface-100">ContentDeck</h1>
+        <div className="flex items-center gap-2 mb-3">
+          <img
+            src="/icon.svg"
+            alt="ContentDeck"
+            width={22}
+            height={22}
+            className="rounded-[5px] flex-shrink-0"
+          />
+          <h1 className="text-base font-bold text-surface-900 dark:text-surface-100 leading-none">
+            ContentDeck
+          </h1>
+        </div>
         <button
           onClick={onAdd}
-          className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-medium transition-colors min-h-[44px]"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-medium transition-colors min-h-[44px]"
         >
           <Plus size={18} />
           New Bookmark

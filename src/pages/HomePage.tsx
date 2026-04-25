@@ -60,6 +60,15 @@ const SOURCE_ACCENT: Record<string, string> = {
   arxiv: 'var(--color-source-arxiv)',
 };
 
+// When a non-default mood is active, override the pick card accent color.
+const MOOD_ACCENT: Partial<Record<MoodMode, string>> = {
+  'deep-dive': '#f59e0b', // amber  — focused, intense
+  'light-read': '#10b981', // emerald — easy, refreshing
+  'quick-win': '#22c55e', // green  — fast, satisfying
+  shuffle: '#8b5cf6', // violet — playful, random
+  // 'default' intentionally omitted — source color is used
+};
+
 const MOODS: Array<{ value: MoodMode; icon: string; label: string }> = [
   { value: 'default', icon: '🧠', label: 'Smart' },
   { value: 'deep-dive', icon: '🔥', label: 'Deep' },
@@ -112,9 +121,10 @@ interface PrimaryPickCardProps {
   now: Date;
   mood: MoodMode;
   onStartReading: (b: Bookmark) => void;
+  moodAccentOverride: string | null;
 }
 
-function PrimaryPickCard({ topPick, isLoading, now, mood, onStartReading }: PrimaryPickCardProps) {
+function PrimaryPickCard({ topPick, isLoading, now, mood, onStartReading, moodAccentOverride }: PrimaryPickCardProps) {
   const h = now.getHours();
   const contextLabel = getContextLabel(h, mood);
 
@@ -146,11 +156,27 @@ function PrimaryPickCard({ topPick, isLoading, now, mood, onStartReading }: Prim
   }
 
   const { bookmark, reason } = topPick;
-  const accentColor = SOURCE_ACCENT[bookmark.source_type] ?? SOURCE_ACCENT['blog'];
+  const accentColor = moodAccentOverride ?? SOURCE_ACCENT[bookmark.source_type] ?? SOURCE_ACCENT['blog'];
   const minutes = getReadingMinutes(bookmark);
 
   return (
-    <div className="relative rounded-2xl border border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 p-5 mb-4 overflow-hidden motion-safe:animate-[fadeSlideUp_0.25s_ease-out]">
+    <div
+      className="relative rounded-2xl border border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 p-5 mb-4 overflow-hidden motion-safe:animate-[fadeSlideUp_0.25s_ease-out] transition-[border-color,background-color] duration-300"
+      style={
+        moodAccentOverride
+          ? {
+              borderColor: `${moodAccentOverride}40`,
+              backgroundColor: `${moodAccentOverride}06`,
+            }
+          : undefined
+      }
+    >
+      {/* Source/mood color tint overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.04] pointer-events-none"
+        style={{ backgroundColor: accentColor }}
+        aria-hidden="true"
+      />
       {/* Source accent bar */}
       <div
         className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
@@ -165,7 +191,7 @@ function PrimaryPickCard({ topPick, isLoading, now, mood, onStartReading }: Prim
         <div className="flex gap-3 items-start">
           <div className="flex-1 min-w-0">
             {/* Title */}
-            <p className="text-[1.05rem] font-semibold line-clamp-3 leading-snug text-surface-900 dark:text-surface-100 mb-2">
+            <p className="text-xl font-bold line-clamp-3 leading-snug text-surface-900 dark:text-surface-100 mb-2">
               {bookmark.title ?? bookmark.url}
             </p>
             {/* Source + reading time */}
@@ -267,7 +293,7 @@ function SecondaryCard({ type, bookmark, onOpen, onMarkDone }: SecondaryCardProp
       aria-label={ariaLabel}
       onClick={() => onOpen(b)}
       onKeyDown={handleKeyDown}
-      className="rounded-xl border border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 p-4 cursor-pointer hover:border-surface-300 dark:hover:border-surface-700 transition-colors focus-visible:ring-2 min-h-[44px]"
+      className="rounded-xl border border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 p-3 cursor-pointer hover:border-surface-300 dark:hover:border-surface-700 transition-colors focus-visible:ring-2 min-h-[44px]"
     >
       {/* Label row */}
       <div className={`flex items-center gap-1 mb-2 text-xs font-medium ${cfg.color}`}>
@@ -577,6 +603,7 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
             now={now}
             mood={mood}
             onStartReading={handleStartReading}
+            moodAccentOverride={MOOD_ACCENT[mood] ?? null}
           />
 
           {/* Secondary cards — only render row if at least one slot is filled */}

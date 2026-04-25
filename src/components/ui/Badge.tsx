@@ -23,6 +23,12 @@ const statusLabels: Record<Status, string> = {
   done: 'Done',
 };
 
+const STATUS_NEXT_LABEL: Record<Status, string> = {
+  unread: 'Reading',
+  reading: 'Done',
+  done: 'Unread',
+};
+
 export function SourceBadge({ source }: { source: SourceType }) {
   return (
     <span
@@ -45,7 +51,12 @@ export function StatusBadge({ status, onClick }: { status: Status; onClick?: () 
         ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}
       `}
       onClick={onClick}
-      {...(onClick ? { 'aria-label': `Status: ${statusLabels[status]}. Click to advance.` } : {})}
+      {...(onClick
+        ? {
+            'aria-label': `Status: ${statusLabels[status]}. Click to advance.`,
+            title: `Click to mark as ${STATUS_NEXT_LABEL[status]}`,
+          }
+        : {})}
     >
       {statusLabels[status]}
     </Tag>

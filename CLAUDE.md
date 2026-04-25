@@ -19,7 +19,8 @@ All project docs live in `docs/`. Start each session by reading `docs/INDEX.md`.
 | `docs/plan/` | Feature roadmap chunked by phase |
 | `docs/log/` | Implementation records for shipped features |
 | `docs/guides/` | Development workflow and setup guides |
-| `docs/reference/` | Audit trail, integrations, lookup tables, **design system** |
+| `docs/reference/` | Audit trail, integrations, component patterns + theme architecture |
+| `docs/design/` | Claude Design overhaul sessions — workflow guide, canonical design tokens, session logs |
 
 **Current phase:** Phase 2 (Trusted Curator) — see `docs/plan/phase-2.md`. 2.0 Obsidian Plugin ✅ · 2.1 Values Onboarding ✅ · 2.2 Scoring Engine ✅ · 2.3 Home Screen ✅ · 2.4 Reflection Prompt ✅ · 2.5 Spaced Review ✅ · **Phase 2 COMPLETE. Maintenance mode — no new features planned. Next: Phase 3 or v4.0 Intelligence Layer (deferred).**
 
@@ -91,7 +92,9 @@ supabase/
 - **Route split (Phase 2.3):** `/` → HomePage (curator-first; requires real data; no demo mode), `/library` → Dashboard (existing library; demo mode stays here)
 - **Theme pattern:** Container/panel backgrounds → `bg-surface-50 dark:bg-surface-900`. Form inputs keep `bg-white dark:bg-surface-800`. Navy co-applies `.dark` class via `applyTheme()` so all `dark:` variants activate. All close/icon buttons need explicit `text-surface-500 dark:text-surface-400` — icons have no default dark-mode color.
 - **4-theme verification:** Any UI change touching bg/border/text must be checked in all 4 themes (Light, Dark, Sepia, Navy) before shipping.
-- **Design system:** Full token reference, component catalog, spacing conventions, and accessibility patterns live in `docs/reference/design-system.md`. Read it before any UI work.
+- **Design tokens (canonical):** `docs/design/design-tokens.md` — color values, type scale, spacing, radii, shadows, animation. **This is the source of truth for token values**, produced by Claude Design from the live codebase.
+- **Design system (component patterns):** `docs/reference/design-system.md` — theme architecture rules, component catalog, a11y patterns. Read both before any UI work.
+- **Design overhaul sessions:** `docs/design/INDEX.md` — workflow guide for Claude Design → Claude Code sessions. Session logs in `docs/design/session-*.md`.
 
 ## Database (Supabase PostgreSQL)
 
@@ -147,6 +150,30 @@ RLS policies:
 - **Notes mutations**: `addNote`/`deleteNote` fetch current state from DB (not cache) to prevent race conditions
 - **AI/Metadata**: Fire-and-forget with silent failure — non-critical features. Metadata fetch completes before AI tagging so the LLM has title + excerpt context.
 
+## Design Overhaul Workflow
+
+UI/UX overhaul is guided by **Claude Design** (claude.ai/design) and implemented by Claude Code. The process produces a design bundle (`.tar.gz`) that Claude Code reads and implements.
+
+### How to run a session
+1. Open [claude.ai/design](https://claude.ai/design), share the GitHub repo, let it produce the design system bundle.
+2. In Claude Code: provide the bundle URL and say "implement the design system".
+3. Claude Code fetches + decompresses the bundle, reads `chats/chat1.md` (intent) and `phase1_diffs.html` (exact diffs), and implements them.
+4. Run the full quality pipeline: `typecheck → lint → test → build`.
+5. Document in `docs/design/session-N.md` + update `docs/design/INDEX.md`.
+
+### Design system authority
+- **`docs/design/design-tokens.md`** — canonical token values (color, type, spacing). Produced by Claude Design.
+- **`docs/reference/design-system.md`** — component patterns, theme architecture rules, a11y conventions.
+- When these conflict, `design-tokens.md` wins for token values; `design-system.md` wins for architectural rules.
+
+### Roadmap status (as of 2026-04-25)
+- **Phase 1 Quick Wins** ✅ — card shadow, sidebar lockup, badge tooltip, panel header
+- **Phase 2 Visual Hierarchy** ✅ — card title weight, primary pick dominance, secondary subordination, source tab dots, mood accent shift
+- **Phase 3 Delight** ⬜ — empty reward state, status animation, ceremonial reflection modal, inline onboarding
+- **Phase 4 Signature** ⬜ — sepia serif font, stats heatmap, areas visual grid
+
+Full roadmap: `docs/design/INDEX.md`
+
 ## Development Workflow
 
 ### Branching Strategy
@@ -191,3 +218,4 @@ Run in this order before every commit — all must pass:
 | `/perf-check` | Bundle size, deployment config, TTFB investigation |
 | `/supabase-migrate` | Generate SQL migration files following schema conventions |
 | `/obsidian-plugin` | Obsidian plugin lifecycle — debug, add features, release, keep in sync with ContentDeck |
+| `/ui` | Systematic UI work — component states, mobile parity, 4-theme verification, design system compliance |

@@ -61,11 +61,11 @@ export default function BookmarkCard({
       tabIndex={0}
       aria-label={b.title || b.url}
       className={`
-        group relative flex gap-3 p-3 rounded-xl border transition-colors cursor-pointer
+        group relative flex gap-3 p-3 rounded-xl border transition-[colors,box-shadow] cursor-pointer
         ${
           selected
-            ? 'border-primary-500 bg-primary-600/5 dark:bg-primary-400/5'
-            : 'border-surface-200 dark:border-surface-800 hover:border-surface-300 dark:hover:border-surface-700 bg-surface-50 dark:bg-surface-900'
+            ? 'border-primary-500 bg-primary-600/5 dark:bg-primary-400/5 shadow-sm'
+            : 'border-surface-200 dark:border-surface-800 hover:border-surface-300 dark:hover:border-surface-700 bg-surface-50 dark:bg-surface-900 hover:shadow-md'
         }
       `}
     >
@@ -91,7 +91,7 @@ export default function BookmarkCard({
         </div>
 
         {/* Title */}
-        <h3 className="text-sm font-medium text-surface-900 dark:text-surface-100 line-clamp-2 mb-1">
+        <h3 className="text-base font-semibold text-surface-900 dark:text-surface-100 line-clamp-2 mb-1">
           {b.title || (noUrl ? 'Untitled Book' : truncate(b.url, 60))}
         </h3>
 

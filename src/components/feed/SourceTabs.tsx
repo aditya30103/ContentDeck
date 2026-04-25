@@ -2,6 +2,16 @@ import { useUI } from '../../context/UIProvider';
 import { SOURCE_LIST, SOURCE_LABELS } from '../../types';
 import type { Bookmark, SourceType } from '../../types';
 
+const SOURCE_COLORS: Partial<Record<SourceType, string>> = {
+  youtube: '#ff4444',
+  twitter: '#1da1f2',
+  linkedin: '#0077b5',
+  substack: '#ff6818',
+  blog: '#6366f1',
+  book: '#4ecdc4',
+  arxiv: '#b31b1b',
+};
+
 export default function SourceTabs({ bookmarks }: { bookmarks: Bookmark[] }) {
   const { currentSource, setSource } = useUI();
 
@@ -34,7 +44,7 @@ export default function SourceTabs({ bookmarks }: { bookmarks: Bookmark[] }) {
             aria-selected={active}
             onClick={() => setSource(key)}
             className={`
-              flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors min-h-[36px]
+              flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors min-h-[36px]
               ${
                 active
                   ? 'bg-primary-600 text-white'
@@ -42,6 +52,13 @@ export default function SourceTabs({ bookmarks }: { bookmarks: Bookmark[] }) {
               }
             `}
           >
+            {key !== 'all' && SOURCE_COLORS[key] && (
+              <span
+                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                style={{ backgroundColor: active ? 'rgba(255,255,255,0.7)' : SOURCE_COLORS[key] }}
+                aria-hidden="true"
+              />
+            )}
             {label}
             {count > 0 && (
               <span

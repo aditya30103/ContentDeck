@@ -7,6 +7,7 @@ import {
   useTransform,
 } from 'framer-motion';
 import { X, BookOpen } from 'lucide-react';
+import { SourceBadge } from '../ui/Badge';
 import MetadataHeader from './MetadataHeader';
 import NotesTab from './NotesTab';
 import DetailActions from './DetailActions';
@@ -198,9 +199,12 @@ export default function DetailPanel({
 
           {/* Header */}
           <div className="sticky top-0 flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900 rounded-t-2xl z-10">
-            <h2 className="text-base font-semibold text-surface-900 dark:text-surface-100 truncate">
-              Details
-            </h2>
+            <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
+              <SourceBadge source={bookmark.source_type} />
+              <h2 className="text-sm font-semibold text-surface-900 dark:text-surface-100 truncate">
+                {bookmark.title || bookmark.url}
+              </h2>
+            </div>
             <button
               onClick={onClose}
               className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center text-surface-500 dark:text-surface-400"
@@ -223,9 +227,12 @@ export default function DetailPanel({
         transition={shouldReduceMotion ? REDUCED_MOTION_TRANSITION : { duration: 0.15 }}
       >
         <div className="sticky top-0 flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900 z-10">
-          <h2 className="text-base font-semibold text-surface-900 dark:text-surface-100">
-            Details
-          </h2>
+          <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
+            <SourceBadge source={bookmark.source_type} />
+            <h2 className="text-sm font-semibold text-surface-900 dark:text-surface-100 truncate">
+              {bookmark.title || bookmark.url}
+            </h2>
+          </div>
           <button
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 min-w-[44px] min-h-[44px] flex items-center justify-center text-surface-500 dark:text-surface-400"

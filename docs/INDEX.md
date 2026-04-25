@@ -20,7 +20,8 @@
 | Debugging something that used to work or refer past work | [log/](log/) — completed plan sections link directly to their log; log files link back to their plan section            |
 | Setting up Supabase Auth                                 | [guides/supabase-auth-setup.md](guides/supabase-auth-setup.md)                                                           |
 | Checking what's been fixed                               | [reference/audit.md](reference/audit.md)                                                                                 |
-| Doing any UI work (colors, spacing, components, themes)  | [reference/design-system.md](reference/design-system.md) — read before touching any bg/text/border class                |
+| Doing any UI work (colors, spacing, components, themes)  | [design/design-tokens.md](design/design-tokens.md) — canonical token reference (from Claude Design) · [reference/design-system.md](reference/design-system.md) — component patterns + theme rules |
+| Running a design overhaul session                        | [design/INDEX.md](design/INDEX.md) — workflow guide + session index + roadmap                                            |
 | Looking for integration ideas                            | [reference/integrations.md](reference/integrations.md)                                                                   |
 | Planning infrastructure                                  | [plan/infrastructure.md](plan/infrastructure.md)                                                                         |
 | Hardening tests or reviewing test coverage               | [reference/test-audit.md](reference/test-audit.md) — comprehensive 2026-04-06 audit, per-file grades, gap list          |
@@ -71,9 +72,13 @@ docs/
 ├── guides/                         # How-to references
 │   ├── workflow.md                 # Development practices, session workflow
 │   └── supabase-auth-setup.md      # Supabase Auth provider configuration
+├── design/                         # Claude Design overhaul sessions
+│   ├── INDEX.md                    # Workflow guide + session index + remaining roadmap
+│   ├── design-tokens.md            # Canonical token reference (color, type, spacing, radii, shadows, animation)
+│   └── session-01.md               # Session 1 (2026-04-25): P1 complete + P2 partial, 8 changes
 └── reference/                      # Lookup tables
     ├── audit.md                    # Bug tracking trail (v1→v2→v2.2)
-    ├── design-system.md            # Color tokens, component catalog, theme rules, spacing, a11y patterns
+    ├── design-system.md            # Component catalog, theme architecture rules, a11y patterns (legacy — use design/design-tokens.md for token values)
     ├── integrations.md             # Potential integrations & extensions
     └── test-audit.md              # 2026-04-06 test suite audit — per-file grades, gaps, hardening plan
 ```
