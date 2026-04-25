@@ -124,7 +124,14 @@ interface PrimaryPickCardProps {
   moodAccentOverride: string | null;
 }
 
-function PrimaryPickCard({ topPick, isLoading, now, mood, onStartReading, moodAccentOverride }: PrimaryPickCardProps) {
+function PrimaryPickCard({
+  topPick,
+  isLoading,
+  now,
+  mood,
+  onStartReading,
+  moodAccentOverride,
+}: PrimaryPickCardProps) {
   const h = now.getHours();
   const contextLabel = getContextLabel(h, mood);
 
@@ -156,7 +163,8 @@ function PrimaryPickCard({ topPick, isLoading, now, mood, onStartReading, moodAc
   }
 
   const { bookmark, reason } = topPick;
-  const accentColor = moodAccentOverride ?? SOURCE_ACCENT[bookmark.source_type] ?? SOURCE_ACCENT['blog'];
+  const accentColor =
+    moodAccentOverride ?? SOURCE_ACCENT[bookmark.source_type] ?? SOURCE_ACCENT['blog'];
   const minutes = getReadingMinutes(bookmark);
 
   return (
