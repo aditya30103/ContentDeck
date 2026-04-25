@@ -42,18 +42,22 @@ self.addEventListener('fetch', (event) => {
   if (event.request.mode === 'navigate') {
     event.respondWith(
       caches.match(event.request).then((cached) => {
-        const networkFetch = fetch(event.request).then((response) => {
-          if (response.ok) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()))
-          }
-          return response
+        const offlineResponse = () => cached ?? new Response('Offline', {
+          status: 503,
+          headers: { 'Content-Type': 'text/plain' },
         })
 
+        const networkFetch = fetch(event.request)
+          .then((response) => {
+            if (response.ok) {
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()))
+            }
+            return response
+          })
+          .catch(() => offlineResponse()) // network error → cached HTML or 503
+
         const timeout = new Promise((resolve) =>
-          setTimeout(() => resolve(cached ?? new Response('Offline', {
-            status: 503,
-            headers: { 'Content-Type': 'text/plain' },
-          })), 8000)
+          setTimeout(() => resolve(offlineResponse()), 8000)
         )
 
         return Promise.race([networkFetch, timeout])
