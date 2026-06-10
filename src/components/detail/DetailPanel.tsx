@@ -5,6 +5,7 @@ import {
   useReducedMotion,
   useMotionValue,
   useTransform,
+  useDragControls,
 } from 'framer-motion';
 import { X, BookOpen } from 'lucide-react';
 import { SourceBadge } from '../ui/Badge';
@@ -57,6 +58,7 @@ export default function DetailPanel({
   // Drive backdrop opacity from live drag offset
   const dragY = useMotionValue(0);
   const backdropOpacity = useTransform(dragY, [0, 350], [0.5, 0]);
+  const dragControls = useDragControls();
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -174,6 +176,10 @@ export default function DetailPanel({
           exit={{ y: '100%' }}
           transition={transition}
           drag="y"
+          // drag="y" on the whole sheet swallows touch scrolling — dismissal
+          // drag must start from the handle/header only (dragControls)
+          dragListener={false}
+          dragControls={dragControls}
           dragConstraints={{ top: 0 }}
           dragElastic={0.1}
           dragMomentum={false}
@@ -192,13 +198,21 @@ export default function DetailPanel({
             }
           }}
         >
-          {/* Drag handle pill */}
-          <div className="flex justify-center pt-3 pb-1">
+          {/* Drag handle pill — dismissal drag starts here */}
+          <div
+            className="flex justify-center pt-3 pb-1"
+            style={{ touchAction: 'none' }}
+            onPointerDown={(e) => dragControls.start(e)}
+          >
             <div className="w-10 h-1 rounded-full bg-surface-300 dark:bg-surface-600" />
           </div>
 
           {/* Header */}
-          <div className="sticky top-0 flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900 rounded-t-2xl z-10">
+          <div
+            className="sticky top-0 flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900 rounded-t-2xl z-10"
+            style={{ touchAction: 'none' }}
+            onPointerDown={(e) => dragControls.start(e)}
+          >
             <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
               <SourceBadge source={bookmark.source_type} />
               <h2 className="text-sm font-semibold text-surface-900 dark:text-surface-100 truncate">

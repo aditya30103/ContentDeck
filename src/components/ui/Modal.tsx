@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion, useDragControls } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import {
@@ -23,6 +23,7 @@ export default function Modal({ open, onClose, title, children, size = 'md' }: M
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const isMobile = useIsMobile();
   const shouldReduceMotion = useReducedMotion();
+  const dragControls = useDragControls();
 
   const sizeClasses = {
     sm: 'max-w-sm',
@@ -130,6 +131,10 @@ export default function Modal({ open, onClose, title, children, size = 'md' }: M
             {...panelVariants}
             transition={transition}
             drag={isMobile ? 'y' : false}
+            // drag="y" on the whole panel swallows touch scrolling — dismissal
+            // drag must start from the handle/header only (dragControls)
+            dragListener={false}
+            dragControls={dragControls}
             dragConstraints={{ top: 0 }}
             dragElastic={0.05}
             dragMomentum={false}
@@ -145,14 +150,22 @@ export default function Modal({ open, onClose, title, children, size = 'md' }: M
               }
             }}
           >
-            {/* Drag handle pill — mobile only */}
+            {/* Drag handle pill — mobile only; dismissal drag starts here */}
             {isMobile && (
-              <div className="flex justify-center pt-3 pb-1">
+              <div
+                className="flex justify-center pt-3 pb-1"
+                style={{ touchAction: 'none' }}
+                onPointerDown={(e) => dragControls.start(e)}
+              >
                 <div className="w-10 h-1 rounded-full bg-surface-300 dark:bg-surface-600" />
               </div>
             )}
 
-            <div className="sticky top-0 flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900 rounded-t-2xl sm:rounded-t-2xl z-10">
+            <div
+              className="sticky top-0 flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900 rounded-t-2xl sm:rounded-t-2xl z-10"
+              style={isMobile ? { touchAction: 'none' } : undefined}
+              onPointerDown={isMobile ? (e) => dragControls.start(e) : undefined}
+            >
               <h2
                 id="modal-title"
                 className="text-lg font-semibold text-surface-900 dark:text-surface-100"
