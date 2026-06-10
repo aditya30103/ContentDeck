@@ -89,6 +89,50 @@ Start small: try designing your next button component this way. Or a card. The t
   method: 'readability',
 };
 
+const DEMO_CONTENT_AHA: BookmarkContent = {
+  text: `Every codebase eventually faces the same tension: duplication feels wrong, but the wrong abstraction is worse. The advice "don't repeat yourself" gets applied so aggressively that two pieces of code which merely look similar today get fused into one, and from that day forward every divergence between them costs a conditional.
+
+AHA — Avoid Hasty Abstractions — is a different posture. Prefer duplication until the abstraction is obvious. Duplicated code tells you the truth about itself: you can read it top to bottom and know exactly what it does. A premature abstraction lies. It promises that two call sites are the same thing, and when requirements drift apart, the abstraction accumulates flags, options, and special cases to keep the promise alive.
+
+The lifecycle is familiar. Someone extracts a helper from two similar functions. A third caller arrives that almost fits, so the helper grows a parameter. A fourth caller needs slightly different behavior, so the parameter becomes an options object. Within a year the helper has eight options, three of which are only ever used together, and nobody can change it without reading every call site — the exact work the abstraction was supposed to eliminate.
+
+The fix is not "never abstract." It is to let the abstraction reveal itself. When you've seen the third or fourth genuine repetition, you know which parts actually vary and which are truly fixed. The abstraction you write then is shaped by evidence rather than prediction.
+
+A useful test: if you deleted the abstraction and inlined it everywhere, would the code get clearer or murkier? If inlining clarifies, the abstraction was hasty. If inlining produces an unreadable sprawl of identical logic, the abstraction is earning its keep.
+
+Optimize for change first. Duplication is cheap to fix later; the wrong abstraction is expensive to unwind, because by the time you notice, a dozen call sites depend on its quirks.`,
+  author: 'Kent C. Dodds',
+  word_count: 1200,
+  reading_time: 5,
+  excerpt:
+    'Prefer duplication over the wrong abstraction — let repeated code reveal the right boundaries before you commit to one.',
+  extracted_at: daysAgo(1),
+  method: 'readability',
+};
+
+const DEMO_CONTENT_BIG_FIVE: BookmarkContent = {
+  text: `The generative AI wave is often framed as a disruption story, but for the largest technology companies it is better understood as an amplification story: each of the five is bending the technology toward the business model it already has.
+
+Microsoft moved earliest and most decisively, wiring models into the products enterprises already pay for. The strategic insight was that distribution beats novelty: a slightly worse model inside the tools a company already uses wins against a slightly better model that requires new procurement. The cloud business compounds this — every AI workload an enterprise adopts is also a cloud commitment.
+
+Google's position is the most paradoxical. It has world-class research, enormous proprietary data, and custom silicon, yet its core business is the one most exposed. Every question answered directly is a search results page not served. The company is therefore running the hardest version of the innovator's dilemma: disrupting itself before someone else does, while protecting margins that funded the research in the first place.
+
+Amazon plays the arms dealer. Rather than betting on a single frontier model, it sells the infrastructure on which everyone else's bets run, and offers a marketplace of models the way it offers a marketplace of everything else. The margin is in the compute, not the model.
+
+Apple is the patient one. Its advantage is the device in a billion pockets and the silicon inside it. On-device inference aligns with its privacy positioning and its control of the platform — and it can wait, because whoever wins the model race will still need distribution through the phone.
+
+Meta took the most unorthodox path: releasing weights openly. Commoditizing the model layer is rational for a company whose profits come from attention, not from selling intelligence. If models are abundant and cheap, the scarce assets are distribution and engagement — exactly what Meta owns.
+
+The shared thread is that none of the five is really selling a model. They are selling the thing they always sold — productivity, answers, infrastructure, devices, attention — with intelligence as the new ingredient.`,
+  author: 'Ben Thompson',
+  word_count: 3800,
+  reading_time: 15,
+  excerpt:
+    'How Microsoft, Google, Amazon, Apple, and Meta are positioning around large language models and generative AI infrastructure.',
+  extracted_at: daysAgo(0),
+  method: 'readability',
+};
+
 export const DEMO_BOOKMARKS: Bookmark[] = [
   {
     id: 'demo-1',
@@ -205,7 +249,7 @@ export const DEMO_BOOKMARKS: Bookmark[] = [
     areas: [],
     metadata: {},
     content: {},
-    content_status: 'pending',
+    content_status: 'skipped',
     content_fetched_at: null,
     synced: false,
     created_at: daysAgo(1),
@@ -227,7 +271,7 @@ export const DEMO_BOOKMARKS: Bookmark[] = [
     areas: [],
     metadata: { word_count: 2400, reading_time: 10 },
     content: {},
-    content_status: 'pending',
+    content_status: 'skipped',
     content_fetched_at: null,
     synced: false,
     created_at: daysAgo(4),
@@ -261,9 +305,14 @@ export const DEMO_BOOKMARKS: Bookmark[] = [
     tags: ['productivity', 'engineering'],
     areas: [],
     metadata: { word_count: 3200, reading_time: 13 },
-    content: {},
-    content_status: 'pending',
-    content_fetched_at: null,
+    content: {
+      text: 'DORA metrics, cycle time, and deployment frequency — the signals that actually predict team health. The full article could not be extracted, but the core argument is that productivity metrics work as conversation starters for teams, not as performance scores for individuals.',
+      word_count: 3200,
+      reading_time: 13,
+      truncated: true,
+    },
+    content_status: 'partial',
+    content_fetched_at: daysAgo(4),
     synced: false,
     created_at: daysAgo(10),
     status_changed_at: daysAgo(4),
@@ -284,9 +333,14 @@ export const DEMO_BOOKMARKS: Bookmark[] = [
     tags: ['leadership', 'systems-thinking'],
     areas: [],
     metadata: { word_count: 4500, reading_time: 18 },
-    content: {},
-    content_status: 'pending',
-    content_fetched_at: null,
+    content: {
+      text: 'Systems thinking applied to engineering management — staffing ratios, team sizing, and technical debt treated as inventory. Only the opening section could be extracted; open the original for the full essay.',
+      word_count: 4500,
+      reading_time: 18,
+      truncated: true,
+    },
+    content_status: 'partial',
+    content_fetched_at: daysAgo(2),
     synced: false,
     created_at: daysAgo(2),
     status_changed_at: daysAgo(2),
@@ -424,9 +478,9 @@ export const DEMO_BOOKMARKS: Bookmark[] = [
     tags: [],
     areas: [],
     metadata: { word_count: 1200, reading_time: 5 },
-    content: {},
-    content_status: 'pending',
-    content_fetched_at: null,
+    content: DEMO_CONTENT_AHA,
+    content_status: 'success',
+    content_fetched_at: daysAgo(1),
     synced: false,
     created_at: daysAgo(1),
     status_changed_at: daysAgo(1),
@@ -447,9 +501,9 @@ export const DEMO_BOOKMARKS: Bookmark[] = [
     tags: [],
     areas: [],
     metadata: { word_count: 3800, reading_time: 15 },
-    content: {},
-    content_status: 'pending',
-    content_fetched_at: null,
+    content: DEMO_CONTENT_BIG_FIVE,
+    content_status: 'success',
+    content_fetched_at: daysAgo(0),
     synced: false,
     created_at: daysAgo(0),
     status_changed_at: daysAgo(0),
