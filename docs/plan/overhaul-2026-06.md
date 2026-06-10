@@ -107,6 +107,7 @@ Full QA evidence: `.gstack/qa-reports/qa-report-contentdeck-vercel-app-2026-06-1
 | 6 | P2 | Docs | Demo mode serves HomePage at `/`; docs say demo stays on `/library` only — doc drift or route-guard regression | ⬜ (WS-meta) |
 | 7 | P2 | Meta | package.json 3.10.0 vs shipped v3.11.0 | ⬜ (WS-meta) |
 | 8 | P2 | Tests | framer-motion `ref` warning in Modal tests; 6 ESLint warnings (unused disables, fast-refresh, useMemo dep) | ⬜ |
+| 9 | P1 | UI | Bottom nav floated above a dead band (user-reported, multiple past fix attempts failed). Root cause: `position: fixed` anchors to iOS's small layout viewport — the zone below is unclaimable by CSS. | ✅ Fixed + verified — static flex-none footer in app column, 49px row + `env(safe-area-inset-bottom)` (PR #60) |
 
 Still pending in WS0: `/audit` (async/cache/demo-parity code audit), `/cso` (security), logged-in flow QA, screen-by-screen scroll audit of remaining modals.
 
