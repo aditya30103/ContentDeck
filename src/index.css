@@ -55,10 +55,12 @@
   --color-surface-100: #f9f3e3;
   --color-surface-200: #f0e6cc;
   --color-surface-300: #e4d5b0;
-  --color-surface-400: #c8b888;
-  --color-surface-500: #a89060;
-  --color-surface-600: #7a6540;
-  --color-surface-700: #5c4828;
+  /* 400-700 darkened for WCAG contrast: text-surface-400/500 are the app's
+     most common secondary text colors and must stay ≥4.5:1 on surface-50 */
+  --color-surface-400: #8d7440;
+  --color-surface-500: #715a2e;
+  --color-surface-600: #5e4a24;
+  --color-surface-700: #4a3819;
   --color-surface-800: #3e2e15;
   --color-surface-900: #261a08;
   --color-surface-950: #150e04;
@@ -114,6 +116,10 @@ html.dark {
 
 html.sepia {
   background-color: var(--color-surface-50); /* sepia surface-50 = #fdf9f0 via :root.sepia */
+  /* Tailwind's `sepia` FILTER utility shares the name of this theme class and
+     applies filter: sepia(100%) to <html>, washing out every color in the app.
+     Neutralize it — the theme works via the palette vars above, not a filter. */
+  filter: none;
 }
 
 body {
