@@ -5,6 +5,16 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
 
+// Safe-area insets must only be applied when the viewport is truly full-bleed.
+// iOS standalone installs in status-bar-inset mode (viewport already shrunk by
+// the OS) still report nonzero env() insets — padding for them double-counts.
+// .vp-fullbleed gates the --safe-* variables in index.css.
+function syncViewportMode() {
+  document.documentElement.classList.toggle('vp-fullbleed', window.innerHeight === screen.height);
+}
+syncViewportMode();
+window.addEventListener('resize', syncViewportMode);
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
