@@ -9,6 +9,50 @@ import Button from '../ui/Button';
 import TokenManager from '../settings/TokenManager';
 import FeedbackList from '../settings/FeedbackList';
 
+// TEMP: surfaces the viewport numbers the device actually reports, so the iOS
+// bottom-bar dead zone (overhaul finding #9) can be diagnosed from a screenshot.
+function ViewportDiagnostics() {
+  const [info, setInfo] = useState<Record<string, string> | null>(null);
+
+  useEffect(() => {
+    const probe = document.createElement('div');
+    probe.style.cssText =
+      'position:fixed;visibility:hidden;pointer-events:none;' +
+      'padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)';
+    document.body.appendChild(probe);
+    const cs = getComputedStyle(probe);
+    const standalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (navigator as Navigator & { standalone?: boolean }).standalone === true;
+    setInfo({
+      standalone: String(standalone),
+      'window.innerHeight': String(window.innerHeight),
+      'html.clientHeight': String(document.documentElement.clientHeight),
+      'visualViewport.height': String(Math.round(window.visualViewport?.height ?? 0)),
+      'screen.height': String(screen.height),
+      'safe-area top / bottom': `${cs.paddingTop} / ${cs.paddingBottom}`,
+    });
+    document.body.removeChild(probe);
+  }, []);
+
+  if (!info) return null;
+  return (
+    <section className="pt-2 border-t border-surface-200 dark:border-surface-800">
+      <h3 className="text-xs font-semibold text-surface-500 dark:text-surface-400 mb-1.5">
+        Viewport diagnostics (temporary)
+      </h3>
+      <dl className="font-mono text-[11px] leading-relaxed text-surface-500 dark:text-surface-400">
+        {Object.entries(info).map(([k, v]) => (
+          <div key={k} className="flex justify-between gap-2">
+            <dt>{k}</dt>
+            <dd className="text-surface-700 dark:text-surface-200">{v}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
 interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
@@ -357,10 +401,14 @@ export default function SettingsModal({
             </section>
           )}
 
+          {/* TEMP: viewport diagnostics for the iOS bottom-bar dead-zone investigation
+              (overhaul finding #9). Remove once the mobile nav fix is confirmed on device. */}
+          <ViewportDiagnostics />
+
           {/* Info */}
           <section className="pt-2 border-t border-surface-200 dark:border-surface-800">
             <div className="flex items-center justify-between text-xs text-surface-400 dark:text-surface-500">
-              <span>ContentDeck v3.9.3</span>
+              <span>ContentDeck v3.11.1</span>
               <a
                 href="https://github.com/aditya30103/ContentDeck"
                 target="_blank"
