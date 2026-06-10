@@ -62,7 +62,10 @@ export default function AuthScreen({ onDemo, onMagicLink, onGoogle, onGitHub }: 
   }
 
   return (
-    <div className="h-[100dvh] overflow-y-auto overscroll-contain bg-surface-50 dark:bg-surface-950">
+    <div
+      className="h-[100dvh] overflow-y-auto overscroll-contain bg-surface-50 dark:bg-surface-950"
+      style={{ paddingTop: 'var(--safe-top)', paddingBottom: 'var(--safe-bottom)' }}
+    >
       <div className="min-h-full flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-2xl space-y-8">
           {/* Header */}

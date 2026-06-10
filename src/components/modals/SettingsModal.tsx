@@ -26,6 +26,7 @@ function ViewportDiagnostics() {
       (navigator as Navigator & { standalone?: boolean }).standalone === true;
     setInfo({
       standalone: String(standalone),
+      'fullbleed mode': String(document.documentElement.classList.contains('vp-fullbleed')),
       'window.innerHeight': String(window.innerHeight),
       'html.clientHeight': String(document.documentElement.clientHeight),
       'visualViewport.height': String(Math.round(window.visualViewport?.height ?? 0)),

@@ -592,11 +592,11 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
   return (
     <div
       className="h-full overflow-y-auto bg-surface-50 dark:bg-surface-950"
-      style={{ paddingTop: 'env(safe-area-inset-top, 0px)', overscrollBehavior: 'contain' }}
+      style={{ overscrollBehavior: 'contain' }}
     >
       <div
         className="max-w-lg mx-auto px-4 py-6"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}
+        style={{ paddingBottom: 'calc(var(--safe-bottom) + 16px)' }}
       >
         <main id="main-content">
           <HomeHeader

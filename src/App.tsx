@@ -104,8 +104,9 @@ export default function App() {
             >
               Skip to main content
             </a>
-            {/* Flex column so banners reserve layout space instead of overlaying app chrome */}
-            <div className="h-[100dvh] flex flex-col">
+            {/* Flex column so banners reserve layout space instead of overlaying app chrome.
+                --safe-top is 0 unless the viewport is full-bleed (see index.css). */}
+            <div className="h-[100dvh] flex flex-col" style={{ paddingTop: 'var(--safe-top)' }}>
               {isDemo ? <DemoBanner onSignIn={handleExitDemo} /> : <UpdateBanner />}
               <div className="flex-1 min-h-0">
                 <Suspense fallback={<LoadingSpinner />}>
