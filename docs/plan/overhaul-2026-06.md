@@ -107,7 +107,8 @@ Full QA evidence: `.gstack/qa-reports/qa-report-contentdeck-vercel-app-2026-06-1
 | 6 | P2 | Docs | Demo mode serves HomePage at `/`; docs say demo stays on `/library` only — doc drift or route-guard regression | ⬜ (WS-meta) |
 | 7 | P2 | Meta | package.json 3.10.0 vs shipped v3.11.0 | ⬜ (WS-meta) |
 | 8 | P2 | Tests | framer-motion `ref` warning in Modal tests; 6 ESLint warnings (unused disables, fast-refresh, useMemo dep) | ⬜ |
-| 9 | P1 | UI | Bottom nav floated above a dead band (user-reported, multiple past fix attempts failed). Root cause: `position: fixed` anchors to iOS's small layout viewport — the zone below is unclaimable by CSS. | ✅ Fixed + verified — static flex-none footer in app column, 49px row + `env(safe-area-inset-bottom)` (PR #60) |
+| 9 | P0 | UI | Bottom nav floats above a ~59pt dead band on device (user-reported, multiple past fix attempts failed). The zone is outside the layout viewport — unclaimable by CSS layout. PR #60 (static footer + safe-area pad) made it WORSE on device: `env(safe-area-inset-bottom)` double-counts there. Padding reverted (PR #61); temp viewport diagnostics added to Settings; awaiting device numbers to finish. | 🟡 In progress — diagnostics deployed, waiting on device screenshot |
+| 10 | P0 | UI | ALL tall bottom-sheet modals (Settings, Detail panel, Add/Edit, Stats…) unscrollable on touch devices since v3.9: framer-motion `drag="y"` on the whole panel captured every vertical touch, starving `overflow-y-auto`. Mouse wheel unaffected → invisible in desktop testing. | ✅ Fixed + deployed — `dragListener={false}` + `useDragControls` from handle/header (PR #62); awaiting real-device confirmation |
 
 Still pending in WS0: `/audit` (async/cache/demo-parity code audit), `/cso` (security), logged-in flow QA, screen-by-screen scroll audit of remaining modals.
 
