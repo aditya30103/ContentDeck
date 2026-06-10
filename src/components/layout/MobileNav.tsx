@@ -31,10 +31,11 @@ export default function MobileNav({ counts }: MobileNavProps) {
 
   return (
     <nav
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-surface-50 dark:bg-surface-950 border-t border-surface-200 dark:border-surface-800"
+      className="lg:hidden flex-none z-30 bg-surface-50 dark:bg-surface-950 border-t border-surface-200 dark:border-surface-800"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       aria-label="Bottom navigation"
     >
-      <div className="flex h-[44px]">
+      <div className="flex h-[49px]">
         {tabs.map(({ status, label, icon: Icon, countKey }) => {
           const active = currentStatus === status;
           const count = counts[countKey];
