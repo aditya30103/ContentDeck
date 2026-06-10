@@ -50,16 +50,15 @@ export default function AppShell({
         {/* Content Area */}
         <main
           id="main-content"
-          className="flex-1 overflow-y-auto"
-          style={{
-            paddingBottom: '44px',
-            overscrollBehavior: 'contain',
-          }}
+          className="flex-1 min-h-0 overflow-y-auto"
+          style={{ overscrollBehavior: 'contain' }}
         >
           {children}
         </main>
 
-        {/* Mobile Bottom Nav */}
+        {/* Mobile Bottom Nav — static footer in the flex column (never `fixed`:
+            iOS anchors fixed elements to the small viewport, leaving a dead band
+            under the bar; in-flow keeps it flush with the app container bottom) */}
         <MobileNav counts={counts} />
       </div>
     </div>
