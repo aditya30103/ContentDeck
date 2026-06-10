@@ -46,7 +46,7 @@ export default function UpdateBanner() {
   if (!showUpdate) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-center gap-3 px-4 py-2.5 bg-primary-600 text-white text-sm font-medium shadow-lg">
+    <div className="flex-none z-[60] flex items-center justify-center gap-3 px-4 py-2.5 bg-primary-600 text-white text-sm font-medium shadow-lg">
       <RefreshCw size={16} className="animate-spin" />
       <span>Updating to latest version…</span>
     </div>

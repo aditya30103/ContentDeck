@@ -220,7 +220,7 @@ export default function DetailPanel({
 
       {/* Desktop: right column panel with subtle slide-in */}
       <motion.aside
-        className="hidden lg:flex flex-col w-[400px] h-[100dvh] border-l border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 overflow-y-auto"
+        className="hidden lg:flex flex-col w-[400px] h-full border-l border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-900 overflow-y-auto"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 20 }}

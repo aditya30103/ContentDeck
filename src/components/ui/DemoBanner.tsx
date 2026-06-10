@@ -6,12 +6,12 @@ interface DemoBannerProps {
 
 export default function DemoBanner({ onSignIn }: DemoBannerProps) {
   return (
-    <div className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-center gap-3 px-4 py-2.5 bg-amber-500 dark:bg-amber-600 text-white text-sm font-medium shadow-lg">
+    <div className="flex-none z-[60] flex items-center justify-center gap-3 px-4 py-2.5 bg-amber-500 dark:bg-amber-600 text-amber-950 text-sm font-medium shadow-lg">
       <FlaskConical size={16} />
       <span>Exploring with sample data — changes won't be saved</span>
       <button
         onClick={onSignIn}
-        className="px-3 py-1 rounded-md bg-white/20 hover:bg-white/30 font-semibold transition-colors min-h-[32px]"
+        className="px-3 py-1 rounded-md bg-white/80 hover:bg-white text-amber-950 font-semibold transition-colors min-h-[32px]"
       >
         Sign In
       </button>
