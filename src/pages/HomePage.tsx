@@ -591,7 +591,7 @@ export function HomePage({ userEmail, onSignOut, isDemo }: HomePageProps) {
 
   return (
     <div
-      className="h-[100dvh] overflow-y-auto bg-surface-50 dark:bg-surface-950"
+      className="h-full overflow-y-auto bg-surface-50 dark:bg-surface-950"
       style={{ paddingTop: 'env(safe-area-inset-top, 0px)', overscrollBehavior: 'contain' }}
     >
       <div

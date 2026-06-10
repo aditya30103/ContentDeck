@@ -32,3 +32,4 @@ rename-project.bat
 
 # Obsidian workspace config
 .obsidian/
+.gstack/

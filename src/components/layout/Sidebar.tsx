@@ -57,7 +57,7 @@ export default function Sidebar({
   const totalCount = counts.unread + counts.reading + counts.done;
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 h-[100dvh] bg-surface-50 dark:bg-surface-900 border-r border-surface-200 dark:border-surface-800">
+    <aside className="hidden lg:flex flex-col w-64 h-full bg-surface-50 dark:bg-surface-900 border-r border-surface-200 dark:border-surface-800">
       {/* Header */}
       <div className="p-4 border-b border-surface-200 dark:border-surface-800">
         <div className="flex items-center gap-2 mb-3">

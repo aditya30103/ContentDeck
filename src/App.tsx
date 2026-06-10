@@ -104,33 +104,38 @@ export default function App() {
             >
               Skip to main content
             </a>
-            {isDemo ? <DemoBanner onSignIn={handleExitDemo} /> : <UpdateBanner />}
-            <Suspense fallback={<LoadingSpinner />}>
-              <Routes>
-                <Route
-                  path="/"
-                  element={
-                    <HomePage
-                      userEmail={userEmail}
-                      onSignOut={isDemo ? handleExitDemo : handleSignOut}
-                      isDemo={isDemo}
+            {/* Flex column so banners reserve layout space instead of overlaying app chrome */}
+            <div className="h-[100dvh] flex flex-col">
+              {isDemo ? <DemoBanner onSignIn={handleExitDemo} /> : <UpdateBanner />}
+              <div className="flex-1 min-h-0">
+                <Suspense fallback={<LoadingSpinner />}>
+                  <Routes>
+                    <Route
+                      path="/"
+                      element={
+                        <HomePage
+                          userEmail={userEmail}
+                          onSignOut={isDemo ? handleExitDemo : handleSignOut}
+                          isDemo={isDemo}
+                        />
+                      }
                     />
-                  }
-                />
-                <Route
-                  path="/library"
-                  element={
-                    <Dashboard
-                      userEmail={userEmail}
-                      onSignOut={isDemo ? handleExitDemo : handleSignOut}
-                      isDemo={isDemo}
-                      sharedUrl={sharedUrl}
+                    <Route
+                      path="/library"
+                      element={
+                        <Dashboard
+                          userEmail={userEmail}
+                          onSignOut={isDemo ? handleExitDemo : handleSignOut}
+                          isDemo={isDemo}
+                          sharedUrl={sharedUrl}
+                        />
+                      }
                     />
-                  }
-                />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Suspense>
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Suspense>
+              </div>
+            </div>
           </ToastProvider>
         </UIProvider>
       </SupabaseProvider>
