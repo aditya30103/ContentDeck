@@ -159,11 +159,11 @@ select {
   }
 }
 
-/* Safe area CSS variables.
-   Applied unconditionally: fresh full-bleed PWA installs (black-translucent +
-   viewport-fit=cover) report correct env() insets. The earlier .vp-fullbleed
-   JS gate (innerHeight === screen.height) misfired on real devices — the class
-   is kept in main.tsx purely as a diagnostics signal, not a CSS switch. */
+/* Safe area CSS variables. CAUTION (finding #9, June 2026): iOS standalone
+   inset reporting lies — installs run status-bar-inset (viewport already
+   excludes the top zone) while still reporting a 59px top inset, and 100dvh
+   under-measures. Consume these vars only with real-device verification;
+   the app shell sizes via the height:100% chain, never dvh. */
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
