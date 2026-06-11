@@ -32,10 +32,11 @@ export default function MobileNav({ counts }: MobileNavProps) {
   return (
     <nav
       className="lg:hidden flex-none z-30 bg-surface-50 dark:bg-surface-950 border-t border-surface-200 dark:border-surface-800"
-      style={{ paddingBottom: 'var(--safe-bottom)' }}
       aria-label="Bottom navigation"
     >
-      <div className="flex h-[49px]">
+      {/* 44px row, no safe-area pad — matches the original compact bar (the
+          home-indicator overlap was never a real-use problem; reclaim the space) */}
+      <div className="flex h-[44px]">
         {tabs.map(({ status, label, icon: Icon, countKey }) => {
           const active = currentStatus === status;
           const count = counts[countKey];
