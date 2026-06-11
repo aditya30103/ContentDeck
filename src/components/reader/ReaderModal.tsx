@@ -341,7 +341,6 @@ export default function ReaderModal({
       {/* Header */}
       <header
         className={`flex items-center justify-between gap-3 px-4 py-2 border-b ${headerThemeClasses} shrink-0`}
-        style={{ paddingTop: 'calc(8px + var(--safe-top))' }}
       >
         {/* Left: icon + title */}
         <div className="flex items-center gap-2 min-w-0">

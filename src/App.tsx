@@ -21,7 +21,7 @@ const DEMO_KEY = 'contentdeck_demo';
 
 function LoadingSpinner() {
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-surface-50 dark:bg-surface-950">
+    <div className="min-h-full flex items-center justify-center bg-surface-50 dark:bg-surface-950">
       <Spinner size={32} />
     </div>
   );
@@ -105,8 +105,9 @@ export default function App() {
               Skip to main content
             </a>
             {/* Flex column so banners reserve layout space instead of overlaying app chrome.
-                --safe-top is 0 unless the viewport is full-bleed (see index.css). */}
-            <div className="h-[100dvh] flex flex-col" style={{ paddingTop: 'var(--safe-top)' }}>
+                h-full (not 100dvh): iOS standalone under-computes dvh. No top padding:
+                the OS already insets the webview below the status bar. */}
+            <div className="h-full flex flex-col">
               {isDemo ? <DemoBanner onSignIn={handleExitDemo} /> : <UpdateBanner />}
               <div className="flex-1 min-h-0">
                 <Suspense fallback={<LoadingSpinner />}>

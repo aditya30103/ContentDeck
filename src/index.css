@@ -101,7 +101,10 @@
 /* Base styles — native app foundation */
 html {
   scroll-behavior: smooth;
-  height: 100dvh;
+  /* height: 100% (not 100dvh) — iOS standalone computes 100dvh as
+     viewport minus the (bogus) top safe-area inset, losing 59px of usable
+     height. Percentages resolve against the true viewport. */
+  height: 100%;
   overflow: hidden;
   overscroll-behavior: none;
   touch-action: manipulation; /* disables double-tap zoom */
@@ -124,10 +127,14 @@ html.sepia {
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  height: 100dvh;
+  height: 100%;
   overflow: hidden;
   overscroll-behavior: none;
   background-color: inherit;
+}
+
+#root {
+  height: 100%;
 }
 
 /* Prevent iOS auto-zoom on input focus (triggers when font-size < 16px) */
