@@ -17,10 +17,11 @@ function ViewportDiagnostics() {
   useEffect(() => {
     const probe = document.createElement('div');
     probe.style.cssText =
-      'position:fixed;visibility:hidden;pointer-events:none;' +
+      'position:fixed;visibility:hidden;pointer-events:none;height:100dvh;' +
       'padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)';
     document.body.appendChild(probe);
     const cs = getComputedStyle(probe);
+    const dvhPx = probe.getBoundingClientRect().height;
     const standalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (navigator as Navigator & { standalone?: boolean }).standalone === true;
@@ -30,6 +31,7 @@ function ViewportDiagnostics() {
       'window.innerHeight': String(window.innerHeight),
       'html.clientHeight': String(document.documentElement.clientHeight),
       'visualViewport.height': String(Math.round(window.visualViewport?.height ?? 0)),
+      '100dvh measures as': `${Math.round(dvhPx)}px`,
       'screen.height': String(screen.height),
       'safe-area top / bottom': `${cs.paddingTop} / ${cs.paddingBottom}`,
     });
